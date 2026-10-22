@@ -1,13 +1,24 @@
-Part Tracking Demo UALR 1.2.0
+Part Tracking Demo UALR 1.2.1 candidate
 Windows x64 portable demo
-Color sorting: 0 = pass, 1 = divert
-Default bottle model: YOLOX-S COCO with Gatorade color sampling
-Barcode decoder: ZXing-C++
-Camera inputs: USB, Basler/GigE, video dry run
-Camera selection: named devices, remembered identity, no automatic fallback
-Inference: portable ONNX Runtime CPU
-Motion bridge: EtherMotion authenticated local HTTP Once programs
+Package: PartTrackingDemoUALR-v1.2.1-Windows-x64.zip
+Routing: 0 = PASS (optional program), 1 = REJECT / DIVERT
+Models: separate bottle/color YOLOX ONNX pickers or one colored-bottle model
+Generic bottle locators: blank = YOLOX-Nano; optional selectable YOLOX-S (COCO ID 39)
+Color decisions: trained YOLOX class outputs only; no pixel-color fallback
+White color: supported only through a trained YOLOX class and explicit/metadata labels
+Gatorade photo references: optional offline assets only; no live brand/photo gate
+Live confidence: separate bottle/color thresholds while disarmed; fresh tracks required
+Camera inputs: named USB, Basler/GigE, video dry run; no automatic fallback
+Display: F11 or double-click full screen; Esc exits
+Controls: Models / Color + code / Tracking / Diverter
+Barcode decoder: ZXing-C++; keyboard-style USB scanner input
+Conveyor: controlled by its own hardware; measured speed used for timing only
+Motion: authenticated EtherMotion Once primary/optional return programs
+Cycles: separate PASS/REJECT counts 1-10; sequential run completion and return
+Return: waits for primary completion + hold AND predicted bottle clearance
+Timing: calibrated estimates; no independent bottle/diverter position sensing
+Busy/overlapping bottles disarm output; the app cannot stop the conveyor
 
-Keep _runtime, models, data, and EtherMotion beside PartTrackingUALR.exe.
+Keep _runtime, models, data, and supplied folders beside PartTrackingUALR.exe.
 Runtime checks: Verify Demo.cmd (does not open cameras or send motion).
 Editable source: app/ and run.py. Rebuild: Build.ps1.

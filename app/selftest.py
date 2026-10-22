@@ -15,7 +15,7 @@ def check_runtime(root: Path) -> int:
         import pypylon.pylon
         from PySide6 import QtCore, QtGui, QtWidgets, QtNetwork
         from .barcode_fixture import demo_barcode, ean13_bgr
-        from .vision import barcode_status, decode_barcodes, classify_color
+        from .vision import barcode_status, decode_barcodes
         from .vendor.inference import Detector, DetectorConfig
         checks['native_imports'] = True
         from .cameras import discover_cameras
@@ -27,25 +27,22 @@ def check_runtime(root: Path) -> int:
         checks['ean13_decoded'] = available and any(item['text'] == code for item in decoded)
         if not checks['ean13_decoded']:
             raise RuntimeError('Bundled decoder did not read the generated EAN-13.')
-        cfg = DetectorConfig(model_path=str(root / 'models' / 'yolox_s.onnx'),
-                             class_names=[str(i) for i in range(80)], img_size=640,
-                             conf=.25, device='cpu', intra_op_threads=2)
+        checks['bundled_models'] = {}
         started = time.monotonic()
-        with Detector(cfg) as detector:
-            result = detector.infer(np.zeros((480, 640, 3), dtype=np.uint8))
-            checks['model_backend'] = detector.describe()
-            checks['blank_detections'] = len(result.detections)
+        for filename in ('yolox_nano.onnx','yolox_s.onnx'):
+            cfg = DetectorConfig(model_path=str(root / 'models' / filename),
+                                 class_names=[str(i) for i in range(80)], img_size=640,
+                                 conf=.25, device='cpu', intra_op_threads=2)
+            with Detector(cfg) as detector:
+                result = detector.infer(np.zeros((480, 640, 3), dtype=np.uint8))
+                checks['model_backend'] = detector.describe()
+                checks['blank_detections'] = len(result.detections)
+                checks['bundled_models'][filename] = {'backend':detector.describe(),
+                                                      'blank_detections':len(result.detections)}
         checks['model_load_and_infer_ms'] = round((time.monotonic()-started)*1000)
-        sample = np.full((256,128,3),(15,140,245),dtype=np.uint8)
-        name, confidence = classify_color(sample,(0,0,128,256))
-        checks['color'] = name
-        if name != 'orange':
-            raise RuntimeError('Color sampler did not recognize the generated orange sample.')
-        from .gatorade import GatoradeLabelMatcher, measure_drink_color
-        checks['gatorade_label_references'] = len(GatoradeLabelMatcher(root / 'models').references)
-        checks['gatorade_orange'] = measure_drink_color(sample, (0, 0, 128, 256))['name']
-        if checks['gatorade_orange'] != 'orange':
-            raise RuntimeError('Gatorade color sampler did not recognize orange.')
+        from .model_classes import build_color_map
+        checks['yolox_color_class_map'] = build_color_map(['blue_bottle','yellow_bottle','white_bottle'],class_count=3)
+        checks['trained_color_model_required'] = True
         from .tracking import BottleTracker, TrackingConfig
         from .simulation import Simulation, WIDTH, HEIGHT
         from .settings import DEFAULTS

@@ -1,87 +1,31 @@
-"""Gatorade demo observations layered on the generic YOLOX-S bottle boxes.
+"""Optional offline matching of Gatorade reference artwork.
 
-Color and label evidence are separate from the detector so future inspections
-can consume the same localized bottle without changing tracking or motion code.
+This utility is for examining reference images only. Live bottle locations and
+colors come exclusively from the selected YOLOX model class predictions; label
+artwork matching does not supply color, pass/fail, tracking, or motion decisions.
 """
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Sequence
 
 import cv2
 import numpy as np
 
 
-COLOR_NAMES = ("red", "orange", "yellow", "green", "blue", "purple", "white")
-
-
-def _sample(frame: np.ndarray, bbox: Sequence[float], top: float, bottom: float) -> tuple[np.ndarray, tuple[int, int, int, int]]:
-    height, width = frame.shape[:2]
-    x1, y1, x2, y2 = (int(round(float(value))) for value in bbox)
-    x1, y1 = max(0, x1), max(0, y1)
-    x2, y2 = min(width, x2), min(height, y2)
-    bw, bh = x2 - x1, y2 - y1
-    roi = (int(x1 + .30 * bw), int(y1 + top * bh),
-           int(x1 + .70 * bw), int(y1 + bottom * bh))
-    return frame[roi[1]:roi[3], roi[0]:roi[2]], roi
-
-
-def _classify_patch(crop: np.ndarray, roi: tuple[int, int, int, int]) -> dict:
-    reading = {"name": "unknown", "confidence": 0.0, "roi": roi}
-    if not crop.size or min(crop.shape[:2]) < 8:
-        return reading
-    hue, saturation, value = cv2.split(cv2.cvtColor(crop, cv2.COLOR_BGR2HSV))
-    chromatic = (saturation >= 65) & (value >= 45)
-    pale = (saturation < 55) & (value >= 115)
-    if float(chromatic.mean()) < .25:
-        fraction = float(pale.mean())
-        if fraction >= .70:
-            reading.update(name="white", confidence=fraction)
-        return reading
-    hues = hue[chromatic]
-    votes = (
-        ((hues < 9) | (hues >= 170)).mean(),
-        ((hues >= 9) & (hues < 23)).mean(),
-        ((hues >= 23) & (hues < 38)).mean(),
-        ((hues >= 38) & (hues < 88)).mean(),
-        ((hues >= 88) & (hues < 133)).mean(),
-        ((hues >= 133) & (hues < 170)).mean(),
-    )
-    winner = int(np.argmax(votes))
-    confidence = float(votes[winner])
-    reading.update(name=COLOR_NAMES[winner] if confidence >= .65 else "unknown",
-                   confidence=confidence)
-    return reading
-
-
-def measure_drink_color(frame: np.ndarray, bbox: Sequence[float]) -> dict:
-    """Sample exposed liquid on the shoulder, with a fallback for cropped views."""
-    if not isinstance(frame, np.ndarray) or frame.ndim != 3 or frame.shape[2] != 3:
-        raise ValueError("Expected an HxWx3 BGR camera frame.")
-    if len(bbox) != 4 or not all(np.isfinite(float(value)) for value in bbox):
-        raise ValueError("Bottle box must contain four finite coordinates.")
-    x1, y1, x2, y2 = (float(value) for value in bbox)
-    if x2 - x1 < 20 or y2 - y1 < 40:
-        return {"name": "unknown", "confidence": 0.0, "roi": (0, 0, 0, 0)}
-    crop, roi = _sample(frame, bbox, .22, .35)
-    reading = _classify_patch(crop, roi)
-    if reading["name"] == "unknown" and y1 <= .02 * frame.shape[0]:
-        crop, roi = _sample(frame, bbox, .10, .22)
-        reading = _classify_patch(crop, roi)
-    if reading["name"] == "unknown" and y2 < .98 * frame.shape[0]:
-        crop, roi = _sample(frame, bbox, .82, .93)
-        reading = _classify_patch(crop, roi)
-    return reading
-
-
 class GatoradeLabelMatcher:
-    """Geometric Gatorade label evidence; a failed match is not a brand verdict."""
+    """Offline geometric reference matching, separate from the live YOLOX route.
+
+    A match is reference-image evidence only. A failed match is not a brand
+    verdict, and neither result is a bottle-color prediction.
+    """
 
     def __init__(self, model_dir: Path):
         self.sift = cv2.SIFT_create(nfeatures=800, contrastThreshold=.02)
         self.references = []
         for name in ("logo", "blue", "yellow", "white"):
             path = Path(model_dir) / f"gatorade_{name}_reference.png"
+            if not path.is_file():
+                continue
             reference = cv2.imread(str(path), cv2.IMREAD_GRAYSCALE)
             if reference is None:
                 continue
@@ -92,7 +36,9 @@ class GatoradeLabelMatcher:
             raise FileNotFoundError(f"No usable Gatorade label references in {model_dir}")
 
     def match(self, crop: np.ndarray) -> bool:
-        if not crop.size or min(crop.shape[:2]) < 40:
+        if (not isinstance(crop, np.ndarray) or crop.ndim != 3
+                or crop.shape[2] != 3 or crop.dtype != np.uint8
+                or not crop.size or min(crop.shape[:2]) < 40):
             return False
         scale = min(1.0, 800 / max(crop.shape[:2]))
         gray = cv2.cvtColor(cv2.resize(crop, None, fx=scale, fy=scale), cv2.COLOR_BGR2GRAY)

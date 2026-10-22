@@ -84,15 +84,14 @@ class SimulationTrackingTests(unittest.TestCase):
 
     def test_sixty_seconds_both_directions_every_pass_color(self):
         for direction in ("ltr", "rtl"):
-            for pass_color in ("orange", "yellow", "green", "blue", "red", "purple", "clear"):
+            for pass_color in ("orange", "yellow", "green", "blue", "red", "purple", "white", "clear"):
                 with self.subTest(direction=direction, pass_color=pass_color):
                     events = self.run_conveyor(direction=direction, pass_color=pass_color)
                     self.assertGreater(len(events), 35)
                     self.assertTrue(any(event["divert"] for event in events))
                     matching = [event for event in events if event["color"] == pass_color]
                     self.assertTrue(all(not event["divert"] for event in matching))
-                    if pass_color in ("orange", "blue", "green", "red"):
-                        self.assertTrue(matching)
+                    self.assertTrue(matching)
 
     def test_all_none_and_every_n_rules_use_same_tracked_id_and_code(self):
         for direction in ("ltr", "rtl"):

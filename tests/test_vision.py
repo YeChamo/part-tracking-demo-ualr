@@ -1,128 +1,12 @@
-import json
 import tempfile
-import time
 import unittest
 from pathlib import Path
-from types import SimpleNamespace
 from unittest.mock import patch
 
 import cv2
 import numpy as np
 
-from app.vision import (VideoWorker, barcode_status, classify, classify_color, decode_barcodes,
-                        inspection_error, teach_color, teach_reference)
-
-
-def good_bottle():
-    image = np.full((300, 160, 3), 35, dtype=np.uint8)
-    box = (20, 20, 140, 280)
-    image[20:280, 20:140] = (30, 120, 220)
-    image[20:78, 20:140] = (230, 70, 20)
-    image[110:224, 20:140] = (25, 220, 40)
-    for y in range(115, 218, 8):
-        image[y:y+3, 32:128] = (220, 230, 240)
-    return image, box
-
-
-class RuleTests(unittest.TestCase):
-    def setUp(self):
-        self.frame, self.box = good_bottle()
-        self.reference = teach_reference(self.frame, self.box)
-        self.settings = {"rule": "cap_label"}
-
-    def test_reference_roundtrips_and_good_matches(self):
-        reference = json.loads(json.dumps(self.reference))
-        self.assertEqual(classify(self.frame, self.box, self.settings, reference), [])
-
-    def test_missing_cap_is_rejected(self):
-        frame = self.frame.copy()
-        frame[20:78, 20:140] = (35, 35, 35)
-        self.assertTrue(any("Cap" in why for why in classify(frame, self.box, self.settings, self.reference)))
-
-    def test_missing_label_is_rejected(self):
-        frame = self.frame.copy()
-        frame[110:224, 20:140] = (30, 120, 220)
-        reasons = classify(frame, self.box, self.settings, self.reference)
-        self.assertTrue(any("Label" in why for why in reasons))
-        self.assertFalse(any("Cap" in why for why in reasons))
-
-    def test_untrained_and_corrupt_reference_never_pass(self):
-        self.assertTrue(classify(self.frame, self.box, self.settings, None))
-        self.reference["cap"]["hist"][0] = float("nan")
-        self.assertTrue(inspection_error(self.settings, self.reference))
-
-    def test_cap_only_and_demo_rules(self):
-        changed = self.frame.copy()
-        changed[110:224, 20:140] = 0
-        self.assertEqual(classify(changed, self.box, {"rule": "cap"}, self.reference), [])
-        self.assertTrue(classify(changed, self.box, {"rule": "all"}, None))
-        self.assertEqual(classify(changed, self.box, {"rule": "none"}, None), [])
-
-    def test_tiny_box_rejected(self):
-        with self.assertRaises(ValueError):
-            teach_reference(self.frame, (1, 1, 2, 2))
-
-
-class ColorTests(unittest.TestCase):
-    @staticmethod
-    def image(hue, saturation=220, value=220):
-        hsv = np.full((300, 160, 3), (hue, saturation, value), dtype=np.uint8)
-        return cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR), (0, 0, 160, 300)
-
-    def test_predefined_colors_and_routing(self):
-        for name, hue in (("red", 0), ("orange", 15), ("yellow", 29),
-                          ("green", 65), ("blue", 110), ("purple", 150)):
-            with self.subTest(name=name):
-                image, box = self.image(hue)
-                measured, confidence = classify_color(image, box)
-                self.assertEqual(measured, name)
-                self.assertGreater(confidence, 0.9)
-                self.assertEqual(classify(image, box, {"pass_color": name}, None), [])
-                other = "blue" if name != "blue" else "orange"
-                self.assertTrue(classify(image, box, {"pass_color": other}, None))
-
-    def test_red_wrap_clear_and_dark_unknown(self):
-        image, box = self.image(179)
-        self.assertEqual(classify_color(image, box)[0], "red")
-        image, box = self.image(0, saturation=0)
-        self.assertEqual(classify_color(image, box)[0], "clear")
-        self.assertEqual(classify(image, box, {"pass_color": "clear"}, None), [])
-        image, box = self.image(15, value=10)
-        self.assertEqual(classify_color(image, box)[0], "unknown")
-        self.assertEqual(classify(image, box, {}, None), ["Unknown color"])
-
-    def test_mixed_color_is_unknown(self):
-        orange, box = self.image(15)
-        blue, _ = self.image(110)
-        orange[:, 80:] = blue[:, 80:]
-        self.assertEqual(classify_color(orange, box)[0], "unknown")
-
-    def test_sample_zone_avoids_label_and_is_configurable(self):
-        orange, box = self.image(15)
-        blue, _ = self.image(110)
-        orange[230:, :] = blue[230:, :]
-        self.assertEqual(classify_color(orange, box)[0], "blue")
-        self.assertEqual(classify_color(orange, box, {"color_y1": .20, "color_y2": .40})[0], "orange")
-
-    def test_cap_label_and_belt_colors_do_not_define_body_color(self):
-        orange, box = self.image(15)
-        blue, _ = self.image(110)
-        # A strongly colored cap/label covers most of the bottle. The exposed
-        # liquid at the bottom remains orange; edge strips are the blue belt.
-        orange[:225] = blue[:225]
-        orange[:, :18] = blue[:, :18]
-        orange[:, 142:] = blue[:, 142:]
-        self.assertEqual(classify_color(orange, box)[0], "orange")
-
-    def test_taught_color_requires_reference_and_compares_circular_hue(self):
-        image, box = self.image(179)
-        reference = teach_color(image, box)
-        self.assertTrue(inspection_error({"pass_color": "taught"}, None))
-        self.assertFalse(inspection_error({"pass_color": "taught"}, reference))
-        red, _ = self.image(2)
-        self.assertEqual(classify(red, box, {"pass_color": "taught"}, reference), [])
-        blue, _ = self.image(110)
-        self.assertTrue(classify(blue, box, {"pass_color": "taught"}, reference))
+from app.vision import VideoWorker, barcode_status, decode_barcodes
 
 
 class BarcodeTests(unittest.TestCase):
@@ -163,18 +47,38 @@ class BarcodeTests(unittest.TestCase):
         self.assertTrue(any(item["text"] == digits for item in symbols))
 
 
+class FakePipeline:
+    def __init__(self, result=None):
+        self.result = result or {"boxes": [], "reasons": [], "colors": [],
+                                 "color_confidences": [], "model_labels": [],
+                                 "inference_ms": 1.0}
+        self.opened = False
+        self.closed = False
+        self.frames = []
+
+    def open(self):
+        self.opened = True
+
+    def describe(self):
+        return "YOLOX test bottle/color models"
+
+    def infer(self, frame):
+        self.frames.append(frame)
+        return self.result
+
+    def close(self):
+        self.closed = True
+
+
 class MailboxTests(unittest.TestCase):
     def test_barcode_coordinates_are_never_replayed_on_another_frame(self):
-        class FakeDetector:
-            def infer(self, frame):
-                return SimpleNamespace(detections=[], inference_ms=1.0)
-            def close(self): pass
+        pipeline = FakePipeline()
         frame = np.full((100, 100, 3), 100, dtype=np.uint8)
         source = ("usb", object(), None)
         packets = []
         timestamps = iter((10.0, 10.05, 10.20))
         with tempfile.TemporaryDirectory() as folder:
-            worker = VideoWorker({"source": "usb", "rule": "none"}, Path(folder))
+            worker = VideoWorker({"source": "usb", "rule": "color"}, Path(folder))
             def read(_source):
                 packet = worker.take_latest()
                 if packet is not None:
@@ -184,7 +88,7 @@ class MailboxTests(unittest.TestCase):
                 except StopIteration:
                     raise EOFError("Test source ended")
             symbol = {"text": "5901234123457", "format": "EAN-13", "bbox": (5, 5, 20, 25)}
-            with patch.object(worker, "_make_detector", return_value=FakeDetector()), patch.object(
+            with patch("app.vision.YoloXPipeline", return_value=pipeline), patch.object(
                     worker, "_open_source", return_value=(source, "fake USB")), patch.object(
                     worker, "_read_source", side_effect=read), patch.object(
                     worker, "_close_source"), patch("app.vision.barcode_status", return_value=(True, "Test decoder")), patch(
@@ -200,6 +104,8 @@ class MailboxTests(unittest.TestCase):
             self.assertTrue(packets[1]["barcode_available"])
             self.assertEqual(packets[2]["barcodes"], [symbol])
             self.assertEqual(packets[2]["barcode_captured"], packets[2]["captured"])
+            self.assertTrue(pipeline.opened)
+            self.assertTrue(pipeline.closed)
 
     def test_take_latest_consumes_and_stop_discards(self):
         worker = VideoWorker({}, Path("."))
@@ -216,21 +122,73 @@ class MailboxTests(unittest.TestCase):
             def read(self): return False, None
             def get(self, _): return 30.0
             def release(self): self.released = True
-        class FakeDetector:
-            def close(self): pass
         capture = EmptyVideo()
+        pipeline = FakePipeline()
         with tempfile.TemporaryDirectory() as folder:
-            worker = VideoWorker({"source": "video", "rule": "none"}, Path(folder))
+            worker = VideoWorker({"source": "video", "rule": "color"}, Path(folder))
             faults = []
             worker.fault.connect(faults.append)
             worker._latest = {"frame": "stale"}
-            with patch.object(worker, "_make_detector", return_value=FakeDetector()), patch.object(
+            with patch("app.vision.YoloXPipeline", return_value=pipeline), patch.object(
                     worker, "_open_source", return_value=(("video", capture, None), "sample.avi")):
                 worker.run()  # Fake source only: no actual camera or hardware is opened.
             self.assertTrue(capture.released)
+            self.assertTrue(pipeline.closed)
             self.assertIsNone(worker.take_latest())
             self.assertEqual(len(faults), 1)
             self.assertIn("Video ended", faults[0])
+
+
+class YoloXWorkerTests(unittest.TestCase):
+    def test_worker_uses_model_predictions_instead_of_pixel_color(self):
+        # The visible pixels are orange. The model reports blue, and its class
+        # prediction and routing decision must arrive at the UI unchanged.
+        frame = np.full((100, 100, 3), (0, 128, 255), dtype=np.uint8)
+        expected = {"boxes": [(10.0, 10.0, 90.0, 90.0)],
+                    "colors": ["blue"], "color_confidences": [0.92],
+                    "reasons": [["YOLOX color blue (divert)"]],
+                    "model_labels": ["blue_bottle"], "inference_ms": 4.75}
+        pipeline = FakePipeline(expected)
+        packets = []
+        timestamps = iter((10.0,))
+        with tempfile.TemporaryDirectory() as folder:
+            worker = VideoWorker({"source": "usb", "rule": "color", "pass_color": "orange"}, Path(folder))
+            def read(_source):
+                packet = worker.take_latest()
+                if packet is not None:
+                    packets.append(packet)
+                try:
+                    return frame.copy(), next(timestamps)
+                except StopIteration:
+                    raise EOFError("Test source ended")
+            with patch("app.vision.YoloXPipeline", return_value=pipeline), patch.object(
+                    worker, "_open_source", return_value=(("usb", object(), None), "fake USB")), patch.object(
+                    worker, "_read_source", side_effect=read), patch.object(
+                    worker, "_close_source"), patch("app.vision.barcode_status", return_value=(False, "Unavailable")):
+                worker.run()
+            self.assertEqual(len(packets), 1)
+            packet = packets[0]
+            for key, value in expected.items():
+                self.assertEqual(packet[key], value, key)
+            self.assertEqual(packet["defects"], expected["boxes"])
+            self.assertTrue(packet["inspection_ready"])
+            self.assertEqual(packet["vision_pipeline"], pipeline.describe())
+            self.assertEqual(len(pipeline.frames), 1)
+            np.testing.assert_array_equal(pipeline.frames[0], frame)
+            self.assertTrue(pipeline.closed)
+
+    def test_missing_trained_color_model_does_not_open_camera(self):
+        with tempfile.TemporaryDirectory() as folder:
+            worker = VideoWorker({"source": "usb", "rule": "color", "yolox_mode": "two_models",
+                                  "color_model_path": str(Path(folder) / "missing_color_model.onnx")}, Path(folder))
+            faults = []
+            worker.fault.connect(faults.append)
+            with patch.object(worker, "_open_source") as open_source:
+                worker.run()
+            open_source.assert_not_called()
+            self.assertIsNone(worker.take_latest())
+            self.assertEqual(len(faults), 1)
+            self.assertIn("YOLOX model was not found", faults[0])
 
 
 if __name__ == "__main__":
