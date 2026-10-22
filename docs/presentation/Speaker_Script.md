@@ -4,11 +4,11 @@
 
 Go 4th Fridays · October 23, 2026
 
-This follows the ten-slide corporate deck. Speaker labels are spoken lines; italic text is a stage cue. Aim for about **10–12 minutes of remarks**, plus **5–6 minutes for the live demo** and **3 minutes for the audience activity**. Practice the handoffs more than the exact wording.
+This follows the ten-slide corporate deck. Brad’s lines are a draft to practice. Wesley’s sections are prompts: he chooses his own words and examples throughout. Italic text is a stage cue. Aim for about **10–12 minutes of remarks**, plus **5–6 minutes for the live demo** and **3 minutes for the audience activity**. Practice the handoffs more than the exact wording.
 
 | Slide | Lead | Main idea |
 | --- | --- | --- |
-| 1 · Engineering at The Kinetic Group | Brad | Meet the people and set the purpose |
+| 1 · Engineering at The Kinetic Group | Brad → Wesley → Brad | Brad opens; Wesley introduces himself |
 | 2 · Writing the next rules | Brad | Honor the legacy; name the ambition |
 | 3 · Engineering that reaches the floor | Brad | Sense → decide → act |
 | 4 · Why we love this work | Wesley | Variety, freedom, ownership, opportunity |
@@ -21,9 +21,11 @@ This follows the ten-slide corporate deck. Speaker labels are spoken lines; ital
 
 ## Slide 1 — Engineering at The Kinetic Group
 
-**Brad:** Good afternoon. I’m Brad Daugherty. I lead small engineering teams across The Kinetic Group, with most of my work at Remington in Lonoke. I’m here with Wesley Siharath, an engineer who helped start Remington Vision when he was one of our first software interns. He has carried that work forward ever since.
+**Brad:** Good afternoon. I’m Brad Daugherty. I lead small engineering teams across The Kinetic Group, with most of my work at Remington in Lonoke. I’m here with Wesley Siharath. Wesley, I’ll let you introduce yourself.
 
-Today we want to show you what engineering can look like when an idea reaches the factory floor. We’ll introduce the organization, explain the system in simple terms, and then demonstrate it together. We are also here to meet people who might want to help us build what comes next.
+**Wesley — introduce yourself in your own words (about 30 seconds):** *Tell the room where you started, what you work on now, and what pulled you into the project. Your path from one of the first software interns to engineer is a strong story; choose the parts that feel right to you.*
+
+**Brad:** Today we want to show you what engineering can look like when an idea reaches the factory floor. We’ll explain the system in simple terms and then demonstrate it together. We are also here to meet people who might want to help us build what comes next.
 
 ## Slide 2 — Writing the next rules
 
@@ -41,17 +43,11 @@ The interesting engineering is in connecting those steps. Can we get a clear vie
 
 *Brad turns toward Wesley.*
 
-**Brad:** Wesley has lived that process from the beginning of Remington Vision. I want him to tell you what makes the work exciting.
+**Brad:** Wesley has lived that process from the beginning of Remington Vision. Wesley, what makes this work exciting for you?
 
 ## Slide 4 — Why we love this work
 
-**Wesley:** Brad mentioned that I started here as one of the first software interns. Remington Vision was one of the first projects I was asked to take on, and it pulled me into some interesting work with AI and different machines. What I enjoy most is the variety, the freedom to explore ideas, and the chance to take ownership.
-
-One day we might be working through a software problem. The next, we are at a machine trying to understand what is actually happening. We get to follow an idea far enough to see whether it helps. There is always something new to figure out.
-
-**Wesley’s example — 30 to 45 seconds:** *Describe one specific moment from Remington Vision or another project: What did you try? What surprised you? What did you change? Use your own words and only details you can share publicly.*
-
-**Wesley:** I’ve had opportunities here that I would not have expected when I came in. I was trusted to learn, to explore, and to own a piece of the work. That is why I love doing it, and it is the kind of opportunity we want more people to have.
+**Wesley — in your own words (about 1 minute):** *Draw from what you already planned: working with AI and different machines; the variety; freedom to explore; taking ownership; and opportunities you did not expect. Pick one real moment that illustrates it. What was the problem, what did you try, and what did you learn? Finish with why this work matters to you. These are prompts, not a required script.*
 
 *Wesley hands the floor back to Brad. Both presenters move to the demo setup.*
 
@@ -59,11 +55,11 @@ One day we might be working through a software problem. The next, we are at a ma
 
 **Brad:** Let’s put that idea in front of you. We’ll place Gatorade bottles in front of a camera. The application will identify what it sees and show a sorting decision on screen. Watch the path from an image to a decision to a visible result.
 
-*Brad places the first bottle and pauses for the result. Wesley points out what appears on screen.*
+*Brad places the first bottle and pauses for the result.*
 
-**Wesley:** Here is what the camera sees, and here is the decision the application makes. Let’s change the bottle and see what happens.
+**Wesley — in your own words:** *Point out what the camera sees and the decision on screen. Choose the next bottle or feature and show what changes. Add any detail you think is worth showing.*
 
-*Wesley places a different bottle. Brad invites the audience to predict the result before it appears. If time permits, the two presenters show another feature or let someone choose the next bottle.*
+*Wesley chooses the next bottle or feature and narrates it in his own words. Brad can invite the audience to predict the result before it appears.*
 
 **Brad:** This is a demonstration setup, so the sorting decision is shown on screen. What matters is the engineering path you just saw: sense what is happening, make a decision, and make that decision useful.
 
@@ -71,11 +67,7 @@ One day we might be working through a software problem. The next, we are at a ma
 
 ## Slide 6 — The hard problems
 
-**Wesley:** A live result is exciting. The deeper challenge is making it useful again and again. Lighting changes. Objects arrive at different angles. A decision may need to happen quickly. And if the result is hard to understand, the people using it cannot rely on it.
-
-That is why we test variation, timing, and reliability together. We have to know how a system behaves when it is uncertain, and we have to make that behavior clear to the person who needs to act.
-
-**Wesley’s technical example — 20 to 30 seconds:** *Point to something the audience just saw. Explain one practical issue you had to solve or would test next. Keep it concrete.*
+**Wesley — in your own words (about 1 minute):** *Use the demo to explain the hard parts you find most important. Possible anchors: changes in lighting or angle, how quickly a decision is needed, what happens when the system is uncertain, and whether people can trust the result. Choose one practical challenge you solved or would test next. You can go deeper if the room asks.*
 
 **Brad:** That is what we mean by engineering that reaches the floor. A promising idea is the beginning. Making it dependable in the real operation is the work. If we want to write the rules for the future of manufacturing, our systems have to keep working as conditions change, the pace picks up, and people depend on the result. Those are some of the most interesting engineering challenges of our time.
 
@@ -103,7 +95,7 @@ Tell us what you want to build and why it matters to you. If there is a fit, we 
 
 **Brad:** My email is on the screen. Wesley and I will be here afterward, and we would love to hear from you. If you are interested in a role at Remington or elsewhere in The Kinetic Group, the careers page is the place to look. If you want to keep developing an idea, connect with us through 4Founders.
 
-**Wesley:** And if you want to ask how the system works, or show us something you are building, please come find us. We enjoy talking through the hard parts with people who are curious about them.
+**Wesley — in your own words:** *Invite people to ask about the engineering or show you what they are building.*
 
 **Brad:** The rules for the future will be written by people willing to build. **Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.**
 
