@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 import cv2
 import numpy as np
 
 from app.gatorade import GatoradeLabelMatcher, measure_drink_color
+from app.gatorade_pipeline import GatoradePipeline
 from app.settings import DEFAULTS
-from app.vision import classify, classify_color
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,18 +40,19 @@ class GatoradeColorTests(unittest.TestCase):
 
     def test_cropped_blue_and_two_way_routing(self):
         frame, box = bottle_image((235, 155, 65), cropped_top=True)
-        settings = {**DEFAULTS, "pass_color": "blue"}
-        observed = classify_color(frame, box, settings)
-        self.assertEqual(observed[0], "blue")
-        self.assertEqual(classify(frame, box, settings, None, observed), [])
-        settings["pass_color"] = "yellow"
-        self.assertEqual(classify(frame, box, settings, None, observed),
-                         ["Color: blue (divert)"])
+        self.assertEqual(measure_drink_color(frame, box)["name"], "blue")
+        detection = SimpleNamespace(xyxy=box, class_id=39, label="bottle", score=.9)
+        result = SimpleNamespace(detections=[detection], inference_ms=1.0)
+        pipeline = GatoradePipeline({**DEFAULTS, "pass_color": "blue"}, ROOT)
+        pipeline.detector = SimpleNamespace(infer=lambda _frame: result)
+        self.assertEqual(pipeline.infer(frame)["reasons"], [[]])
+        pipeline.settings["pass_color"] = "yellow"
+        self.assertEqual(pipeline.infer(frame)["reasons"], [["Gatorade color blue (divert)"]])
 
     def test_white_is_distinct_from_legacy_clear(self):
         frame, box = bottle_image((180, 180, 180))
-        self.assertEqual(classify_color(frame, box, DEFAULTS)[0], "white")
-        self.assertEqual(classify(frame, box, {**DEFAULTS, "pass_color": "white"}, None), [])
+        self.assertEqual(measure_drink_color(frame, box)["name"], "white")
+        self.assertNotEqual(measure_drink_color(frame, box)["name"], "clear")
 
     def test_reference_matcher_rejects_plain_g(self):
         matcher = GatoradeLabelMatcher(ROOT / "models")

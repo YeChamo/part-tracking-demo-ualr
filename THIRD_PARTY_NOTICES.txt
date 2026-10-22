@@ -107,8 +107,8 @@ yolox_nano.onnx
 yolox_nano.onnx.data
 f57d43a8aadb3b4072a2e884e572a5f89848bc778f611d8ae3de58cefc5b7746
 
-This is the existing generic YOLOX nano COCO bottle-detection model used for
-this demo, not a newly trained Gatorade/Gator brand model. No separate model-
+This is the existing generic YOLOX nano COCO bottle-detection model retained
+for trained-color locator mode, not a Gatorade brand model. No separate model-
 specific license or attribution file was found beside those local model files;
 no additional model license is inferred here.
 

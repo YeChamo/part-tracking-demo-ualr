@@ -46,6 +46,7 @@ class StubController:
         self.calls = []
         self.current = {"ok": True, "run_id": "old-run", "status": "completed", "running": False, "repeat_mode": "once"}
         self.stop_error = None
+        self.runs = 0
 
     def check_ready(self, program):
         self.calls.append(("ready", program))
@@ -61,7 +62,9 @@ class StubController:
         if deadline is not None and time.monotonic() > deadline:
             raise EtherMotionError("Motion deadline expired.")
         self.calls.append(("trigger", program, request_id))
-        self.current = {"ok": True, "run_id": "new-run", "status": "running", "running": True, "repeat_mode": "once"}
+        self.runs += 1
+        run_id = "new-run" if self.runs == 1 else f"new-run-{self.runs}"
+        self.current = {"ok": True, "run_id": run_id, "status": "running", "running": True, "repeat_mode": "once"}
         return {"ok": True, "operation": "run", "request_id": request_id, "duplicate": False}
 
     def stop(self, program, request_id):
@@ -124,16 +127,25 @@ class UiMotionTests(unittest.TestCase):
         self.window.settings["source"] = "usb"
         self.window.settings["distance_mm"] = 0
         self.window.settings["delay_ms"] = self.window.settings["lead_ms"] = 0
+        # Synthetic instantaneous movements keep dispatch immediate. Real
+        # bottle length and clearance remain enabled in the event's plan.
+        self.window.settings["move_ms"] = 0
         self.window.started_at = time.monotonic()
         self.window.last_packet = {"captured": time.monotonic(), "inspection_ready": True}
         self.window.armed = armed
         if armed:
             self.window.send_gate.set()
 
-    def schedule(self, bottle_id=1):
-        captured = time.monotonic()
-        self.window.decision(Decision(bottle_id, True, ["Blue differs from pass color"], captured, (10, 20, 70, 180)))
-        return self.window.events[-1], captured
+    def schedule(self, bottle_id=1, *, bad=True, captured=None):
+        captured = time.monotonic() if captured is None else captured
+        self.window.decision(Decision(bottle_id, bad, ["Blue differs from pass color"] if bad else [], captured, (10, 20, 70, 180)))
+        event = self.window.events[-1]
+        if ("_plan" in event and self.window.settings["distance_mm"] == 0
+                and all(self.window.settings[key] == 0 for key in ("delay_ms", "lead_ms", "move_ms"))):
+            # The instantaneous synthetic fixture has no real transit/move
+            # budget. Give its in-memory request callback time to execute.
+            event["_send_deadline"] = captured + .25
+        return event, captured
 
     def accept(self):
         self.live()
@@ -195,6 +207,9 @@ class UiMotionTests(unittest.TestCase):
         self.assertEqual(self.window.complete_count, 0)
         self.controller.current.update(status="completed", running=False)
         self.poll()
+        self.assertEqual(self.window.complete_count, 0)
+        self.assertTrue(self.window.owns_motion)
+        self.window.resume_sequence(event["_plan"]["clearance_at"] + .01)
         self.assertEqual(self.window.complete_count, 1)
         self.assertEqual(event["output"], "COMPLETED")
         self.assertFalse(self.window.owns_motion)
@@ -209,6 +224,7 @@ class UiMotionTests(unittest.TestCase):
         self.assertEqual(event["output"], "ACCEPTED")
         self.controller.current.update(run_id="new-run", status="completed", running=False)
         self.poll()
+        self.window.resume_sequence(event["_plan"]["clearance_at"] + .01)
         self.assertEqual(self.window.complete_count, 1)
 
     def test_stop_before_queued_send_prevents_trigger(self):
@@ -307,6 +323,219 @@ class UiMotionTests(unittest.TestCase):
         self.assertEqual(first["session"], second["session"])
         self.assertNotEqual(first["event_id"], second["event_id"])
         self.assertNotEqual(first["request_id"], second["request_id"])
+
+    def test_pass_program_is_selected_for_a_good_bottle(self):
+        self.live()
+        self.window.settings["pass_program_id"] = "pass-once"
+        event, captured = self.schedule(bad=False)
+        self.assertEqual(event["decision"], 0)
+        self.assertEqual(event["program_id"], "pass-once")
+        self.window.dispatch_due(captured)
+        self.jobs.run_next()
+        triggers = [call for call in self.controller.calls if call[0] == "trigger"]
+        self.assertEqual([call[1] for call in triggers], ["pass-once"])
+        self.assertEqual(self.window.active_program, "pass-once")
+        self.assertEqual(self.window.pass_count, 1)
+        self.assertEqual(self.window.divert_count, 0)
+
+    def test_no_action_pass_reserves_clearance_and_blocks_reject(self):
+        self.live()
+        event, captured = self.schedule(bad=False)
+        self.window.dispatch_due(captured)
+        self.assertEqual(event["output"], "PASS")
+        self.assertFalse(self.jobs.pending)
+        self.assertFalse(self.controller.calls)
+        self.assertEqual(self.window.pass_clearance_until, event["_plan"]["clearance_at"])
+        reject, reject_at = self.schedule(2, captured=captured + .05)
+        with self.assertLogs(level="ERROR"):
+            self.window.dispatch_due(reject_at)
+        self.assertEqual(reject["output"], "SPACING CONFLICT")
+        self.assertFalse(self.window.armed)
+        self.assertFalse(self.window.running)
+        self.assertFalse(self.jobs.pending)
+        self.assertFalse(any(call[0] == "trigger" for call in self.controller.calls))
+
+    def test_pass_arriving_during_reject_sequence_stops_output(self):
+        self.accept()
+        passed, captured = self.schedule(2, bad=False)
+        with self.assertLogs(level="ERROR"):
+            self.window.dispatch_due(captured)
+        self.assertEqual(passed["output"], "REJECTOR BUSY")
+        self.assertFalse(self.window.armed)
+        self.assertFalse(self.window.running)
+        self.jobs.run_next()  # The only new command is Stop for the active cycle.
+        self.assertEqual(sum(call[0] == "trigger" for call in self.controller.calls), 1)
+        self.assertEqual(sum(call[0] == "stop" for call in self.controller.calls), 1)
+
+    def test_return_waits_for_both_primary_hold_and_bottle_clearance(self):
+        # One case is limited by clearance; the other is limited by the hold.
+        for index, hold_ms in enumerate((100, 1000), start=1):
+            with self.subTest(hold_ms=hold_ms):
+                self.live()
+                self.window.settings["return_program_id"] = "return-once"
+                self.window.settings["hold_ms"] = hold_ms
+                event, captured = self.schedule(index)
+                self.window.dispatch_due(captured)
+                self.jobs.run_next()
+                finished_at = captured + .05
+                self.controller.current.update(status="completed", running=False)
+                with patch("app.ui.time.monotonic", return_value=finished_at):
+                    self.poll()
+                expected_wait = max(finished_at + hold_ms / 1000, event["_plan"]["clearance_at"])
+                self.assertEqual(self.window.sequence_wait_until, expected_wait)
+                self.assertEqual(self.window.complete_count, index - 1)
+                self.assertTrue(self.window.owns_motion)
+                self.assertFalse(self.jobs.pending)
+                self.window.resume_sequence(expected_wait - .001)
+                self.assertFalse(self.jobs.pending)
+                self.window.resume_sequence(expected_wait)
+                self.assertEqual(self.window.active_program, "return-once")
+                self.assertEqual(self.window.sequence_stage, "return")
+                self.jobs.run_next()
+                self.assertEqual(self.controller.calls[-1][0:2], ("trigger", "return-once"))
+                self.assertEqual(self.window.complete_count, index - 1)
+                self.controller.current.update(status="completed", running=False)
+                with patch("app.ui.time.monotonic", return_value=expected_wait + .05):
+                    self.poll()
+                self.assertEqual(event["output"], "COMPLETED")
+                self.assertEqual(self.window.complete_count, index)
+                self.assertFalse(self.window.owns_motion)
+
+    def test_repeat_waits_for_new_completed_run_and_counts_one_bottle(self):
+        self.window.settings["reject_cycles"] = 2
+        self.window.settings["hold_ms"] = 200
+        event = self.accept()
+        captured = event["_plan"]["arrival_at"]
+        self.poll()  # First run is still running; no repeat is requested.
+        self.window.resume_sequence(captured + 10)
+        self.assertFalse(self.jobs.pending)
+        self.assertEqual(sum(call[0] == "trigger" for call in self.controller.calls), 1)
+        self.controller.current.update(status="completed", running=False)
+        with patch("app.ui.time.monotonic", return_value=captured + .05):
+            self.poll()
+        self.assertEqual(event["cycles_completed"], 1)
+        self.assertEqual(self.window.complete_count, 0)
+        wait_until = self.window.sequence_wait_until
+        self.window.resume_sequence(wait_until - .001)
+        self.assertFalse(self.jobs.pending)
+        self.window.resume_sequence(wait_until)
+        self.jobs.run_next()
+        triggers = [call for call in self.controller.calls if call[0] == "trigger"]
+        self.assertEqual(len(triggers), 2)
+        self.assertEqual([call[1] for call in triggers], ["reject-once", "reject-once"])
+        self.assertNotEqual(triggers[0][2], triggers[1][2])
+        self.assertEqual(self.window.sequence_cycle, 2)
+        self.assertEqual(self.window.complete_count, 0)
+        second_run = self.controller.current["run_id"]
+        self.controller.current.update(run_id="new-run", status="completed", running=False)
+        self.poll()  # The first cycle's old completed status cannot finish cycle two.
+        self.assertEqual(self.window.complete_count, 0)
+        self.assertTrue(self.window.owns_motion)
+        self.controller.current.update(run_id=second_run, status="completed", running=False)
+        with patch("app.ui.time.monotonic", return_value=wait_until + .05):
+            self.poll()
+        self.assertEqual(event["cycles_completed"], 2)
+        self.assertEqual(event["output"], "COMPLETED")
+        self.assertEqual(self.window.complete_count, 1)
+        self.assertFalse(self.window.owns_motion)
+
+    def test_stop_during_hold_prevents_return_and_repeat(self):
+        self.window.settings.update(return_program_id="return-once", reject_cycles=2, hold_ms=1000)
+        event = self.accept()
+        self.controller.current.update(status="completed", running=False)
+        self.poll()
+        hold_until = self.window.sequence_wait_until
+        self.assertIsNotNone(hold_until)
+        self.window.stop()
+        self.window.resume_sequence(hold_until + 10)
+        self.assertEqual(len(self.jobs.pending), 1)  # Stop only, no return/repeat.
+        self.jobs.run_next()
+        self.controller.current.update(status="stopped", running=False)
+        self.poll()
+        self.window.resume_sequence(hold_until + 20)
+        self.assertFalse(self.jobs.pending)
+        triggers = [call for call in self.controller.calls if call[0] == "trigger"]
+        self.assertEqual([call[1] for call in triggers], ["reject-once"])
+        self.assertEqual(self.window.complete_count, 0)
+        self.assertEqual(event["cycles_completed"], 0)
+        self.assertFalse(self.window.owns_motion)
+
+    def test_delayed_primary_poll_does_not_change_return_stage(self):
+        self.window.settings.update(return_program_id="return-once", hold_ms=0)
+        event = self.accept()
+        self.window.poll_motion()
+        _old_function, old_callback = self.jobs.pending.pop(0)
+        self.controller.current.update(status="completed", running=False)
+        self.poll()
+        self.window.resume_sequence(self.window.sequence_wait_until)
+        self.jobs.run_next()
+        self.assertEqual(self.window.active_program, "return-once")
+        phase = self.window.phase_generation
+        self.window.poll_motion()  # The current return-stage status is pending.
+        self.assertTrue(self.window.network_poll)
+        old_callback(None, EtherMotionError("Delayed primary status failure"))
+        self.assertTrue(self.window.network_poll)
+        self.assertEqual(self.window.phase_generation, phase)
+        self.assertEqual(self.window.active_program, "return-once")
+        self.assertIsNone(self.window.active_run)
+        self.assertEqual(event["output"], "ACCEPTED")
+        self.assertTrue(self.window.armed)
+        self.assertEqual(self.window.complete_count, 0)
+        self.jobs.run_next()
+
+    def test_stop_targets_the_active_return_program_snapshot(self):
+        self.window.settings.update(return_program_id="return-once", hold_ms=0)
+        self.accept()
+        self.controller.current.update(status="completed", running=False)
+        self.poll()
+        self.window.resume_sequence(self.window.sequence_wait_until)
+        self.jobs.run_next()
+        self.window.settings["program_id"] = "unrelated-program"
+        self.window.settings["return_program_id"] = "different-return"
+        self.window.stop()
+        self.jobs.run_next()
+        stops = [call for call in self.controller.calls if call[0] == "stop"]
+        self.assertEqual([call[1] for call in stops], ["return-once"])
+
+    def test_arming_checks_pass_reject_and_return_programs(self):
+        self.live(armed=False)
+        self.window.pass_program.addItem("Pass once", "pass-once")
+        self.window.pass_program.setCurrentIndex(self.window.pass_program.findData("pass-once"))
+        self.window.return_program.addItem("Return once", "return-once")
+        self.window.return_program.setCurrentIndex(self.window.return_program.findData("return-once"))
+        self.window.toggle_arm(True)
+        self.jobs.run_next()
+        programs = {call[1] for call in self.controller.calls if call[0] == "ready"}
+        self.assertEqual(programs, {"pass-once", "reject-once", "return-once"})
+        self.assertTrue(self.window.armed)
+
+    def test_readiness_latency_cannot_consume_the_diverter_move_budget(self):
+        self.live()
+        self.window.settings.update(distance_mm=60, lead_ms=200, move_ms=150)
+        event, captured = self.schedule()
+        self.assertAlmostEqual(event["_plan"]["due_at"] - captured, .1)
+        self.assertAlmostEqual(event["_send_deadline"] - captured, .15)
+        self.window.dispatch_due(event["_plan"]["due_at"])
+        # Readiness/status work finishes too late to leave enough time for
+        # the gate to move, although generic 250 ms dispatch tolerance remains.
+        with patch("app.ui.time.monotonic", return_value=event["_send_deadline"] + .001):
+            with self.assertLogs(level="ERROR"):
+                self.jobs.run_next()
+        self.assertEqual(event["output"], "REFUSED")
+        self.assertIn("deadline", event["detail"].lower())
+        self.assertFalse(self.window.running)
+        self.assertFalse(any(call[0] == "trigger" for call in self.controller.calls))
+
+    def test_dispatch_rejects_a_missed_move_deadline_before_queueing(self):
+        self.live()
+        self.window.settings.update(distance_mm=60, lead_ms=200, move_ms=150)
+        event, _captured = self.schedule()
+        with self.assertLogs(level="ERROR"):
+            self.window.dispatch_due(event["_send_deadline"] + .001)
+        self.assertEqual(event["output"], "MISSED TIMING")
+        self.assertFalse(self.jobs.pending)
+        self.assertFalse(self.controller.calls)
+        self.assertFalse(self.window.armed)
 
 
 if __name__ == "__main__":
