@@ -6,10 +6,13 @@ models. This mode supplies useful sorting from the current example photos.
 from __future__ import annotations
 
 import math
+import logging
 import time
+from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 
 from .gatorade import GatoradeLabelMatcher, measure_drink_color, neutralize_color_cast
+from .inspections import LabelReader, has_gatorade_text, inspect_orange_cap, label_summary
 from .vendor.inference import Detector, DetectorConfig
 
 
@@ -19,6 +22,11 @@ class GatoradePipeline:
         self.root = Path(root)
         self.detector: Detector | None = None
         self.matcher: GatoradeLabelMatcher | None = None
+        self.reader: LabelReader | None = None
+        self.ocr_pool: ThreadPoolExecutor | None = None
+        self.ocr_future: Future | None = None
+        self.ocr_box: tuple[float, float, float, float] | None = None
+        self.last_ocr_at = 0.0
         self.bottle_confidence = 0.25
         self.color_confidence = 0.50
 
@@ -46,16 +54,23 @@ class GatoradePipeline:
             self.detector.open()
             if self.settings.get("gatorade_label_check", True):
                 self.matcher = GatoradeLabelMatcher(self.root / "models")
+            if self.settings.get("label_ocr", True):
+                self.reader = LabelReader()
+                self.ocr_pool = ThreadPoolExecutor(max_workers=1,thread_name_prefix='gatorade-ocr')
         except Exception:
             self.close()
             raise
         return self
 
     def close(self) -> None:
+        if self.ocr_pool is not None:
+            self.ocr_pool.shutdown(wait=False,cancel_futures=True)
+        self.ocr_pool = self.ocr_future = self.ocr_box = None
         if self.detector is not None:
             self.detector.close()
         self.detector = None
         self.matcher = None
+        self.reader = None
 
     def set_confidence(self, bottle: float, color: float) -> None:
         try:
@@ -69,7 +84,22 @@ class GatoradePipeline:
             self.detector._cfg.conf = bottle
 
     def describe(self) -> str:
-        return "YOLOX-S bottle + Gatorade drink color"
+        return "YOLOX-S bottle + color + cap + label"
+
+    @staticmethod
+    def _match_ocr_box(old, boxes) -> int | None:
+        if old is None or not boxes:
+            return None
+        ox,oy = (old[0]+old[2])/2,(old[1]+old[3])/2
+        ow,oh = old[2]-old[0],old[3]-old[1]
+        candidates = []
+        for index,box in enumerate(boxes):
+            x,y = (box[0]+box[2])/2,(box[1]+box[3])/2
+            width,height = box[2]-box[0],box[3]-box[1]
+            if (abs(x-ox)<=.4*max(ow,width) and abs(y-oy)<=.35*max(oh,height)
+                    and .5<=width/max(ow,1)<=2 and .5<=height/max(oh,1)<=2):
+                candidates.append(index)
+        return candidates[0] if len(candidates)==1 else None
 
     def infer(self, frame) -> dict:
         if self.detector is None:
@@ -81,23 +111,45 @@ class GatoradePipeline:
         boxes = [tuple(item.xyxy) for item in detections]
         started = time.perf_counter()
         color_frame = neutralize_color_cast(frame) if boxes else frame
-        colors, confidences, reasons, matches = [], [], [], []
+        colors, confidences, reasons, matches, caps, label_texts = [], [], [], [], [], []
         height, width = frame.shape[:2]
         pass_color = str(self.settings.get("pass_color", "blue")).lower()
-        for box in boxes:
+        now = time.monotonic()
+        completed_ocr = None
+        if self.ocr_future is not None and self.ocr_future.done():
+            index = self._match_ocr_box(self.ocr_box,boxes)
+            if index is not None:
+                try:
+                    completed_ocr = (index,self.ocr_future.result())
+                except Exception:
+                    logging.warning('Label OCR failed; color and cap inspection continue.',exc_info=True)
+            self.ocr_future = self.ocr_box = None
+        if self.reader and self.ocr_pool and boxes and self.ocr_future is None and now-self.last_ocr_at >= .8:
+            index = max(range(len(boxes)), key=lambda i:
+                        (boxes[i][2]-boxes[i][0])*(boxes[i][3]-boxes[i][1]))
+            x1,y1,x2,y2 = (int(round(value)) for value in boxes[index])
+            crop = frame[max(0,y1):min(height,y2),max(0,x1):min(width,x2)]
+            self.ocr_box = boxes[index]
+            self.ocr_future = self.ocr_pool.submit(self.reader.read,crop.copy())
+            self.last_ocr_at = now
+        for index, box in enumerate(boxes):
             reading = measure_drink_color(color_frame, box)
             color = reading["name"] if reading["confidence"] >= self.color_confidence else "unknown"
             colors.append(color)
             confidences.append(float(reading["confidence"]) if color != "unknown" else 0.0)
-            reasons.append([] if color == pass_color else
-                           ["Unknown color"] if color == "unknown" else
-                           [f"Gatorade color {color} (divert)"])
+            why = ([] if color == pass_color else ["Unknown color"] if color == "unknown"
+                   else [f"Gatorade color {color} (divert)"])
+            cap = inspect_orange_cap(frame, box)
+            caps.append(cap)
+            reasons.append(why)
             x1, y1, x2, y2 = (int(round(value)) for value in box)
             x1, y1, x2, y2 = max(0, x1), max(0, y1), min(width, x2), min(height, y2)
             crop = frame[y1:y2, x1:x2]
-            matches.append(bool(self.matcher and self.matcher.match(crop)))
+            label_lines = completed_ocr[1] if completed_ocr and index==completed_ocr[0] else []
+            label_texts.append(label_summary(label_lines))
+            matches.append(has_gatorade_text(label_lines) or bool(self.matcher and self.matcher.match(crop)))
         return {"boxes": boxes, "colors": colors, "color_confidences": confidences,
                 "reasons": reasons, "inference_ms": float(result.inference_ms),
                 "inspection_ms": (time.perf_counter() - started) * 1000.0,
                 "model_labels": [item.label for item in detections],
-                "brand_matches": matches}
+                "brand_matches": matches, "caps": caps, "label_texts": label_texts}

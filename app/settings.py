@@ -9,6 +9,7 @@ DEFAULTS = {
     'camera_manual': False, 'basler_serial': '', 'video_path': '',
     'model_path': '', 'model_class_id': 39, 'image_size': 640,
     'yolox_mode': 'gatorade', 'gatorade_label_check': True,
+    'label_ocr': True, 'aux_camera_ids': [],
     'model_class_names': '', 'color_model_path': '',
     'color_class_names': '', 'color_class_map': '', 'color_image_size': 640,
     'confidence': .25, 'color_confidence': .50, 'rule': 'color', 'pass_color': 'blue',

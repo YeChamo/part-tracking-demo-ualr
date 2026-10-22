@@ -1,16 +1,18 @@
 # Run with Python 3.11 + PyInstaller. Runtime stays beside the executable.
 from pathlib import Path
+from PyInstaller.utils.hooks import collect_data_files
 
 root = Path(SPECPATH)
 a = Analysis(
     [str(root / 'run.py')],
     pathex=[str(root)],
-    binaries=[], datas=[],
-    hiddenimports=['zxingcpp', 'pypylon.pylon', 'pypylon.genicam', 'PySide6.QtNetwork'],
+    binaries=[], datas=collect_data_files('rapidocr_onnxruntime'),
+    hiddenimports=['zxingcpp', 'pypylon.pylon', 'pypylon.genicam', 'PySide6.QtNetwork',
+                   'rapidocr_onnxruntime'],
     hookspath=[], runtime_hooks=[],
     excludes=['torch', 'torchvision', 'torchaudio', 'transformers', 'tensorflow', 'scipy',
               'matplotlib', 'pandas', 'sklearn', 'sympy', 'IPython', 'notebook', 'onnx',
-              'pytest', 'PyQt5', 'PyQt6', 'PySide2', 'tkinter', 'PIL', 'tensorboard'],
+              'pytest', 'PyQt5', 'PyQt6', 'PySide2', 'tkinter', 'tensorboard'],
     noarchive=False,
 )
 # CPU inspection is deliberately portable; GPU runtimes need station-specific drivers.

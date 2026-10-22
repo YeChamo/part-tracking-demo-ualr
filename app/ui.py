@@ -15,11 +15,11 @@ from pathlib import Path
 
 import cv2
 from PySide6.QtCore import QObject, QRectF, Qt, QTimer, QUrl, Signal
-from PySide6.QtGui import QColor, QDesktopServices, QFont, QIcon, QImage, QPainter, QPen
+from PySide6.QtGui import QColor, QDesktopServices, QFont, QIcon, QImage, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import (
     QAbstractItemView, QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
     QFileDialog, QFormLayout, QFrame, QHBoxLayout, QHeaderView, QLabel,
-    QLineEdit, QMainWindow, QMessageBox, QPushButton, QScrollArea, QSpinBox,
+    QLineEdit, QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPushButton, QScrollArea, QSpinBox,
     QSplitter, QTableWidget, QTableWidgetItem, QTabWidget, QVBoxLayout, QWidget, QSizePolicy,
 )
 
@@ -131,7 +131,9 @@ class VisionView(QWidget):
         else:
             p.setPen(QColor('#8ba1bc'))
             p.setFont(QFont('Segoe UI', 23))
-            p.drawText(QRectF(0, 0, w, h), Qt.AlignmentFlag.AlignCenter, 'Choose a source, then start inspection')
+            prompt = ('Opening live camera…' if m.running else
+                      'Select a camera, then start live inspection')
+            p.drawText(QRectF(0, 0, w, h), Qt.AlignmentFlag.AlignCenter, prompt)
         # Geometry and tracking boxes use source-image coordinates.
         rtl = m.settings['direction'] == 'rtl'
         entry = w*(1-m.settings['entry'] if rtl else m.settings['entry'])
@@ -190,6 +192,9 @@ class MainWindow(QMainWindow):
         self.sim = Simulation()
         self.tracker = self.make_tracker()
         self.worker = None
+        self.aux_workers = {}
+        self.aux_panels = {}
+        self.aux_current_ids = set(self.settings.get('aux_camera_ids') or [])
         self.last_packet = None
         self.track_meta = {}
         self.session = uuid.uuid4().hex[:12]
@@ -222,7 +227,7 @@ class MainWindow(QMainWindow):
         self.last_poll = 0.0
         self.pass_count = self.divert_count = self.complete_count = 0
         self.jobs = Jobs(self)
-        self.setWindowTitle('RemingtonVision • Gatorade Sorting Demo')
+        self.setWindowTitle('RemingtonVision • Gatorade Inspection Demo')
         self.setWindowIcon(QIcon(str(root/'assets'/'demo.ico')))
         self.resize(1450, 960)
         self.setMinimumSize(1100, 720)
@@ -256,7 +261,7 @@ class MainWindow(QMainWindow):
         brand.setStyleSheet('background:#2e76f3;color:white;font-weight:800;font-size:18px;border-radius:9px;padding:15px;')
         header.addWidget(brand)
         title = QVBoxLayout()
-        title.addWidget(self.label('Gatorade color sorting', 'title'))
+        title.addWidget(self.label('Gatorade inspection & sorting', 'title'))
         title.addWidget(self.label('RemingtonVision  /  UALR live demo', 'muted'))
         header.addLayout(title)
         header.addStretch()
@@ -331,6 +336,7 @@ class MainWindow(QMainWindow):
         self.live_detail = self.label('Live camera inspection will appear here')
         self.live_detail.setStyleSheet('font-size:17px;font-weight:700;')
         self.live_evidence = self.label('YOLOX-S bottle detection + exposed drink color', 'muted')
+        self.live_evidence.setWordWrap(True)
         inspection_text.addWidget(self.live_title)
         inspection_text.addWidget(self.live_detail)
         inspection_text.addWidget(self.live_evidence)
@@ -361,6 +367,7 @@ class MainWindow(QMainWindow):
         self.path_buttons = {}
         self.build_models_tab()
         self.build_sort_tab()
+        self.build_cameras_tab()
         self.build_conveyor_tab()
         self.build_reject_tab()
         splitter.addWidget(self.tabs)
@@ -439,8 +446,8 @@ class MainWindow(QMainWindow):
         rl.addWidget(edit); rl.addWidget(browse); form.addRow(title,row)
 
     def build_sort_tab(self):
-        box = self.new_tab('Color + code')
-        self.note(box,'Choose the color that stays on the belt. Other colors produce decision 1 and the selected divert motion.')
+        box = self.new_tab('Inspections')
+        self.note(box,'Choose the pass color. The orange-cap check and actual label OCR add separate evidence for each bottle.')
         form = QFormLayout(); form.setSpacing(10)
         self.sort_form = form
         self.combo(form,'pass_color','Pass color',[(c.title(),c) for c in ['blue','yellow','white','orange','green','red','purple','clear']])
@@ -449,9 +456,12 @@ class MainWindow(QMainWindow):
                         if self.smoke_test else [('Drink color → pass / divert','color')])
         self.combo(form,'rule','Sort rule',rule_choices)
         self.field(form,'every_n','Every Nth','int',2,100)
+        self.note(box,'Orange-cap status is informational only; it never changes the sort route.')
+        self.combo(form,'label_ocr','Read label text',
+                   [('On · actual OCR',True),('Off for speed',False)])
         box.addLayout(form)
         box.addWidget(self.barcode_card)
-        self.note(box,'Live barcode reader: UPC / EAN / Code 128 / QR and more. Unread codes remain UNREAD. Codes are displayed and logged; color determines routing.')
+        self.note(box,'Live barcode reader: UPC / EAN / Code 128 / QR and more. Unread codes remain UNREAD. OCR text, cap status, and label evidence are logged. Only color affects routing.')
         form = QFormLayout(); form.setSpacing(10)
         self.field(form,'camera_index','Manual USB index','int',0,63)
         self.path_field(form,'video_path','Video file','Videos (*.mp4 *.avi *.mov *.mkv);;All files (*)')
@@ -465,6 +475,142 @@ class MainWindow(QMainWindow):
         tools.addWidget(self.reset_button)
         box.addLayout(tools)
         box.addStretch()
+
+    def build_cameras_tab(self):
+        box = self.new_tab('Cameras')
+        self.note(box,'The camera in the top bar is PRIMARY. It tracks bottles and is the only camera allowed to schedule diverter actions.')
+        self.note(box,'Select additional cameras below. Each runs live bottle, cap, color, and label inspection independently; auxiliary results never command motion.')
+        self.aux_list = QListWidget()
+        self.aux_list.setMaximumHeight(105)
+        self.aux_list.itemChanged.connect(self.aux_selection_changed)
+        box.addWidget(self.aux_list)
+        self.aux_layout = QVBoxLayout()
+        box.addLayout(self.aux_layout)
+        self.aux_empty = self.note(box,'No auxiliary camera selected.')
+        box.addStretch()
+
+    def aux_selection_changed(self, item):
+        identifier = item.data(Qt.ItemDataRole.UserRole)
+        if item.checkState()==Qt.CheckState.Checked:
+            self.aux_current_ids.add(identifier)
+        else:
+            self.aux_current_ids.discard(identifier)
+
+    def refresh_auxiliary_choices(self):
+        if not hasattr(self,'aux_list'): return
+        primary = self.camera_picker.currentData()
+        primary_id = primary.id if isinstance(primary,CameraChoice) else None
+        if primary_id: self.aux_current_ids.discard(primary_id)
+        manual_index = self.fields['camera_index'].value() if primary=='manual' else None
+        if manual_index is not None:
+            self.aux_current_ids.difference_update(
+                device.id for device in self.camera_devices
+                if device.kind=='usb' and device.index==manual_index)
+        self.aux_list.blockSignals(True)
+        self.aux_list.clear()
+        for device in self.camera_devices:
+            if device.id==primary_id or (manual_index is not None and device.kind=='usb' and device.index==manual_index):
+                continue
+            item = QListWidgetItem(f'{device.name}  ·  {device.kind.upper()}')
+            item.setData(Qt.ItemDataRole.UserRole,device.id)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(Qt.CheckState.Checked if device.id in self.aux_current_ids else Qt.CheckState.Unchecked)
+            self.aux_list.addItem(item)
+        self.aux_list.blockSignals(False)
+
+    def start_auxiliary_workers(self):
+        self.aux_workers.clear()
+        self.aux_panels.clear()
+        while self.aux_layout.count():
+            item = self.aux_layout.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+        primary = self.camera_picker.currentData()
+        chosen = [device for device in self.camera_devices
+                  if device.id in self.aux_current_ids and
+                  not (isinstance(primary,CameraChoice) and device.id==primary.id) and
+                  not (primary=='manual' and device.kind=='usb' and
+                       device.index==self.settings['camera_index'])]
+        missing = self.aux_current_ids - {device.id for device in chosen}
+        self.aux_empty.setVisible(not chosen or bool(missing))
+        self.aux_empty.setText('Selected auxiliary camera unavailable; reconnect and refresh.'
+                               if missing else 'No auxiliary camera selected.')
+        for device in chosen:
+            card = QFrame(); card.setObjectName('card')
+            layout = QVBoxLayout(card); layout.setContentsMargins(12,10,12,10)
+            layout.addWidget(self.label(f'{device.name}  •  AUXILIARY / NO OUTPUT','muted'))
+            preview = QLabel('Opening live camera…')
+            preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            preview.setMinimumHeight(155)
+            preview.setStyleSheet('background:#17202b;border-radius:7px;color:#a9c8ff;')
+            layout.addWidget(preview)
+            summary = self.label('Waiting for inspection','muted')
+            summary.setWordWrap(True); layout.addWidget(summary)
+            self.aux_layout.addWidget(card)
+            self.aux_panels[device.id] = {'preview':preview,'summary':summary,
+                                          'name':device.name,'last_at':None}
+            values = self.settings.copy()
+            values['source'] = device.kind
+            values['auxiliary'] = True
+            if device.kind=='usb':
+                values.update(camera_id=device.id,camera_name=device.name,
+                              camera_index=device.index,camera_manual=False)
+            else:
+                values['basler_serial'] = device.serial
+            worker = VideoWorker(values,self.root)
+            self.aux_workers[device.id] = worker
+            worker.ready.connect(lambda message, identifier=device.id, source=worker:
+                                 self.aux_ready(identifier,source,message))
+            worker.fault.connect(lambda message, identifier=device.id, source=worker:
+                                 self.aux_fault(identifier,source,message))
+            worker.start()
+
+    def aux_ready(self, identifier, worker, message):
+        if self.aux_workers.get(identifier) is worker and self.running:
+            self.aux_panels[identifier]['summary'].setText('Live inspection ready  •  no motion output')
+
+    def aux_fault(self, identifier, worker, message):
+        if self.aux_workers.get(identifier) is worker:
+            worker.stop()
+            self.aux_panels[identifier]['summary'].setText('Camera unavailable: '+message)
+            logging.warning('Auxiliary camera %s: %s',identifier,message)
+
+    def update_auxiliary_views(self, now):
+        for identifier, worker in self.aux_workers.items():
+            panel = self.aux_panels[identifier]
+            packet = worker.take_latest()
+            if packet is None:
+                if panel['last_at'] is not None and now-panel['last_at']>1.0 and worker.isRunning():
+                    panel['summary'].setText('Waiting for fresh auxiliary camera frame')
+                continue
+            captured = packet['captured']
+            if now-captured>.85:
+                panel['summary'].setText('Auxiliary frame is stale')
+                continue
+            panel['last_at'] = captured
+            frame = packet['frame'].copy()
+            colors = packet.get('colors',[])
+            caps = packet.get('caps',[])
+            for index, box in enumerate(packet.get('boxes',[])):
+                x1,y1,x2,y2 = (int(value) for value in box)
+                color = str(colors[index] if index<len(colors) else 'unknown').upper()
+                cap = caps[index]['status'].upper() if index<len(caps) else 'UNKNOWN'
+                cv2.rectangle(frame,(x1,y1),(x2,y2),(255,185,90),2)
+                cv2.putText(frame,f'{color} / CAP {cap}',(x1,max(20,y1-8)),
+                            cv2.FONT_HERSHEY_SIMPLEX,.55,(255,185,90),2)
+            height,width = frame.shape[:2]
+            rgb = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+            image = QImage(rgb.data,width,height,rgb.strides[0],QImage.Format.Format_RGB888).copy()
+            panel['preview'].setPixmap(QPixmap.fromImage(image).scaled(
+                330,180,Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation))
+            if packet.get('boxes'):
+                color = str(colors[0] if colors else 'unknown').upper()
+                cap = caps[0]['status'].upper() if caps else 'UNKNOWN'
+                labels = packet.get('label_texts',[])
+                text = next((value for value in labels if value),'')
+                evidence = text or ('Gatorade label matched' if any(packet.get('brand_matches',[])) else 'Label not read')
+                panel['summary'].setText(f'{color}  •  CAP {cap}  •  {evidence}')
+            else:
+                panel['summary'].setText('Live camera  •  waiting for bottle')
 
     def build_models_tab(self):
         box = self.new_tab('Models')
@@ -599,7 +745,7 @@ class MainWindow(QMainWindow):
         self.connection_note = self.note(box,'Not connected. Only programs saved as Once are offered.')
         self.arm = QCheckBox('Enable live diverter actions')
         self.arm.setEnabled(False); self.arm.toggled.connect(self.toggle_arm); box.addWidget(self.arm)
-        self.output_note = self.note(box,'DISARMED • Simulation and video files never move hardware.')
+        self.output_note = self.note(box,'DISARMED • no new divert commands')
         self.motion_label = self.note(box,'No motion requested.')
         self.open_motion = QPushButton('Open EtherMotion'); self.open_motion.clicked.connect(self.launch_ethermotion); box.addWidget(self.open_motion)
         self.note(box,'With a return program, the gate waits for both the configured hold and calculated bottle clearance before returning. Without one, the main EtherMotion cycle must include its own hold and return. Repeats run only after confirmed completion, never as simultaneous triggers.')
@@ -614,6 +760,7 @@ class MainWindow(QMainWindow):
             else: value = widget.value()
             self.settings[key] = value
         self.settings['source'] = self.source.currentData()
+        self.settings['aux_camera_ids'] = sorted(self.aux_current_ids)
         self.settings['program_id'] = self.program.currentData() or self.settings.get('program_id','')
         self.settings['pass_program_id'] = self.pass_program.currentData() or ''
         self.settings['return_program_id'] = self.return_program.currentData() or ''
@@ -654,6 +801,7 @@ class MainWindow(QMainWindow):
 
     def camera_choice_changed(self):
         if not hasattr(self,'fields'): return
+        self.refresh_auxiliary_choices()
         self.update_enabled()
         selection=self.camera_picker.currentData()
         if isinstance(selection,CameraChoice):
@@ -693,6 +841,7 @@ class MainWindow(QMainWindow):
                     restored=index
             self.camera_picker.setCurrentIndex(restored)
             self.camera_picker.blockSignals(False)
+            self.refresh_auxiliary_choices()
             count=sum(device.kind==source for device in self.camera_devices)
             if error:
                 self.set_status('Camera discovery failed: '+str(error),'#f3b252')
@@ -714,6 +863,8 @@ class MainWindow(QMainWindow):
             return
         if self.worker and self.worker.isRunning():
             self.set_status('Camera is still releasing. Wait, then start again.','#f3b252'); return
+        if any(worker.isRunning() for worker in self.aux_workers.values()):
+            self.set_status('An auxiliary camera is still releasing. Wait, then start again.','#f3b252'); return
         try:
             self.collect_settings()
             self.confidence_timer.stop()
@@ -734,11 +885,14 @@ class MainWindow(QMainWindow):
                 worker.fault.connect(lambda message: self.camera_fault(worker,message))
                 worker.ready.connect(lambda message: self.set_status('Running • '+message,'#54dfbb') if self.worker is worker and self.running else None)
                 self.worker.start()
+                self.start_auxiliary_workers()
                 self.set_status('Opening source and loading bottle detector…','#8dcaff')
             self.update_enabled()
             self.log('Inspection started • '+self.settings['source']+' • pass='+self.settings['pass_color'])
         except Exception as exc:
             self.running = False
+            if self.worker: self.worker.stop()
+            for worker in self.aux_workers.values(): worker.stop()
             self.set_status(str(exc),'#fb8b94')
             self.update_enabled()
 
@@ -752,6 +906,7 @@ class MainWindow(QMainWindow):
         self.tracker.reset()
         self.update_live_inspection()
         if self.worker: self.worker.stop()
+        for worker in self.aux_workers.values(): worker.stop()
         self.set_disarmed()
         self.request_motion_stop()
         self.set_status('Stopped • pending decisions cleared • output disarmed','#f3b252')
@@ -791,11 +946,14 @@ class MainWindow(QMainWindow):
         self.path_buttons['color_model_path'].setEnabled(not self.running and two_models)
         self.fields['model_class_id'].setEnabled(not self.running and mode!='combined')
         self.fields['gatorade_label_check'].setEnabled(not self.running and mode=='gatorade')
+        for key in ('label_ocr',):
+            self.fields[key].setEnabled(not self.running and mode=='gatorade')
         for key in ('confidence','color_confidence'):
             self.fields[key].setEnabled(not self.armed and not self.arming and not self.owns_motion)
         camera_source=self.source.currentData() in ('usb','basler')
         self.camera_picker.setEnabled(not self.running and not self.owns_motion and not self.camera_scanning and camera_source)
         self.refresh_cameras_button.setEnabled(not self.running and not self.owns_motion and not self.camera_scanning and camera_source)
+        self.aux_list.setEnabled(not self.running and not self.owns_motion and not self.camera_scanning and camera_source)
         self.fields['camera_index'].setEnabled(not self.running and self.source.currentData()=='usb' and self.camera_picker.currentData()=='manual')
         for widget in (self.program,self.pass_program,self.return_program):
             widget.setEnabled(not self.running and not self.armed and not self.arming and not self.owns_motion)
@@ -840,6 +998,8 @@ class MainWindow(QMainWindow):
                     elif self.last_packet is None and now-self.started_at>15:
                         self.fail('Source did not deliver its first inspection within 15 seconds.'); return
                     self.update_enabled()
+                if self.running:
+                    self.update_auxiliary_views(now)
                 if self.running: self.dispatch_due(now)
             except Exception as exc:
                 self.fail('Inspection error: '+str(exc))
@@ -854,6 +1014,7 @@ class MainWindow(QMainWindow):
         boxes = packet['boxes']; colors = packet.get('colors',[]); codes = packet.get('barcodes',[])
         color_confidences = packet.get('color_confidences',[])
         brand_matches = packet.get('brand_matches',[])
+        caps = packet.get('caps',[]); label_texts = packet.get('label_texts',[])
         fresh = [t for t in tracks if not t.missed]
         for track in fresh:
             meta = self.track_meta.setdefault(track.id,{'color':'unknown','barcode':'UNREAD','format':'',
@@ -863,6 +1024,11 @@ class MainWindow(QMainWindow):
                 i=min(range(len(boxes)),key=lambda j: abs((boxes[j][0]+boxes[j][2])/2-cx)+abs((boxes[j][1]+boxes[j][3])/2-cy))
                 if i<len(colors): meta['color']=colors[i]
                 if i<len(color_confidences): meta['color_confidence']=color_confidences[i]
+                if i<len(caps):
+                    status = caps[i].get('status','unknown')
+                    if status!='unknown' or not meta.get('cap_status'):
+                        meta['cap_status']=status
+                if i<len(label_texts) and label_texts[i]: meta['label_text']=label_texts[i]
                 if i<len(brand_matches) and brand_matches[i]: meta['gatorade_label_match']=True
             for code in codes:
                 box=code.get('bbox')
@@ -893,9 +1059,13 @@ class MainWindow(QMainWindow):
             support = max(0.0,min(1.0,float(values[index]))) if index<len(values) else 0.0
             matches = packet.get('brand_matches',[])
             label = 'label visible' if index<len(matches) and matches[index] else 'label not confirmed'
+            caps = packet.get('caps',[])
+            cap = caps[index].get('status','unknown') if index<len(caps) else 'unknown'
+            text = packet.get('label_texts',[])
+            read = text[index] if index<len(text) else ''
             self.show_live_color(color,support)
             self.live_title.setText('BOTTLE DETECTED · NOT TRACKED')
-            self.live_evidence.setText(f'{label}  •  move across blue entry line to start sorting')
+            self.live_evidence.setText(f'CAP {cap.upper()}  •  {read or label}  •  move to entry')
             self.live_route.setText('MOVE TO ENTRY')
             self.live_route.setStyleSheet('background:#35445a;color:#c8dcff;padding:9px 12px;border-radius:8px;font-weight:700;')
             return
@@ -918,7 +1088,8 @@ class MainWindow(QMainWindow):
         self.show_live_color(color,support)
         self.live_title.setText(f'LIVE BOTTLE  #{track.id:03d}')
         label = 'label visible' if meta.get('gatorade_label_match') else 'label not confirmed'
-        self.live_evidence.setText(f'{label}  •  {track.hits} camera frame(s) tracked')
+        cap = str(meta.get('cap_status','unknown')).upper()
+        self.live_evidence.setText(f'CAP {cap}  •  {meta.get("label_text") or label}  •  {track.hits} frames')
         passing = color == self.settings['pass_color']
         self.live_route.setText('PREDICTED 0 · PASS' if passing else 'PREDICTED 1 · DIVERT')
         tone = '#174b3f' if passing else '#633942'
@@ -973,6 +1144,7 @@ class MainWindow(QMainWindow):
                  'event_id':f'{self.session}-{self.generation}-{decision.id}',
                  'bottle_id':decision.id,'color':meta['color'],'decision':1 if decision.bad else 0,
                  'gatorade_label_match':bool(meta.get('gatorade_label_match',False)),
+                 'cap_status':meta.get('cap_status','unknown'),'label_text':meta.get('label_text',''),
                  'barcode':meta.get('barcode','UNREAD'),'barcode_format':meta.get('format',''),
                  'source':self.settings['source'],'output':output,
                  'detail':'; '.join(decision.reasons),'request_id':'','run_id':''}
@@ -1265,7 +1437,7 @@ class MainWindow(QMainWindow):
         self.refresh_counts()
 
     def write_csv(self,path):
-        fields=['time','session','event_id','bottle_id','color','decision','gatorade_label_match','barcode','barcode_format','source','output','detail','request_id','run_id','program_id','return_program_id','cycles','cycles_completed']
+        fields=['time','session','event_id','bottle_id','color','decision','cap_status','label_text','gatorade_label_match','barcode','barcode_format','source','output','detail','request_id','run_id','program_id','return_program_id','cycles','cycles_completed']
         with Path(path).open('w',newline='',encoding='utf-8-sig') as file:
             writer=csv.DictWriter(file,fieldnames=fields); writer.writeheader()
             writer.writerows({key:event.get(key,'') for key in fields} for event in self.events)
@@ -1295,6 +1467,9 @@ class MainWindow(QMainWindow):
         if self.worker and self.worker.isRunning():
             if not self.worker.wait(1200):
                 event.ignore(); self.set_status('Camera is releasing; close again in a moment.','#f3b252'); return
+        for worker in self.aux_workers.values():
+            if worker.isRunning() and not worker.wait(1200):
+                event.ignore(); self.set_status('Auxiliary camera is releasing; close again in a moment.','#f3b252'); return
         self.timer.stop()
         if self.fullscreen is not None: self.fullscreen.close()
         self.jobs.closed=True

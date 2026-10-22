@@ -1,13 +1,13 @@
-Part Tracking Demo UALR 1.3.2
+Part Tracking Demo UALR 1.4.0
 Windows x64 portable demo
 Routing: 0 = PASS (optional program), 1 = REJECT / DIVERT
-Models: Gatorade YOLOX-S demo, separate trained bottle/color ONNX, or one trained model
+Models: Gatorade YOLOX-S bottle/color/cap/label demo, separate trained ONNX modes
 Color decisions: bounded camera-cast corrected drink sampling or trained YOLOX class outputs
 Theme: RemingtonVision charcoal and blue sorting dashboard with live bottle readout
 Live confidence: separate bottle/color thresholds while disarmed; fresh tracks required
-Camera inputs: named USB or Basler/GigE; saved connected camera opens on launch
+Camera inputs: one primary and optional independent auxiliary USB/Basler cameras
 Display: F11 or double-click full screen; Esc exits
-Controls: Models / Color + code / Tracking / Diverter
+Controls: Models / Inspections / Cameras / Tracking / Diverter
 Barcode decoder: ZXing-C++; keyboard-style USB scanner input
 Conveyor: controlled by its own hardware; measured speed used for timing only
 Motion: authenticated EtherMotion Once primary/optional return programs

@@ -1,16 +1,17 @@
 # Part Tracking Demo UALR
 
-A standalone Windows Gatorade conveyor demo using **YOLOX-S bottle detection**, exposed drink color, per-bottle tracking, barcode display, and saved EtherMotion programs.
+A standalone Windows Gatorade conveyor demo using **YOLOX-S bottle detection**, exposed drink color, orange-cap inspection, label OCR, per-bottle tracking, barcode display, and saved EtherMotion programs.
 
 - **0 = PASS:** the selected color; no movement by default, or a selected pass program.
 - **1 = REJECT / DIVERT:** a different or unknown color; the selected reject program.
 - Named USB/Basler camera selection, live bottle/color confidence sliders, and full-screen inspection.
 - Optional return program, timed clearance, sequential cycle repeats, and CSV logs.
 - Live inspection starts on a saved camera when present; reject output remains disarmed.
+- Optional auxiliary USB/Basler cameras inspect independently and never send diverter commands.
 
 ## Download and run
 
-Build this version from source using the commands below, or use its v1.3.2
+Build this version from source using the commands below, or use its v1.4.0
 Windows portable ZIP when published under [Releases](https://github.com/YeChamo/part-tracking-demo-ualr/releases).
 Extract the complete folder and double-click **Start Demo.cmd**. The portable
 build needs no Python installation. Keep `_runtime`, `models`, and the other
@@ -22,8 +23,9 @@ The repository contains editable source; ready-to-run applications and bundled r
 
 1. Choose **USB camera** or **Basler / GigE** and select your camera by name. A saved connected camera opens automatically. Use **Refresh cameras** after connecting a device.
 2. In **Models**, leave **Gatorade demo** selected. A blank bottle-model field uses the included YOLOX-S file. Other modes accept trained color ONNX models.
-3. In **Color + code**, choose the pass color. Watch the live bottle readout for color support and label evidence. A bottle placed beyond the entry line is marked **not tracked** until it enters the lane. The event table records a decision only after a tracked bottle crosses the decision line.
-4. Use **Tracking** for direction, entry/decision-line geometry, and measured belt speed. Use **Diverter** for EtherMotion programs and timing.
+3. In **Inspections**, choose the pass color. Watch live cap status, OCR text, color support, and label evidence. Cap and label results are informational. A bottle beyond the entry line is marked **not tracked** until it enters the lane. The event table records a decision only after a tracked bottle crosses the decision line.
+4. In **Cameras**, check any auxiliary cameras before starting. The top-bar camera is primary and alone controls sorting. Auxiliary views show independent inspection; they do not assign a shared bottle ID or command motion.
+5. Use **Tracking** for direction, entry/decision-line geometry, and measured belt speed. Use **Diverter** for EtherMotion programs and timing.
 
 A saved USB camera is followed by device identity when Windows changes its index. A missing camera blocks startup; the app does not switch to the laptop camera. Manual camera index remains an explicit advanced choice.
 
@@ -32,6 +34,10 @@ Press **F11** or double-click the inspection view for full screen. Press **Esc**
 ## YOLOX models and confidence
 
 The default **Gatorade demo** mode uses the bundled YOLOX-S COCO detector for bottle boxes, then measures exposed drink color within each box. Blue, yellow, and white are represented in the supplied examples. A separate visible-label check is shown and logged as supporting evidence; a rear-facing or unreadable label does not change routing. The model weights are a generic bottle detector, not a Gatorade-trained detector.
+
+The cap inspection looks for the orange closure shown on the supplied bottles. It reports **present**, **missing**, or **unknown** when the top is clipped or visual evidence is inconclusive. Its result is logged for every primary-camera decision but never changes routing. Real uncapped bottles are needed to finalize this check. Other cap styles need their own inspection profile.
+
+RapidOCR reads actual visible label text in the background. Recognized words appear in the live readout and CSV when they can be associated with the same bottle region. Label text and geometric Gatorade-label matches are evidence, not routing rules; rear-facing or blurred labels can remain unread. Background OCR keeps camera detection responsive.
 
 The detector and color inspection found the expected bottle color in all 13
 supplied photos (6 blue, 4 yellow, 3 white) and in tests with reduced exposure,
@@ -86,7 +92,7 @@ See [EtherMotion setup](docs/ETHERMOTION_SETUP.txt) and the [complete quick star
 
 1. Run `PartTrackingUALR.exe --self-test` from the extracted portable folder (or `python run.py --self-test` from source). Confirm `data/runtime-check.json` reports `ok: true`.
 2. Select the actual camera by name. A saved connected camera opens on launch; the app never arms output automatically.
-3. Keep output disarmed while you check blue, yellow, white, and any other planned color at the actual belt speed, lighting, position, and orientation. Use **Color + code** to set the pass color.
+3. Keep output disarmed while you check blue, yellow, and white bottles at the actual belt speed, lighting, position, and orientation. Use **Inspections** to set the pass color; cap and label results are informational. Test every auxiliary camera independently. Check uncapped bottles when samples become available.
 4. Check the decision line, the measured belt speed and field width, and the EtherMotion Once cycle. Arming is available only for fresh live-camera results after the timing and controller checks.
 5. Keep bottles separated during the demo. Stop + disarm if the camera loses the bottle, color reads unknown, or motion timing differs from the measured cycle.
 

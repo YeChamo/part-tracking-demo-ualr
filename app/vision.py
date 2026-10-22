@@ -272,6 +272,8 @@ class VideoWorker(QThread):
             if source[0] == "video":
                 source_fps = source[1].get(cv2.CAP_PROP_FPS)
                 video_interval = 1.0 / source_fps if source_fps and 0.1 < source_fps < 1000 else 1.0 / 30.0
+            if self.settings.get('auxiliary'):
+                video_interval = max(video_interval,0.5)  # keep primary CPU capacity available
             while not self._stopping():
                 with self._latest_lock:
                     confidence_revision = self._confidence_revision
@@ -314,6 +316,8 @@ class VideoWorker(QThread):
                     "color_confidences": result["color_confidences"],
                     "model_labels": result["model_labels"], "vision_pipeline": pipeline.describe(),
                     "brand_matches": result.get("brand_matches", []),
+                    "caps": result.get("caps", []),
+                    "label_texts": result.get("label_texts", []),
                     "inspection_ms": result.get("inspection_ms", 0.0),
                     "confidence_revision": confidence_revision,
                     "barcodes": barcodes, "barcode_available": barcode_available,

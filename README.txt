@@ -8,14 +8,15 @@ folder together: _runtime, models, and data belong beside the executable. The
 portable app runs independently of RemingtonVision and needs no Python install.
 
 Choose the USB or Basler camera by name. A saved connected camera opens on
-launch. Choose the pass color under Color + code and watch the live bottle
-readout for color support, label evidence, and predicted route. A completed
+launch. Choose the pass color under Inspections and watch the live bottle
+readout for color support, orange-cap status, actual label OCR, and predicted route. A completed
 decision appears in the table when the bottle crosses the decision line.
 Reject output remains disarmed until deliberately enabled in Diverter.
 
-The controls are grouped into four tabs:
+The controls are grouped into five tabs:
   Models       - Gatorade demo or trained YOLOX color models, confidence.
-  Color + code - pass color and barcode controls.
+  Inspections  - pass color, informational cap check, label OCR, and barcode.
+  Cameras      - select independent auxiliary cameras; no motion output.
   Tracking     - direction, entry/decision lines, measured belt speed and scale.
   Diverter     - EtherMotion connection, PASS/REJECT/return programs and timing.
 
@@ -38,7 +39,12 @@ Manual camera index is an explicit advanced fallback.
 
 The default Gatorade demo mode uses the bundled YOLOX-S COCO model to locate
 bottles, then samples exposed drink color within each box. Blue, yellow, and
-white appear in the supplied examples. Select the pass color under Color + code.
+white appear in the supplied examples. Select the pass color under Inspections.
+Orange caps are reported as present, missing, or unknown when the top is clipped.
+Cap status is informational and never changes routing; uncapped samples are
+needed to finalize this check.
+RapidOCR reads visible label words in the background; an unreadable or
+rear-facing label stays unconfirmed and does not change routing.
 Other or unknown colors take route 1. Visible-label evidence is shown and logged
 separately; an unreadable or rear-facing label does not alter color routing.
 For other packaging, choose Two trained models and select your

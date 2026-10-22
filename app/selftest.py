@@ -42,6 +42,17 @@ def check_runtime(root: Path) -> int:
         checks['gatorade_orange'] = measure_drink_color(sample, (0, 0, 128, 256))['name']
         if checks['gatorade_orange'] != 'orange':
             raise RuntimeError('Gatorade color sampler did not recognize orange.')
+        from .inspections import LabelReader, has_gatorade_text, inspect_orange_cap
+        cap_frame = np.full((320,200,3),180,np.uint8)
+        cap_frame[30:60,55:145] = (25,135,240)
+        checks['orange_cap'] = inspect_orange_cap(cap_frame,(40,30,160,300))['status']
+        if checks['orange_cap'] != 'present':
+            raise RuntimeError('Orange-cap inspection failed.')
+        text_frame = np.full((160,600,3),255,np.uint8)
+        cv2.putText(text_frame,'GATORADE',(25,105),cv2.FONT_HERSHEY_SIMPLEX,2,(0,0,0),4)
+        checks['label_ocr'] = has_gatorade_text(LabelReader().read(text_frame))
+        if not checks['label_ocr']:
+            raise RuntimeError('Label OCR did not read the sample text.')
         from .model_classes import build_color_map
         checks['yolox_color_class_map'] = build_color_map(['orange_bottle','blue_bottle'],class_count=2)
         checks['trained_color_model_required'] = True
