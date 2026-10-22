@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import cv2
 import numpy as np
 
-from app.gatorade import GatoradeLabelMatcher, measure_drink_color
+from app.gatorade import GatoradeLabelMatcher, measure_drink_color, neutralize_color_cast
 from app.gatorade_pipeline import GatoradePipeline
 from app.settings import DEFAULTS
 
@@ -53,6 +53,26 @@ class GatoradeColorTests(unittest.TestCase):
         frame, box = bottle_image((180, 180, 180))
         self.assertEqual(measure_drink_color(frame, box)["name"], "white")
         self.assertNotEqual(measure_drink_color(frame, box)["name"], "clear")
+
+    def test_camera_white_balance_does_not_change_drink_color(self):
+        for name, bgr, shift in (("blue", (160, 144, 68), (-22, 0, 22)),
+                                 ("yellow", (86, 163, 159), (22, 0, -22)),
+                                 ("white", (162, 161, 157), (22, 0, -22))):
+            with self.subTest(name=name):
+                frame, box = bottle_image(bgr)
+                cast = np.uint8(np.clip(frame.astype(np.int16) + shift, 0, 255))
+                corrected = neutralize_color_cast(cast)
+                self.assertEqual(measure_drink_color(corrected, box)["name"], name)
+
+    def test_clipped_blue_bottle_uses_lower_liquid_over_pale_highlight(self):
+        frame = np.full((320, 200, 3), 180, np.uint8)
+        frame[0:300, 40:160] = (160, 144, 68)
+        frame[66:105, 40:160] = (225, 225, 225)
+        self.assertEqual(measure_drink_color(frame, (40, 0, 160, 300))["name"], "blue")
+
+    def test_colored_scene_without_neutral_reference_is_not_forced_gray(self):
+        frame = np.full((320, 200, 3), (30, 110, 190), np.uint8)
+        self.assertTrue(np.array_equal(neutralize_color_cast(frame), frame))
 
     def test_reference_matcher_rejects_plain_g(self):
         matcher = GatoradeLabelMatcher(ROOT / "models")

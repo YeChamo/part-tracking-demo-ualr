@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
+import re
 import subprocess
 import zipfile
 
@@ -16,7 +17,10 @@ def main():
         raise SystemExit('Build the application before packaging a release.')
     output = root / '.releases'
     output.mkdir(exist_ok=True)
-    archive = output / 'PartTrackingDemoUALR-v1.3.0-Windows-x64.zip'
+    version = (root / 'VERSION.txt').read_text(encoding='utf-8').splitlines()[0].rsplit(' ', 1)[-1]
+    if not re.fullmatch(r'\d+\.\d+\.\d+', version):
+        raise SystemExit('VERSION.txt must begin with a semantic version.')
+    archive = output / f'PartTrackingDemoUALR-v{version}-Windows-x64.zip'
     files = subprocess.check_output(['git','ls-files','-z'],cwd=root).decode('utf-8').split('\0')
     prefix = 'PartTrackingDemoUALR/'
     entries = []

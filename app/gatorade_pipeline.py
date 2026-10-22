@@ -9,7 +9,7 @@ import math
 import time
 from pathlib import Path
 
-from .gatorade import GatoradeLabelMatcher, measure_drink_color
+from .gatorade import GatoradeLabelMatcher, measure_drink_color, neutralize_color_cast
 from .vendor.inference import Detector, DetectorConfig
 
 
@@ -80,11 +80,12 @@ class GatoradePipeline:
                       if class_id == -1 or item.class_id == class_id]
         boxes = [tuple(item.xyxy) for item in detections]
         started = time.perf_counter()
+        color_frame = neutralize_color_cast(frame) if boxes else frame
         colors, confidences, reasons, matches = [], [], [], []
         height, width = frame.shape[:2]
         pass_color = str(self.settings.get("pass_color", "blue")).lower()
         for box in boxes:
-            reading = measure_drink_color(frame, box)
+            reading = measure_drink_color(color_frame, box)
             color = reading["name"] if reading["confidence"] >= self.color_confidence else "unknown"
             colors.append(color)
             confidences.append(float(reading["confidence"]) if color != "unknown" else 0.0)

@@ -34,34 +34,34 @@ from .tracking import BottleTracker, TrackingConfig
 from .vision import VideoWorker
 
 STYLE = '''
-QMainWindow, QWidget { background: #0c1422; color: #e5edf8; font-family: "Segoe UI"; font-size: 12px; }
-QFrame#card { background: #142034; border: 1px solid #24344a; border-radius: 10px; }
+QMainWindow, QWidget { background: #1e1e1e; color: #f2f4f7; font-family: "Segoe UI"; font-size: 12px; }
+QFrame#card { background: #2c2f36; border: 1px solid #3a3e46; border-radius: 10px; }
 QLabel { background: transparent; }
-QLabel#muted { color: #94a6bd; }
+QLabel#muted { color: #a8adb7; }
 QLabel#title { font-size: 23px; font-weight: 700; }
 QLabel#stat { font-size: 24px; font-weight: 700; }
-QLabel#badge { background: #20364e; color: #8cd4ff; padding: 7px 12px; border-radius: 12px; }
-QPushButton { background: #213249; border: 1px solid #334962; border-radius: 6px; padding: 9px 13px; font-weight: 600; }
-QPushButton:hover { background: #2b425e; border-color: #5c7b9f; }
-QPushButton:disabled { color: #60738b; background: #162235; border-color: #223247; }
-QPushButton#primary { background: #2e75eb; border-color: #4a8cfa; color: white; }
-QPushButton#stop { background: #50303c; border-color: #804453; color: #ffc5ca; }
-QComboBox, QLineEdit, QSpinBox, QDoubleSpinBox { background: #101b2b; border: 1px solid #34475e; padding: 7px; border-radius: 5px; min-height: 18px; }
-QComboBox QAbstractItemView { background: #17273a; selection-background-color: #2e75eb; }
-QTabWidget::pane { border: 1px solid #24344a; border-radius: 8px; }
-QTabBar::tab { background: #132034; padding: 10px 11px; color: #92a6bf; }
-QTabBar::tab:selected { color: #8dcaff; background: #20344e; border-bottom: 2px solid #579aff; }
-QTableWidget { background: #101a2a; alternate-background-color: #142237; gridline-color: #203047; border: none; }
-QHeaderView::section { background: #17263a; color: #93a8c1; border: none; padding: 7px; text-align: left; }
+QLabel#badge { background: #243b61; color: #c8dcff; padding: 7px 12px; border-radius: 12px; }
+QPushButton { background: #353941; border: 1px solid #4a4f59; border-radius: 6px; padding: 9px 13px; font-weight: 600; }
+QPushButton:hover { background: #424752; border-color: #6e7889; }
+QPushButton:disabled { color: #777d88; background: #282b30; border-color: #343840; }
+QPushButton#primary { background: #2e76f3; border-color: #5a93f7; color: white; }
+QPushButton#stop { background: #4b3038; border-color: #80505b; color: #ffced2; }
+QComboBox, QLineEdit, QSpinBox, QDoubleSpinBox { background: #22252a; border: 1px solid #505660; padding: 7px; border-radius: 5px; min-height: 18px; }
+QComboBox QAbstractItemView { background: #2c2f36; selection-background-color: #2e76f3; }
+QTabWidget::pane { border: 1px solid #3a3e46; border-radius: 8px; }
+QTabBar::tab { background: #282b31; padding: 10px 11px; color: #a8adb7; }
+QTabBar::tab:selected { color: #dce9ff; background: #2d3c55; border-bottom: 2px solid #2e76f3; }
+QTableWidget { background: #25282e; alternate-background-color: #2c2f36; gridline-color: #3a3e46; border: none; }
+QHeaderView::section { background: #333741; color: #c0c6d0; border: none; padding: 7px; text-align: left; }
 QScrollArea { border: none; }
 QCheckBox { spacing: 8px; padding: 5px 0; }
 QCheckBox::indicator { width: 17px; height: 17px; }
-QSlider::groove:horizontal { height: 5px; background: #2a405b; border-radius: 2px; }
-QSlider::sub-page:horizontal { background: #4389ed; border-radius: 2px; }
-QSlider::handle:horizontal { background: #9fcaff; width: 15px; margin: -5px 0; border-radius: 7px; }
-QSlider::handle:horizontal:disabled { background: #4b5c73; }
-QToolTip { color: #eaf2fc; background: #263951; border: 1px solid #65809e; }
-QSplitter::handle { background: #0c1422; }
+QSlider::groove:horizontal { height: 5px; background: #4a5361; border-radius: 2px; }
+QSlider::sub-page:horizontal { background: #2e76f3; border-radius: 2px; }
+QSlider::handle:horizontal { background: #a9c8ff; width: 15px; margin: -5px 0; border-radius: 7px; }
+QSlider::handle:horizontal:disabled { background: #656d79; }
+QToolTip { color: #f2f4f7; background: #363a42; border: 1px solid #6b737f; }
+QSplitter::handle { background: #1e1e1e; }
 '''
 
 
@@ -109,7 +109,7 @@ class VisionView(QWidget):
     def paintEvent(self, event):
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        p.fillRect(self.rect(), QColor('#0d1727'))
+        p.fillRect(self.rect(), QColor('#20242b'))
         m = self.main
         frame = m.last_packet.get('frame') if m.last_packet else None
         if m.settings['source'] == 'simulation':
@@ -203,17 +203,17 @@ class MainWindow(QMainWindow):
         self.last_poll = 0.0
         self.pass_count = self.divert_count = self.complete_count = 0
         self.jobs = Jobs(self)
-        self.setWindowTitle('Part Tracking Demo UALR • Color Sort + Barcode')
+        self.setWindowTitle('RemingtonVision • Gatorade Sorting Demo')
         self.setWindowIcon(QIcon(str(root/'assets'/'demo.ico')))
         self.resize(1450, 960)
-        self.setMinimumSize(1180, 800)
+        self.setMinimumSize(1100, 720)
         self.setStyleSheet(STYLE)
         self.build_ui()
         self.last_tick = time.monotonic()
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.tick)
         self.timer.start(30)
-        self.set_status('Ready • Simulation', '#8dcaff')
+        self.set_status('Ready • Simulation', '#a9c8ff')
         self.log('Demo ready. Pass color = '+self.settings['pass_color']+'. Barcodes in simulation are synthetic.')
         QTimer.singleShot(200, self.start)
 
@@ -229,12 +229,12 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(22,18,22,16)
         layout.setSpacing(14)
         header = QHBoxLayout()
-        brand = QLabel('UALR')
-        brand.setStyleSheet('background:#2e75eb;color:white;font-weight:800;font-size:17px;border-radius:9px;padding:15px;')
+        brand = QLabel('RV')
+        brand.setStyleSheet('background:#2e76f3;color:white;font-weight:800;font-size:18px;border-radius:9px;padding:15px;')
         header.addWidget(brand)
         title = QVBoxLayout()
-        title.addWidget(self.label('Part tracking demo', 'title'))
-        title.addWidget(self.label('Bottle color sorting  /  Barcode reading  /  EtherMotion reject', 'muted'))
+        title.addWidget(self.label('Gatorade color sorting', 'title'))
+        title.addWidget(self.label('RemingtonVision  /  UALR live demo', 'muted'))
         header.addLayout(title)
         header.addStretch()
         self.badge = self.label('SIMULATION • NO HARDWARE', 'badge')
@@ -245,7 +245,7 @@ class MainWindow(QMainWindow):
         layout.addLayout(header)
         stats = QHBoxLayout()
         self.stats = {}
-        for key, title, color in [('total','BOTTLES SORTED','#e5edf8'),('pass','0 · PASS','#54dfbb'),('divert','1 · DIVERT','#fb8b94'),('output','MOTION COMPLETED','#8dcaff')]:
+        for key, title, color in [('total','BOTTLES SORTED','#f2f4f7'),('pass','PASS  /  0','#54dfbb'),('divert','DIVERT  /  1','#fb8b94'),('output','MOTION COMPLETED','#a9c8ff')]:
             card = QFrame(); card.setObjectName('card')
             box = QVBoxLayout(card); box.setContentsMargins(16,8,16,8)
             box.addWidget(self.label(title,'muted'))
@@ -293,13 +293,14 @@ class MainWindow(QMainWindow):
         self.diagnostics = self.label('Simulation • upright bottles • entry → decision → reject', 'muted')
         ll.addWidget(self.diagnostics)
         barcode_card = QFrame(); barcode_card.setObjectName('card')
+        self.barcode_card = barcode_card
         bc = QVBoxLayout(barcode_card); bc.setContentsMargins(16,10,16,10)
         self.barcode_title = self.label('LAST BARCODE  •  SYNTHETIC DEMO DATA','muted'); bc.addWidget(self.barcode_title)
         self.barcode_text = QLabel('Waiting for a bottle…')
         self.barcode_text.setTextFormat(Qt.TextFormat.PlainText)
         self.barcode_text.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.barcode_text.setSizePolicy(QSizePolicy.Policy.Ignored,QSizePolicy.Policy.Preferred)
-        self.barcode_text.setStyleSheet('font-size:24px;font-family:Consolas;font-weight:600;color:#b8ddff;')
+        self.barcode_text.setStyleSheet('font-size:24px;font-family:Consolas;font-weight:600;color:#c8dcff;')
         bc.addWidget(self.barcode_text)
         self.barcode_info = self.label('Color and barcode follow the tracked bottle ID.','muted'); bc.addWidget(self.barcode_info)
         self.scanner_input = QLineEdit()
@@ -307,9 +308,8 @@ class MainWindow(QMainWindow):
         self.scanner_input.setPlaceholderText('USB barcode scanner: click here, scan, then Enter')
         self.scanner_input.returnPressed.connect(self.scanner_read)
         bc.addWidget(self.scanner_input)
-        ll.addWidget(barcode_card)
         splitter.addWidget(left)
-        self.tabs = QTabWidget(); self.tabs.setMinimumWidth(335); self.tabs.setMaximumWidth(440)
+        self.tabs = QTabWidget(); self.tabs.setMinimumWidth(365); self.tabs.setMaximumWidth(470)
         self.fields = {}
         self.path_buttons = {}
         self.build_models_tab()
@@ -317,7 +317,7 @@ class MainWindow(QMainWindow):
         self.build_conveyor_tab()
         self.build_reject_tab()
         splitter.addWidget(self.tabs)
-        splitter.setSizes([990,370])
+        splitter.setSizes([970,430])
         layout.addWidget(splitter,1)
         self.table = QTableWidget(0,6)
         self.table.setHorizontalHeaderLabels(['TIME / BOTTLE','COLOR','ROUTING','BARCODE','OUTPUT','DETAIL'])
@@ -338,6 +338,7 @@ class MainWindow(QMainWindow):
         footer.addWidget(help_button)
         layout.addLayout(footer)
         self.fields['yolox_mode'].currentIndexChanged.connect(self.update_enabled)
+        self.fields['rule'].currentIndexChanged.connect(self.update_enabled)
 
     @staticmethod
     def label(text, name=None):
@@ -349,6 +350,7 @@ class MainWindow(QMainWindow):
     def new_tab(self,name):
         inner = QWidget(); box = QVBoxLayout(inner); box.setContentsMargins(14,16,14,16); box.setSpacing(12)
         scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setWidget(inner)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.tabs.addTab(scroll,name)
         return box
 
@@ -371,6 +373,9 @@ class MainWindow(QMainWindow):
     def combo(self,form,key,title,choices):
         widget = QComboBox()
         for name,value in choices: widget.addItem(name,value)
+        widget.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        widget.setMinimumContentsLength(10)
+        widget.setSizePolicy(QSizePolicy.Policy.Expanding,QSizePolicy.Policy.Fixed)
         index = widget.findData(self.settings[key]); widget.setCurrentIndex(max(0,index))
         self.fields[key] = widget; form.addRow(title,widget)
         return widget
@@ -390,10 +395,12 @@ class MainWindow(QMainWindow):
         box = self.new_tab('Color + code')
         self.note(box,'Choose the color that stays on the belt. Other colors produce decision 1 and the selected divert motion.')
         form = QFormLayout(); form.setSpacing(10)
+        self.sort_form = form
         self.combo(form,'pass_color','Pass color',[(c.title(),c) for c in ['blue','yellow','white','orange','green','red','purple','clear']])
-        self.combo(form,'rule','Sort rule',[('YOLOX color → 0 / 1','color'),('Every Nth (simulation)','every_n'),('Divert all (simulation)','all'),('Pass all (simulation)','none')])
+        self.combo(form,'rule','Sort rule',[('Drink color → pass / divert','color'),('Every Nth (simulation)','every_n'),('Divert all (simulation)','all'),('Pass all (simulation)','none')])
         self.field(form,'every_n','Every Nth','int',2,100)
         box.addLayout(form)
+        box.addWidget(self.barcode_card)
         self.note(box,'Live barcode reader: UPC / EAN / Code 128 / QR and more. Unread codes remain UNREAD. Codes are displayed and logged; color determines routing.')
         form = QFormLayout(); form.setSpacing(10)
         self.field(form,'camera_index','Manual USB index','int',0,63)
@@ -406,16 +413,20 @@ class MainWindow(QMainWindow):
 
     def build_models_tab(self):
         box = self.new_tab('Models')
-        self.note(box,'Gatorade demo uses YOLOX-S bottle localization and exposed drink color. Other modes use trained YOLOX bottle-color classes.')
+        self.note(box,'YOLOX-S finds each bottle. The demo reads exposed drink color and sorts by the selected pass color.')
         form = QFormLayout(); form.setSpacing(10)
-        self.combo(form,'yolox_mode','Vision mode',[('Gatorade demo (YOLOX-S + drink color)','gatorade'),('Bottle model + trained color model','two_models'),('One trained model: colored bottles','combined')])
-        self.path_field(form,'model_path','Bottle YOLOX (.onnx)','YOLOX ONNX models (*.onnx)')
-        self.path_field(form,'color_model_path','Color YOLOX (.onnx)','YOLOX ONNX models (*.onnx)')
+        form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapAllRows)
+        self.model_form = form
+        self.combo(form,'yolox_mode','Vision mode',[('Gatorade demo','gatorade'),('Two trained models','two_models'),('Combined trained model','combined')])
+        self.path_field(form,'model_path','Bottle model (.onnx)','YOLOX ONNX models (*.onnx)')
+        self.fields['model_path'].setPlaceholderText('Bundled YOLOX-S')
+        self.path_field(form,'color_model_path','Color model (.onnx)','YOLOX ONNX models (*.onnx)')
         self.path_buttons['model_path'].setText('Choose'); self.path_buttons['model_path'].setMaximumWidth(70)
         self.path_buttons['color_model_path'].setText('Choose'); self.path_buttons['color_model_path'].setMaximumWidth(70)
-        self.combo(form,'gatorade_label_check','Gatorade label evidence',[('Check visible label',True),('Off for speed',False)])
+        self.combo(form,'gatorade_label_check','Label evidence',[('Check visible label',True),('Off for speed',False)])
         box.addLayout(form)
         thresholds=QFormLayout(); thresholds.setSpacing(12)
+        thresholds.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapAllRows)
         for key,title in (('confidence','Bottle confidence'),('color_confidence','Color confidence')):
             control=ConfidenceControl(float(self.settings[key]))
             control.setToolTip('Adjust during live preview while reject output is disarmed.')
@@ -423,7 +434,7 @@ class MainWindow(QMainWindow):
             thresholds.addRow(title,control)
             control.valueChanged.connect(self.confidence_changed)
         box.addLayout(thresholds)
-        self.note(box,'Bottle confidence filters YOLOX detections. In Gatorade mode, color confidence is the minimum sample support, not a trained-model probability. Sliders update live preview while output is disarmed.')
+        self.note(box,'Adjust confidence during a disarmed live preview. Color confidence is the minimum agreement among sampled pixels.')
         advanced_button=QPushButton('Advanced model settings')
         advanced_button.setCheckable(True)
         box.addWidget(advanced_button)
@@ -440,7 +451,7 @@ class MainWindow(QMainWindow):
         mapping=self.field(form,'color_class_map','Class → color map','text')
         mapping.setPlaceholderText('Optional: 0:orange,1:blue,2:green')
         box.addWidget(advanced)
-        self.note(box,'A blank bottle path uses the bundled YOLOX-S model in Gatorade mode. Trained-color modes read classes from ONNX metadata; configure Advanced if needed. The generic bottle model alone does not predict brand or color.')
+        self.note(box,'A blank model path uses the bundled YOLOX-S. Label evidence is visual context; routing follows drink color. Trained model modes are available for future inspections.')
         box.addStretch()
 
     def confidence_changed(self, _value=None):
@@ -710,7 +721,10 @@ class MainWindow(QMainWindow):
         for widget in self.fields.values(): widget.setEnabled(not self.running)
         for button in self.path_buttons.values(): button.setEnabled(not self.running)
         mode=self.fields['yolox_mode'].currentData()
+        self.sort_form.setRowVisible(self.fields['every_n'], self.fields['rule'].currentData()=='every_n')
         two_models=mode=='two_models'
+        self.model_form.setRowVisible(self.fields['color_model_path'].parentWidget(), two_models)
+        self.model_form.setRowVisible(self.fields['gatorade_label_check'], mode=='gatorade')
         for key in ('color_model_path','color_class_names','color_image_size'):
             self.fields[key].setEnabled(not self.running and two_models)
         self.path_buttons['color_model_path'].setEnabled(not self.running and two_models)

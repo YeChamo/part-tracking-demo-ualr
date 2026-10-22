@@ -39,8 +39,8 @@ bottles, then samples exposed drink color within each box. Blue, yellow, and
 white appear in the supplied examples. Select the pass color under Color + code.
 Other or unknown colors take route 1. Visible-label evidence is shown and logged
 separately; an unreadable or rear-facing label does not alter color routing.
-For other packaging, choose Bottle model + trained color model and select your
-YOLOX ONNX files. A blank bottle selection in that mode uses the bundled nano
+For other packaging, choose Two trained models and select your
+YOLOX ONNX files. A blank bottle selection in that mode uses the bundled generic
 COCO locator. The color model must be trained to predict bottle colors.
 
 Advanced model options use the exact class order from ONNX metadata or your
@@ -50,8 +50,8 @@ ID to its bottle class, or -1 for all locator classes. Do not relabel generic
 COCO classes as colors. The bundled YOLOX-S and nano locators are neither
 color-trained nor Gatorade-brand-trained detectors.
 
-For one model already trained on orange_bottle, blue_bottle, etc., choose One
-model: colored bottles and select it in the bottle model picker. Its predictions
+For one model already trained on orange_bottle, blue_bottle, etc., choose
+Combined trained model and select it in the bottle model picker. Its predictions
 supply both boxes and colors. Export .pth weights to ONNX before selecting them.
 Missing/incompatible model setup or class-count mismatch blocks camera startup.
 
@@ -67,6 +67,12 @@ Use one lane and separated bottles. Check every color using real
 bottles and the actual lighting/viewpoint. Models can miss or merge touching,
 cropped, or reflective bottles. A missed bottle creates no tracked event; an
 on-screen count is not an independent count of every physical bottle.
+
+The supplied 13 bottle photos pass detector/color checks under moderate
+exposure, white-balance, blur, and resolution changes. These are related views,
+so they cannot establish reliability in a new camera or conveyor environment.
+Run the included --self-test first, then verify all planned bottles in the
+disarmed live preview before enabling physical output.
 
 For a video dry run choose Video file and the file under Color + code. Close
 other software that owns the camera. Basler requires compatible pylon transport

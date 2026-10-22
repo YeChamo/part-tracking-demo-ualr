@@ -5,13 +5,18 @@ Set-Location -LiteralPath $DemoRoot
 $env:PYTHONPATH = ''
 # Do not let an unrelated document-conversion runtime shadow Windows DLLs.
 $env:PATH = (($env:PATH -split ';') | Where-Object { $_ -notmatch 'codex-runtimes.*(poppler|libheif)' }) -join ';'
-if (-not (Test-Path -LiteralPath (Join-Path $DemoRoot '.build-venv\Scripts\python.exe'))) {
-    & $Python -m venv (Join-Path $DemoRoot '.build-venv')
-    if ($LASTEXITCODE -ne 0) { throw 'Could not create the build environment.' }
+$InstalledVersion = & $Python -c "import PyInstaller, cv2, numpy, onnxruntime, PySide6, zxingcpp; print(PyInstaller.__version__)" 2>$null
+if ($LASTEXITCODE -eq 0 -and $InstalledVersion -eq '6.21.0') {
+    $DemoPython = $Python
+} else {
+    if (-not (Test-Path -LiteralPath (Join-Path $DemoRoot '.build-venv\Scripts\python.exe'))) {
+        & $Python -m venv (Join-Path $DemoRoot '.build-venv')
+        if ($LASTEXITCODE -ne 0) { throw 'Could not create the build environment.' }
+    }
+    $DemoPython = Join-Path $DemoRoot '.build-venv\Scripts\python.exe'
+    & $DemoPython -m pip install -r (Join-Path $DemoRoot 'requirements.txt') pyinstaller==6.21.0
+    if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed.' }
 }
-$DemoPython = Join-Path $DemoRoot '.build-venv\Scripts\python.exe'
-& $DemoPython -m pip install -r (Join-Path $DemoRoot 'requirements.txt') pyinstaller==6.21.0
-if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed.' }
 & $DemoPython -m PyInstaller --noconfirm --distpath .package --workpath .build PartTrackingUALR.spec
 if ($LASTEXITCODE -ne 0) { throw 'Application build failed.' }
 Copy-Item -LiteralPath (Join-Path $DemoRoot '.package\PartTrackingUALR\PartTrackingUALR.exe') -Destination $DemoRoot -Force

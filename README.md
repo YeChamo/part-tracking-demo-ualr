@@ -10,7 +10,7 @@ A standalone Windows Gatorade conveyor demo using **YOLOX-S bottle detection**, 
 
 ## Download and run
 
-Build this version from source using the commands below, or use its v1.3.0
+Build this version from source using the commands below, or use its v1.3.1
 Windows portable ZIP when published under [Releases](https://github.com/YeChamo/part-tracking-demo-ualr/releases).
 Extract the complete folder and double-click **Start Demo.cmd**. The portable
 build needs no Python installation. Keep `_runtime`, `models`, and the other
@@ -21,7 +21,7 @@ The repository contains editable source; ready-to-run applications and bundled r
 ## Camera, models, and display
 
 1. Click **Stop + disarm**, choose **USB camera** or **Basler / GigE**, and select your camera by name. Use **Refresh cameras** after connecting a device.
-2. In **Models**, leave **Gatorade demo (YOLOX-S + drink color)** selected. A blank bottle-model field uses the included YOLOX-S file. Other modes accept trained color ONNX models.
+2. In **Models**, leave **Gatorade demo** selected. A blank bottle-model field uses the included YOLOX-S file. Other modes accept trained color ONNX models.
 3. In **Color + code**, choose the pass color. Click **Start inspection** and verify the boxes, color decisions, and barcode display.
 4. Use **Tracking** for direction, entry/decision-line geometry, and measured belt speed. Use **Diverter** for EtherMotion programs and timing.
 
@@ -33,15 +33,18 @@ Press **F11** or double-click the inspection view for full screen. Press **Esc**
 
 The default **Gatorade demo** mode uses the bundled YOLOX-S COCO detector for bottle boxes, then measures exposed drink color within each box. Blue, yellow, and white are represented in the supplied examples. A separate visible-label check is shown and logged as supporting evidence; a rear-facing or unreadable label does not change routing. The model weights are a generic bottle detector, not a Gatorade-trained detector.
 
-The recorded-video worker found and correctly colored the bottle in all 13
-supplied photos (6 blue, 4 yellow, 3 white). The visible-label check matched
-8 compressed video frames. These photos share a setting, so verify camera
-exposure, glare, placement, and color readings on the intended conveyor before
-enabling physical output.
+The detector and color inspection found the expected bottle color in all 13
+supplied photos (6 blue, 4 yellow, 3 white) and in tests with reduced exposure,
+increased exposure, moderate warm/cool channel shifts, blur, and smaller frames.
+The color sampler corrects bounded camera channel casts when the scene has a
+credible neutral reference. The visible-label check matched 8 compressed video
+frames. These photos share a setting, so verify camera exposure, glare,
+placement, and color readings on the intended conveyor before enabling physical
+output. A missing bottle detection cannot cause a divert decision.
 
-The **Bottle model + trained color model** mode uses one YOLOX detector for bottle boxes and one for trained color predictions. A blank bottle-model selection in that mode uses the bundled generic COCO bottle locator. Select your own color-trained ONNX model.
+The **Two trained models** mode uses one YOLOX detector for bottle boxes and one for trained color predictions. A blank bottle-model selection in that mode uses the bundled generic COCO bottle locator. Select your own color-trained ONNX model.
 
-The color model's class order is read from ONNX metadata. If names are absent, enter the exact trained order, for example `orange,blue,green`. The advanced class map accepts explicit IDs such as `0:orange,1:blue,2:green`. The bottle locator class ID selects its bottle class; `-1` accepts all locator classes. For one model already trained on `orange_bottle`, `blue_bottle`, etc., choose **One model: colored bottles** and select it in the bottle model picker. Export `.pth` weights to ONNX before selecting them.
+The color model's class order is read from ONNX metadata. If names are absent, enter the exact trained order, for example `orange,blue,green`. The advanced class map accepts explicit IDs such as `0:orange,1:blue,2:green`. The bottle locator class ID selects its bottle class; `-1` accepts all locator classes. For one model already trained on `orange_bottle`, `blue_bottle`, etc., choose **Combined trained model** and select it in the bottle model picker. Export `.pth` weights to ONNX before selecting them.
 
 In the trained-color modes, decisions use YOLOX predictions exclusively. Missing, conflicting, or unmapped predictions remain unknown and divert. Model/output shape and class-count mismatches block inspection startup. Gatorade demo mode uses a separate drink-color sampler; unknown samples also divert.
 
@@ -78,6 +81,16 @@ Without a separate return program, the primary saved cycle must include its own 
 Keep enough spacing for **every bottle, including PASS bottles**, to clear the entire active sequence. A busy/overlapping event disarms output rather than issuing a conflicting cycle. **Disarming cannot stop the conveyor** or establish the mechanism's physical position. Resolve the mechanism and bottle flow before resuming.
 
 See [EtherMotion setup](docs/ETHERMOTION_SETUP.txt) and the [complete quick start](README.txt).
+
+## Demo-day run-through
+
+1. Run `PartTrackingUALR.exe --self-test` from the extracted portable folder (or `python run.py --self-test` from source). Confirm `data/runtime-check.json` reports `ok: true`.
+2. Start in **Simulation** and confirm blue passes while the other bottles divert. This mode is hardware-free.
+3. Select the actual camera by name. Keep output disarmed while you check blue, yellow, white, and any other planned color at the actual belt speed, lighting, position, and orientation. Use **Color + code** to set the pass color.
+4. Check the decision line, the measured belt speed and field width, and the EtherMotion Once cycle. Run a recorded-video dry run if useful. Arming is available only for fresh live-camera results after the timing and controller checks.
+5. Keep bottles separated during the demo. Stop + disarm if the camera loses the bottle, color reads unknown, or motion timing differs from the measured cycle.
+
+The optional real-photo regression is `python -m unittest tests.test_gatorade_examples -v` when the supplied `examples` folder sits beside this repository. Its augmented cases support setup checks but do not replace a live conveyor trial.
 
 ## Source setup and build
 
