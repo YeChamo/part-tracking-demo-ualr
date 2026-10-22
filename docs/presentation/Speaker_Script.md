@@ -17,7 +17,7 @@ This follows the ten-slide corporate deck. Brad’s lines are a draft to practic
 | 7 · Come fight for what is next | Brad | Invite talent across Remington and TKG |
 | 8 · Try it yourself | Brad | Let the audience explore the 4Founders activity |
 | 9 · Bring us your idea | Brad | Invite interests beyond the roles described |
-| 10 · Let us connect | Brad → Wesley → Brad | Give clear follow-up paths and close |
+| 10 · Let us connect | Brad → Wesley → Brad | Give Brad’s email and close |
 
 ## Slide 1 — Engineering at The Kinetic Group
 
@@ -83,7 +83,7 @@ We want teammates who are curious enough to ask why something works the way it d
 
 *Pause for the audience activity. Call out one visible change and invite a few reactions. The 4Founders activity is separate from the bottle demonstration.*
 
-**Brad:** If this gets you thinking about something you want to build, we would like to hear about it after the talk. You can also connect through 4Founders to keep that conversation going.
+**Brad:** If this gets you thinking about something you want to build, we would like to hear about it after the talk. My email will be on the final slide so you can follow up.
 
 ## Slide 9 — Bring us your idea
 
@@ -93,10 +93,10 @@ Tell us what you want to build and why it matters to you. If there is a fit, we 
 
 ## Slide 10 — Let us connect
 
-**Brad:** My email is on the screen. Wesley and I will be here afterward, and we would love to hear from you. If you are interested in a role at Remington or elsewhere in The Kinetic Group, the careers page is the place to look. If you want to keep developing an idea, connect with us through 4Founders.
+**Brad:** My email is on the screen. Wesley and I will be here afterward, and we would love to hear from you. Whether you are interested in joining a team, exploring an idea, or asking a question about the work, reach out and tell me what you want to pursue.
 
 **Wesley — in your own words:** *Invite people to ask about the engineering or show you what they are building.*
 
 **Brad:** The rules for the future will be written by people willing to build. **Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.**
 
-*Hold the final slide through questions so the email, careers link, and 4Founders address stay visible.*
+*Hold the final slide through questions so Brad’s email stays visible.*

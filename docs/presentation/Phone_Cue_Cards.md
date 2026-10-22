@@ -93,7 +93,7 @@ If something surprises us: “Good. That tells us what to test next.”
 - **Brad:** “Now it’s your turn. Scan the code, or use the link and PIN. Draw something, test it, and change it.” Pause so the room can participate.
 - Backup: [4founders.dev/demo/ai-in-action/](https://4founders.dev/demo/ai-in-action/) · **PIN 877262**.
 - Ask: “What changed when you tried a different idea?” Take one or two reactions.
-- This 4Founders activity is separate from the bottle demo. It is also a way to connect after the talk.
+- This 4Founders activity is separate from the bottle demo. Point people to your email on the final slide for follow-up.
 
 ---
 
@@ -109,9 +109,9 @@ If something surprises us: “Good. That tells us what to test next.”
 
 ## 10 · CONNECT — BRAD → WESLEY → BRAD
 
-**Email → Careers → 4Founders**
+**One follow-up path → Brad’s email**
 
-- **Brad:** “My email is on the screen. For roles across TKG, use the careers link. If you have an idea to develop, connect through 4Founders. Wesley and I will be here after the talk.”
+- **Brad:** “My email is on the screen. Wesley and I will be here after the talk. If you want to join a team, explore an idea, or ask about the work, email me and tell me what you want to pursue.”
 - **Wesley:** Invite questions about the engineering and ask people to show you what they are building. Your own words.
 - **Brad, close:** “Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.”
 
