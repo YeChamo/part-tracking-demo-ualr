@@ -6,7 +6,7 @@
 
 **One thought to return to:** We want Remington and The Kinetic Group to write the rules for the future of manufacturing. That work has to succeed on the floor.
 
-Read the **bold anchors**, then speak naturally. Each numbered section matches one slide. **Wesley chooses his own words and examples throughout.**
+Each numbered section matches one slide. Use the **bold anchors** if you lose your place. The lines below are short enough to say as written; Wesley can change his wording and examples wherever he wants.
 
 ---
 
@@ -14,10 +14,9 @@ Read the **bold anchors**, then speak naturally. Each numbered section matches o
 
 **Brad opens → Wesley introduces himself → Brad frames the talk**
 
-- I lead small engineering teams across TKG, mainly at Remington in Lonoke.
-- “This is Wesley Siharath. Wesley, I’ll let you introduce yourself.”
-- **Wesley:** Your path, your current work, and what drew you in. Choose your own words.
-- **Brad:** Today: understand the work, see it live, and tell us what you want to build.
+- **Brad:** “I’m Brad Daugherty. I lead small engineering teams across The Kinetic Group, mainly at Remington in Lonoke. I’m here with Wesley Siharath. Wesley, I’ll let you introduce yourself.”
+- **Wesley:** Start with your path from software intern to engineer. Mention Remington Vision and what drew you into the work. About 30 seconds; use your own words.
+- **Brad returns:** “Today we’ll explain the work in simple terms, show it live, and hear what you want to build next.”
 
 ---
 
@@ -25,9 +24,9 @@ Read the **bold anchors**, then speak naturally. Each numbered section matches o
 
 **1816 → 1969 → the next decades**
 
-- Remington has a deep manufacturing history; Lonoke is part of it.
-- The world has changed. We can connect machines, software, and people in new ways.
-- **Our ambition:** Remington and TKG write the rules for the future of manufacturing.
+- **Brad:** “Remington’s story reaches back to 1816. Manufacturing in Lonoke became part of that story in 1969. We are proud of that history.”
+- “The world has changed. We can now connect machines, software, and people in ways that create new capabilities on the floor.”
+- **Land this line:** “We want Remington and The Kinetic Group to write the rules for the future of manufacturing for decades to come.”
 
 ---
 
@@ -35,11 +34,10 @@ Read the **bold anchors**, then speak naturally. Each numbered section matches o
 
 **Sense → Decide → Act**
 
-- A camera or machine captures what is happening.
-- Software makes a useful decision. A person or machine can act.
-- The engineering is making the whole chain work in real conditions.
+- **Brad:** “The system is simple to describe. A camera or machine senses what is happening. Software makes a decision. A person or piece of equipment can act on it.”
+- “Our engineering work is making the whole chain useful and dependable in real conditions.”
 
-**Handoff:** “Wesley has lived this from the start of Remington Vision. Here is why he loves it.”
+**Handoff:** “Wesley has lived that process from the start of Remington Vision. Wesley, what makes this work exciting for you?”
 
 ---
 
@@ -47,12 +45,11 @@ Read the **bold anchors**, then speak naturally. Each numbered section matches o
 
 **Variety → Freedom → Ownership → Growth**
 
-- From one of the first software interns to an engineer working with AI and machines.
-- Different problems, room to explore, and ownership of the result.
-- **Your example:** the problem → what you tried → what you learned.
-- Unexpected opportunities are why the work stays exciting.
+- **Wesley, a possible start:** “I came in as one of the first software interns and got involved with AI and different machines. I enjoy the variety, the freedom to explore ideas, and the chance to own a problem.”
+- **Then your example:** Name one problem → what you tried → what surprised you or what you learned. Keep it to 30–45 seconds.
+- **Possible finish:** “I’ve had opportunities I didn’t expect when I started. That’s what keeps this work exciting for me.”
 
-**Handoff:** Both move to the demo.
+**Handoff:** Both move to the demo. Brad begins the setup.
 
 ---
 
@@ -60,9 +57,10 @@ Read the **bold anchors**, then speak naturally. Each numbered section matches o
 
 **First bottle → Change it → Ask the room**
 
-- **Brad:** Set up camera → decision → on-screen sorting. Show bottle one.
-- **Wesley:** Narrate what matters to you on screen. Choose the next bottle or feature.
-- **Brad:** Ask the room to predict the next result. Close with **sense → decide → act**.
+- **Brad:** “Watch what happens when we put a Gatorade bottle in front of the camera. The application identifies it and shows a sorting decision on screen.” Show bottle one.
+- **Wesley:** Point to the camera view and result. Choose the next bottle or feature. Tell the room what changed and what the system decided.
+- **Brad:** Before the next result, ask: “What do you think it will do?” Then recap: “That’s the path: sense, decide, act.”
+- **Be clear:** This is an on-screen sorting demonstration, not a production sorting line.
 
 If something surprises us: “Good. That tells us what to test next.”
 
@@ -72,9 +70,9 @@ If something surprises us: “Good. That tells us what to test next.”
 
 **Variation → Timing → Trust**
 
-- **Wesley:** Choose the hard parts that best connect to the demo. Possible cues: light, angle, speed, uncertainty, trust.
-- **Brad:** A promising result must become dependable in the real operation.
-- **Point to land:** Writing the future rules means solving what happens outside the perfect demo.
+- **Wesley, a possible start:** “The result you just saw is exciting. The harder question is whether it still works when the light changes, the bottle arrives at another angle, or the decision has to happen faster.”
+- **Then your example:** Pick one issue you actually solved or would test next. Explain what the system should do when it is uncertain.
+- **Brad:** “A promising result is the beginning. To write the rules for the future of manufacturing, we have to make it dependable when people rely on it.”
 
 ---
 
@@ -82,9 +80,9 @@ If something surprises us: “Good. That tells us what to test next.”
 
 **Opportunity → Many disciplines → Invitation**
 
-- Teams across Remington and TKG need mechanical, controls, software, and testing talent.
-- We want curious people willing to get close to a problem and own the answer.
-- Ask: **“What have you built? What do you want to tackle next?”**
+- **Brad:** “We are looking for people who want to work on problems like these. There are opportunities across Remington and TKG, and this work needs mechanical, controls, software, and testing talent.”
+- “We value curiosity, ownership, and the willingness to get close to the real problem.”
+- **Invite:** “What have you built? What are you learning? What do you want to tackle next?”
 
 ---
 
@@ -92,10 +90,10 @@ If something surprises us: “Good. That tells us what to test next.”
 
 **Scan → Try → React**
 
-- Point to the 4Founders QR code, link, and PIN. Give the room time to try it.
+- **Brad:** “Now it’s your turn. Scan the code, or use the link and PIN. Draw something, test it, and change it.” Pause so the room can participate.
 - Backup: [4founders.dev/demo/ai-in-action/](https://4founders.dev/demo/ai-in-action/) · **PIN 877262**.
-- Ask what changed when they adjusted their idea.
-- Keep this audience activity separate from the bottle demo.
+- Ask: “What changed when you tried a different idea?” Take one or two reactions.
+- This 4Founders activity is separate from the bottle demo. It is also a way to connect after the talk.
 
 ---
 
@@ -103,9 +101,9 @@ If something surprises us: “Good. That tells us what to test next.”
 
 **Beyond these roles → Tell us → Explore a fit**
 
-- Their interests may be outside anything we named today.
-- Ask what they want to pursue and why it matters.
-- If there is a fit, we could explore a first use case together, possibly as their first customer.
+- **Brad:** “Your interests might be outside the roles we described. We still want to know what you want to pursue and why it matters to you.”
+- “If there is a real fit, we would be interested in exploring it together. We might help shape a first use case, and in the right situation, we could even become your first customer.”
+- **Point to land:** It starts with a conversation, not a formal pitch.
 
 ---
 
@@ -113,8 +111,8 @@ If something surprises us: “Good. That tells us what to test next.”
 
 **Email → Careers → 4Founders**
 
-- **Brad:** Invite follow-up and point to the three paths on screen.
-- **Wesley:** Invite technical questions and ideas in your own words.
+- **Brad:** “My email is on the screen. For roles across TKG, use the careers link. If you have an idea to develop, connect through 4Founders. Wesley and I will be here after the talk.”
+- **Wesley:** Invite questions about the engineering and ask people to show you what they are building. Your own words.
 - **Brad, close:** “Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.”
 
 ---
