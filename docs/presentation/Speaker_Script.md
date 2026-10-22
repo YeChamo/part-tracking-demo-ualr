@@ -2,15 +2,19 @@
 
 Brad Daugherty and Wesley Siharth · Go 4th Fridays · October 23, 2026
 
-This script follows the ten slide deck. Allow about 9 to 11 minutes of speaking, 5 to 6 minutes for the live demonstration, and about 3 minutes for the interactive challenge.
+This script follows the ten slide deck. Spoken lines are a draft; the marked gaps are for Wesley’s own examples. Allow about 12 to 14 minutes of speaking, 5 to 6 minutes for the live demonstration, and about 3 minutes for the interactive challenge.
 
 ## Slide 1 Introduction
 
 *About 1 minute*
 
-**Brad:** Good afternoon. I’m Brad Daugherty. I lead small engineering teams across The Kinetic Group, and most of my work is at Remington in Lonoke. I’m joined by Wesley Siharth, an engineer who helped start Remington Vision. Wesley was first given that project as an intern and carried it forward into his engineering role. You’ll hear from both of us today.
+**Brad:** Good afternoon. I’m Brad Daugherty. I lead small engineering teams across The Kinetic Group, and most of my work is at Remington in Lonoke. I’m joined by Wesley Siharth. Wesley helped start Remington Vision, and he’ll show you the work firsthand. Wesley, introduce yourself.
 
-We want to introduce the work, show you something live, and leave time for your questions. We also want to meet people who might help shape where this goes next. You do not need a manufacturing background to see the opportunity. The interesting work often starts when someone from a different discipline asks why we do something a certain way.
+**Wesley:** Hi, I’m Wesley Siharth. Remington Vision was first assigned to me when I was an intern, and I’ve carried it forward into my role as an engineer. It has given me a chance to learn by working on a real problem and to keep improving what we build.
+
+> **Wesley’s introduction gap — 15 to 20 seconds:** Add one sentence about what you work on now or what first drew you into engineering. Use your own words.
+
+**Brad:** Today we want to introduce the work, show you something live, and leave time for questions. We also want to meet people who might help shape where this goes next. You do not need a manufacturing background to see the opportunity. The interesting work often starts when someone from a different discipline asks why we do something a certain way.
 
 ## Slide 2 Writing the next rules
 
@@ -32,11 +36,15 @@ The strongest solutions come when those pieces are designed together. A clever a
 
 ## Slide 4 Why we love this work
 
-*Wesley · about 1 minute*
+*Brad hands off to Wesley · about 2 minutes, including Wesley’s example*
 
-**Wesley:** Remington Vision was first given to me when I was an intern. I carried it into my role as an engineer, and that experience is one reason we love this work. The problems do not all look alike. We can move from a mechanical question to a software question and then see whether the answer actually helps on the floor. That visible result matters to us.
+**Brad:** Here is why I love this work: the problems do not all look alike. We can move from a mechanical question to a software question, then walk onto the floor and see whether the answer helps. We stay close enough to the work to see the result. Wesley has experienced that from the start of Remington Vision, so I want him to tell you why he loves it.
 
-It also keeps us learning. No one person has every answer. The work depends on people who cross disciplines and listen to the people who use the system. When we build something, we stay with it long enough to understand how it behaves. That ownership turns a promising idea into engineering.
+**Wesley:** For me, it is the chance to own a problem and keep learning as the answer improves. I started on Remington Vision as an intern and continued with it as an engineer. The work crosses disciplines, and we get to see what happens when an idea meets real conditions.
+
+> **Wesley’s main talking gap — 45 to 60 seconds:** Tell one specific story: a problem you faced on Remington Vision, what you tried, and the moment you saw progress. Explain why that experience made you want to keep doing this work. Keep production details out of the example.
+
+**Wesley:** That is what I love about it. We do not just hand over an idea. We stay with what we build, learn from it, and make it better.
 
 ## Slide 5 Live demonstration
 
@@ -46,17 +54,19 @@ It also keeps us learning. No one person has every answer. The work depends on p
 
 What you are seeing is a demonstration setup. It does not control a production sorting line. We chose an everyday object so the engineering is easy to see and the questions are easy to ask.
 
-*Delivery cue: Demonstrate one bottle, then a different color. If the application supports it and the setup has been tested, let someone choose the next bottle or show another visible feature. Pause after each result. Explain details only when they help the audience understand what changed.*
+*Delivery cue: Brad hands Wesley the floor and operates the slides. Wesley demonstrates one bottle, then a different color. If the setup supports it, let someone choose the next bottle or show another visible feature. Pause after each result. Explain details only when they help the audience understand what changed.*
 
 ## Slide 6 The hard problems
 
-*Wesley · about 2 minutes*
+*Wesley, then Brad · about 2 minutes*
 
 **Wesley:** The live result is the exciting part. The hard engineering is making a system useful when conditions change. A camera may see a different angle or different light. The pace of an operation may give you only a short time to decide. And if a result varies unpredictably, people will stop trusting it, even when it often looks impressive.
 
-So we have to think about variation, timing, and reliability together. We test the conditions a system will really encounter. We decide what it should do when it is uncertain. We make the result clear to the person who needs to act on it. Those are some of the most interesting engineering challenges of our time because the answer has to work beyond a single good demonstration.
+So we have to think about variation, timing, and reliability together. We test the conditions a system will really encounter. We decide what it should do when it is uncertain. We make the result clear to the person who needs to act on it.
 
-That is the future we mean when we talk about writing the next rules. Better sensing and software open the door, but disciplined engineering is what makes the capability useful in manufacturing.
+> **Wesley’s technical talking gap — 20 to 30 seconds:** Point to one behavior the audience just saw. Explain a practical challenge you had to solve to make that result repeatable, using only details you are comfortable sharing publicly.
+
+**Brad:** That is the future we mean when we talk about writing the next rules. Better sensing and software open the door, but disciplined engineering makes the capability useful in manufacturing. These are some of the most interesting engineering challenges of our time because the answer has to work beyond a single good demonstration.
 
 ## Slide 7 Come fight for what is next
 
@@ -88,4 +98,6 @@ Tell us about it. If there is a real fit, we would be interested in exploring it
 
 **Brad:** My email is on the screen, and Wesley and I would be glad to talk after this. For roles at Remington or elsewhere in The Kinetic Group, use the careers link. For the independent project conversation, you can find 4Founders here as well.
 
-Thank you for spending time with us today. We would love to hear what questions you have and what you want to build.
+**Wesley:** If you want to ask about the engineering or show us something you are building, come find us afterward.
+
+**Brad:** Thank you for spending time with us today. We would love to hear what questions you have and what you want to build.
