@@ -4,6 +4,21 @@ Brad Daugherty and Wesley Siharth · Go 4th Fridays · October 23, 2026
 
 This script follows the ten slide deck. Spoken lines are a draft; the marked gaps are for Wesley’s own examples. Allow about 12 to 14 minutes of speaking, 5 to 6 minutes for the live demonstration, and about 3 minutes for the interactive challenge.
 
+## Talk at a glance
+
+| Slide | Lead | Point to land |
+| --- | --- | --- |
+| 1 | Brad → Wesley → Brad | Who we are and why we are here |
+| 2 | Brad | Honor Remington’s history; set the ambition for the next decades |
+| 3 | Brad | Engineering connects sensing, decisions, and action on the floor |
+| 4 | Brad → Wesley | Why we love the variety, freedom, ownership, and growth |
+| 5 | Wesley | Show the Gatorade bottle sorting demonstration |
+| 6 | Wesley → Brad | A promising result must survive variation, timing, and real use |
+| 7 | Brad | Invite people to join teams across Remington and TKG |
+| 8 | Brad | Run the separate 4Founders interactive challenge |
+| 9 | Brad | Invite ideas beyond the roles described; explore a possible fit |
+| 10 | Brad → Wesley → Brad | Give follow-up paths and close on the factory floor |
+
 ## Slide 1 Introduction
 
 *About 1 minute*
@@ -26,19 +41,19 @@ We want to honor that history and be just as ambitious about what comes next. Th
 
 Our ambition is for Remington and The Kinetic Group to keep writing the rules for manufacturing for decades to come. That means building capabilities that matter on the floor: systems that help people see a problem sooner, make a better decision, and keep improving the process. The legacy gives us a strong foundation. What we build from here is our responsibility.
 
-## Slide 3 Engineering across TKG
+## Slide 3 Engineering that reaches the floor
 
 *About 2 minutes*
 
-**Brad:** The teams I lead are small, and the problems cross boundaries. One day the important question is mechanical: how should a machine or fixture be designed so the work is repeatable? Another day it is controls: what should happen when a signal arrives, and how quickly? Software and data help turn what happened into something a person can understand and act on.
+**Brad:** The teams I lead are small, but the system we build crosses disciplines. In simple terms, it has to sense what is happening, make a decision, and help someone or something act. A machine might capture a signal. Software interprets it. Then a person or a control system responds.
 
-The strongest solutions come when those pieces are designed together. A clever algorithm cannot rescue a poor view of a part. A well-built machine is less useful if nobody can see when it needs attention. Testing connects the whole system to the conditions people actually face. That is why our work is a cycle of building, testing, and improving, close to the operation we are trying to help.
+The engineering challenge is making those pieces work together in real conditions. A clever model cannot rescue a poor view of a part. A machine can capture data, but the result only matters if someone can use it. We build the full chain, test it beside the operation, and improve it with the people who use it. That is how an idea becomes a capability on the floor.
 
 ## Slide 4 Why we love this work
 
 *Brad hands off to Wesley · about 2 minutes, including Wesley’s example*
 
-**Brad:** Here is why I love this work: the problems do not all look alike. We can move from a mechanical question to a software question, then walk onto the floor and see whether the answer helps. We stay close enough to the work to see the result. Wesley has experienced that from the start of Remington Vision, so I want him to tell you why he loves it.
+**Brad:** Here is why I love this work: the problems do not all look alike. We can move from a mechanical question to a software question, then walk onto the floor and see whether the answer helps. We have room to explore, but we also own the result. Wesley has experienced that from the start of Remington Vision, so I want him to tell you why he loves it.
 
 **Wesley:** I got involved in some interesting work with AI and different machines. What I enjoy most is the variety, the freedom to explore ideas, and the chance to take ownership. There is always something new to figure out.
 
@@ -94,10 +109,12 @@ Tell us about it. If there is a real fit, we would be interested in exploring it
 
 ## Slide 10 Follow up
 
-*About 30 seconds*
+*About 1 minute*
 
-**Brad:** My email is on the screen, and Wesley and I would be glad to talk after this. For roles at Remington or elsewhere in The Kinetic Group, use the careers link. For the independent project conversation, you can find 4Founders here as well.
+**Brad:** My email is on the screen, and Wesley and I would be glad to talk after this. For roles at Remington or elsewhere in The Kinetic Group, use the careers link. If you want to keep building an idea, connect through 4Founders as well.
 
 **Wesley:** If you want to ask about the engineering or show us something you are building, come find us afterward.
 
-**Brad:** Thank you for spending time with us today. We would love to hear what questions you have and what you want to build.
+**Brad:** All of this comes back to people willing to build. Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.
+
+*Delivery cue: Hold the final slide through applause and questions so the email, careers page, and 4Founders address remain visible.*
