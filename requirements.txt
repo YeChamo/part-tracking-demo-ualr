@@ -4,3 +4,9 @@ numpy==2.2.0
 onnxruntime==1.23.2
 zxing-cpp==3.1.1
 pypylon==26.5.0
+# Build.ps1 installs this from PyTorch's official CPU index before this file.
+torch==2.12.0
+onnx==1.21.0
+onnxscript==0.7.0
+onnx_ir==0.2.1
+sympy==1.14.0

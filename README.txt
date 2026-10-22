@@ -1,6 +1,6 @@
 UALR PART TRACKING DEMO
 YOLOX bottle/color models, tracking, barcode display, and EtherMotion routing
-Version 1.2.1 candidate - PartTrackingDemoUALR-v1.2.1-Windows-x64.zip
+Version 1.3.0 candidate - PartTrackingDemoUALR-v1.3.0-Windows-x64.zip
 
 GET STARTED
 
@@ -36,11 +36,16 @@ A missing selected device blocks startup; the laptop camera is not substituted.
 Manual camera index is an explicit advanced fallback.
 
 In Models, choose Bottle model + color model and select your Bottle YOLOX
-(.onnx) and Color YOLOX (.onnx) exports. A blank bottle selection uses the bundled
+and Color YOLOX files (.pth, .pt, or .onnx). Leave Read saved model settings
+checked and click Load / convert models. Names, input dimensions, and recorded
+model settings are read automatically. A blank bottle selection uses the bundled
 generic COCO YOLOX-Nano bottle locator. The optional larger YOLOX-S locator is
 models\yolox_s.onnx; select it explicitly in the bottle picker. Both use COCO
 bottle class ID 39. Neither supplies trained bottle-color or Gatorade-brand
-predictions. The color model must be your trained color model.
+predictions. The second model must be trained for your selected colors or
+categories and can be a .pth, .pt, or .onnx file. Trained literal categories
+are supported independently of automatic input sizing; use the exact pass
+category name and the correct trained output order.
 The detector supplies tracking boxes, and learned color-class predictions are
 associated with each bottle. There is no HSV or pixel-color fallback.
 
@@ -54,6 +59,8 @@ nor a Gatorade/Gator brand-trained detector.
 Supported trained color labels are orange, yellow, green, blue, red, purple,
 clear, and white. White requires a trained YOLOX color class and correct class
 names/mapping, just like the other colors. It is not derived from photo pixels.
+Other trained literal categories are supported; generic/unknown bottle labels
+or ambiguous color labels are not invented sorting categories.
 
 The four models\gatorade_*_reference.png photo crops and GatoradeLabelMatcher
 in app\gatorade.py are optional OFFLINE reference assets/tools only. The crops
@@ -62,8 +69,44 @@ their color, or changes tracking/routing.
 
 For one model already trained on orange_bottle, blue_bottle, etc., choose One
 model: colored bottles and select it in the bottle model picker. Its predictions
-supply both boxes and colors. Export .pth weights to ONNX before selecting them.
+supply both boxes and colors. Selected .pth/.pt checkpoints convert to cached
+ONNX automatically; there is no separate manual export step.
 Missing/incompatible model setup or class-count mismatch blocks camera startup.
+
+CHECKPOINTS, CUSTOM GRAPHS, AND OPTIONAL TENSORRT
+
+The portable application includes CPU PyTorch and ONNX export dependencies.
+Its pipeline is .pth/.pt -> cached ONNX -> optional TensorRT engine cache.
+Your checkpoint stays at its selected path. Cached conversions and engines
+live under data/ and are excluded from source control and release archives.
+First conversion takes longer; matching later loads reuse the prepared model.
+
+Standard YOLOX Nano/Tiny/S/M/L/X and recorded custom graph settings are
+supported. Class names, image dimensions (including rectangular inputs),
+activation, BatchNorm parameters, and output/decode settings are used when
+recorded. Preparation admits the complete weights into the matching graph and
+checks Torch/ONNX numerical output before publishing a converted model.
+
+For a modified YOLOX graph, select its Python experiment in Advanced model
+settings. It must define build_model() or Exp().get_model(). The bundled base
+app.vendor.yolox_models.experiment.ExportExp supports self-contained inference
+experiments. Your experiment must describe the actual training graph and have
+its custom layer code/dependencies available. Training-only imports may need
+adaptation. Undefined layers cannot be recovered from weights alone; in that
+case supply the missing graph configuration or an ONNX export from training.
+
+Acceleration can be Automatic, ONNX CPU, TensorRT FP32, or TensorRT FP16. The
+normal portable bundle runs on CPU. A GPU-capable build additionally needs a
+compatible NVIDIA GPU/driver and TensorRT runtime on the target computer.
+The GPU dependency overlay pins ONNX Runtime GPU 1.23.2 and TensorRT CUDA 12
+10.9.0.34 together; arbitrary TensorRT upgrades can break compatibility.
+Engine caches are tied to model contents, input shape, precision, GPU identity,
+driver, and runtime versions. They warm before camera startup. Unavailable
+acceleration during load reports a CPU fallback; live inference errors stop
+inspection and disarm output. An engine build is not an accuracy test.
+
+This laptop has Intel graphics and no usable NVIDIA GPU; TensorRT execution
+must be checked on the NVIDIA station. Barcode decoding remains independent.
 
 Use the separate Bottle confidence and Color confidence sliders under Models during a live
 inspection while OUTPUT IS DISARMED. They apply on subsequent frames without
@@ -179,6 +222,11 @@ identities, controller tokens, settings, logs, and generated binaries are not
 published in source control. Releases start with an empty data folder.
 
 Editable source is in app/ and run.py. Build.ps1 rebuilds the portable app.
+The default build installs CPU PyTorch from its official wheel index. An
+optional Build.ps1 -TensorRT installs requirements-tensorrt.txt in this demo's
+own build environment and retains GPU provider libraries. Close the demo first;
+building refuses to replace its runtime while it is open. Do not install CPU
+and GPU ONNX Runtime distributions together. README.md has source setup commands.
 Verify Demo.cmd runs checks without opening cameras or sending motion.
 Package versions and licenses are in THIRD_PARTY_NOTICES.txt and licenses\.
 Actual detection, hardware timing, and physical clearances need verification on

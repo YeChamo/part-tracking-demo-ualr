@@ -1,5 +1,6 @@
 """Full-screen rendering controls; no camera, inference, or motion hardware."""
 import os
+import time
 import unittest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -56,7 +57,9 @@ class FullscreenViewTests(unittest.TestCase):
         first_paints = view.paint_count
         next_frame = object()
         self.main.shared_state["frame"] = next_frame
-        QTest.qWait(100)
+        deadline = time.monotonic() + 2
+        while view.paint_count <= first_paints and time.monotonic() < deadline:
+            QTest.qWait(20)
         self.assertGreater(view.paint_count, first_paints)
         self.assertIs(view.last_frame, next_frame)
         self.assertIs(self.main.worker, original_worker)

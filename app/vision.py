@@ -125,6 +125,7 @@ class VideoWorker(QThread):
     packet = Signal(object)
     fault = Signal(str)
     ready = Signal(str)
+    preparing = Signal(str)
 
     def __init__(self, settings: dict, root: Path):
         super().__init__()
@@ -135,6 +136,8 @@ class VideoWorker(QThread):
         self._latest: dict | None = None
         self._requested_confidence: tuple[float, float] | None = None
         self._confidence_revision = 0
+        self.preparing_models = True
+        self.source_started_at = None
 
     def update_confidence(self, bottle: float, color: float) -> int:
         """Queue thresholds for the next inference; never mutate a running model."""
@@ -253,9 +256,14 @@ class VideoWorker(QThread):
             if self.settings.get("rule", "color") != "color":
                 raise RuntimeError("Live inspection requires the YOLOX color sorting rule.")
             pipeline = YoloXPipeline(self.settings, self.root)
+            pipeline.progress = self.preparing.emit
+            pipeline.cancelled = self._stopping
+            self.preparing.emit('Preparing YOLOX models and cached inference runtime…')
             pipeline.open()
             if self._stopping():
                 return
+            self.preparing_models = False
+            self.source_started_at = time.monotonic()
             source, source_name = self._open_source()
             if self._stopping():
                 return
@@ -323,6 +331,7 @@ class VideoWorker(QThread):
             if not self._stopping():
                 self.fault.emit(str(exc))
         finally:
+            self.preparing_models = False
             try:
                 self._close_source(source)
             except Exception as exc:

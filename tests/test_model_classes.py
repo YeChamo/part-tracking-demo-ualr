@@ -90,5 +90,40 @@ class ColorMapTests(unittest.TestCase):
         self.assertTrue(color_map_error(["bottle"], class_count=1, pass_color="red"))
 
 
+class AutomaticCategoryTests(unittest.TestCase):
+    def test_opt_in_accepts_one_trained_category_and_keeps_known_color_names(self):
+        self.assertEqual(build_color_map(["PINK"], class_count=1, allow_class_labels=True), {0: "pink"})
+        self.assertEqual(build_color_map(["Gatorade_BLUE"], class_count=1, allow_class_labels=True), {0: "blue"})
+        self.assertEqual(build_color_map(["Pink Bottle", "BLACK", "Lot A"], class_count=3, allow_class_labels=True),
+                         {0: "pink bottle", 1: "black", 2: "lot a"})
+        with self.assertRaises(ValueError):
+            build_color_map(["PINK"], class_count=1)
+
+    def test_explicit_custom_routes_require_opt_in(self):
+        self.assertEqual(parse_color_map('0:Pink,1:BLACK', allow_class_labels=True), {0: "pink", 1: "black"})
+        self.assertEqual(build_color_map(["pink", "black"], {1: "Secondary Lane"}, 2, allow_class_labels=True),
+                         {0: "pink", 1: "secondary lane"})
+        with self.assertRaises(ValueError):
+            parse_color_map('0:pink,1:black')
+
+    def test_unknown_generic_and_ambiguous_labels_never_become_auto_routes(self):
+        names = ["bottle", "other", "background", "unknown", "red_blue", "class_5", "pink"]
+        self.assertEqual(build_color_map(names, class_count=len(names), allow_class_labels=True), {6: "pink"})
+        for name in ("bottle", "unknown", "red_blue", "other_red", "background-blue", "class_0"):
+            with self.subTest(label=name), self.assertRaises(ValueError):
+                build_color_map([name], class_count=1, allow_class_labels=True)
+        for name in ("bottle", "unknown", "red_blue", "", None):
+            with self.subTest(explicit_label=name), self.assertRaises(ValueError):
+                parse_color_map({0: name}, allow_class_labels=True)
+
+    def test_custom_routes_still_validate_actual_class_count_and_pass_category(self):
+        with self.assertRaises(ValueError):
+            build_color_map(["pink"], class_count=2, allow_class_labels=True)
+        with self.assertRaises(ValueError):
+            build_color_map(explicit_map={3: "pink"}, class_count=1, allow_class_labels=True)
+        self.assertEqual(color_map_error(["pink"], class_count=1, pass_color="PINK", allow_class_labels=True), "")
+        self.assertIn("pass color", color_map_error(["pink"], class_count=1, pass_color="black", allow_class_labels=True))
+
+
 if __name__ == "__main__":
     unittest.main()

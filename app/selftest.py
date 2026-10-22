@@ -43,6 +43,41 @@ def check_runtime(root: Path) -> int:
         from .model_classes import build_color_map
         checks['yolox_color_class_map'] = build_color_map(['blue_bottle','yellow_bottle','white_bottle'],class_count=3)
         checks['trained_color_model_required'] = True
+        # Synthetic checkpoint exercises the packaged converter, not accuracy.
+        import torch
+        from .vendor.yolox_models import build_model
+        from .checkpoint_export import prepare_model
+        checkpoint=root/'data'/'selftest-yolox.pth'
+        graph=build_model(2,.33,.125)
+        torch.save({'model':graph.state_dict(),'names':['orange','blue'],
+                    'test_size':[160,160],
+                    'yolox_inference_config':{'schema_version':1,'architecture':'yolox_pafpn',
+                        'depth':.33,'width':.125,'depthwise':False,'act':'silu',
+                        'normalization':{'type':'batchnorm2d','eps':.001,'momentum':.03}}},checkpoint)
+        del graph
+        converted=prepare_model(checkpoint,root,image_size=None)
+        from .yolox_pipeline import YoloXPipeline
+        setup={'yolox_mode':'combined','model_path':str(converted),'pass_color':'orange',
+               'auto_model_config':True,'inference_backend':'cpu','rule':'color'}
+        pipeline=YoloXPipeline(setup,root)
+        try:
+            pipeline.open(); converted_result=pipeline.infer(np.zeros((160,160,3),dtype=np.uint8))
+            checks['checkpoint_export']={'synthetic_weights':True,'torch':torch.__version__,
+                                          'onnx_exported':converted.is_file(),
+                                          'pipeline_inference':True}
+        finally:
+            pipeline.close()
+        experiment=root/'data'/'selftest-experiment.py'
+        experiment.write_text('from yolox.exp import Exp as BaseExp\n'
+                              'class Exp(BaseExp):\n'
+                              '    def __init__(self):\n'
+                              '        super().__init__()\n'
+                              '        self.num_classes=2\n'
+                              '        self.depth=.33\n'
+                              '        self.width=.125\n'
+                              '        self.test_size=(160,160)\n',encoding='utf-8')
+        configured=prepare_model(checkpoint,root,image_size=None,experiment_path=str(experiment))
+        checks['checkpoint_export']['custom_experiment_exported']=configured.is_file()
         from .tracking import BottleTracker, TrackingConfig
         from .simulation import Simulation, WIDTH, HEIGHT
         from .settings import DEFAULTS

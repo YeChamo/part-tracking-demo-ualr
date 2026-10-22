@@ -29,6 +29,7 @@ from .confidence_control import ConfidenceControl
 from . import diverter
 from .ethermotion import EtherMotionClient
 from .fullscreen_view import FullscreenCameraWindow
+from .model_preparation import ModelPreparationWorker
 from .simulation import HEIGHT, WIDTH, Simulation
 from .tracking import BottleTracker, TrackingConfig
 from .vision import VideoWorker
@@ -194,6 +195,7 @@ class MainWindow(QMainWindow):
         self.camera_devices = []
         self.camera_scanning = False
         self.fullscreen = None
+        self.model_preparer = None
         self.expected_confidence_revision = 0
         self.confidence_timer = QTimer(self)
         self.confidence_timer.setSingleShot(True)
@@ -357,7 +359,9 @@ class MainWindow(QMainWindow):
 
     def field(self, form, key, title, kind='float', minimum=0, maximum=10000, decimals=0):
         form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
-        if kind == 'text':
+        if kind == 'bool':
+            widget=QCheckBox(); widget.setChecked(bool(self.settings[key]))
+        elif kind == 'text':
             widget = QLineEdit(str(self.settings[key]))
         elif kind == 'int':
             widget = QSpinBox(); widget.setRange(int(minimum),int(maximum)); widget.setValue(int(self.settings[key]))
@@ -390,6 +394,8 @@ class MainWindow(QMainWindow):
         self.note(box,'Choose the color that stays on the belt. Other colors produce decision 1 and the selected divert motion.')
         form = QFormLayout(); form.setSpacing(10)
         self.combo(form,'pass_color','Pass color',[(c.title(),c) for c in ['orange','blue','green','red','yellow','purple','white','clear']])
+        self.fields['pass_color'].setEditable(True)
+        self.fields['pass_color'].setToolTip('Choose a trained color/class, or type its exact name. Load models to read their class names.')
         self.combo(form,'rule','Sort rule',[('YOLOX color → 0 / 1','color'),('Every Nth (simulation)','every_n'),('Divert all (simulation)','all'),('Pass all (simulation)','none')])
         self.field(form,'every_n','Every Nth','int',2,100)
         box.addLayout(form)
@@ -408,11 +414,17 @@ class MainWindow(QMainWindow):
         self.note(box,'Choose the YOLOX models used for bottle tracking and color sorting.')
         form = QFormLayout(); form.setSpacing(10)
         self.combo(form,'yolox_mode','YOLOX models',[('Bottle model + color model','two_models'),('One model: colored bottles','combined')])
-        self.path_field(form,'model_path','Bottle YOLOX (.onnx)','YOLOX ONNX models (*.onnx)')
-        self.path_field(form,'color_model_path','Color YOLOX (.onnx)','YOLOX ONNX models (*.onnx)')
+        self.path_field(form,'model_path','Bottle YOLOX','YOLOX models (*.pth *.pt *.onnx)')
+        self.path_field(form,'color_model_path','Color YOLOX','YOLOX models (*.pth *.pt *.onnx)')
+        self.combo(form,'inference_backend','Acceleration',[('Automatic (GPU if available)','auto'),('ONNX CPU','cpu'),('TensorRT FP32','tensorrt_fp32'),('TensorRT FP16','tensorrt_fp16')])
+        self.field(form,'auto_model_config','Read saved model settings','bool')
         self.path_buttons['model_path'].setText('Choose'); self.path_buttons['model_path'].setMaximumWidth(70)
         self.path_buttons['color_model_path'].setText('Choose'); self.path_buttons['color_model_path'].setMaximumWidth(70)
         box.addLayout(form)
+        self.prepare_models_button=QPushButton('Load / convert models')
+        self.prepare_models_button.clicked.connect(self.prepare_models)
+        box.addWidget(self.prepare_models_button)
+        self.model_note=self.note(box,'Pick .pth/.pt or ONNX. Checkpoints convert automatically; saved exports and GPU engines are reused.')
         thresholds=QFormLayout(); thresholds.setSpacing(12)
         for key,title in (('confidence','Bottle confidence'),('color_confidence','Color confidence')):
             control=ConfidenceControl(float(self.settings[key]))
@@ -437,9 +449,45 @@ class MainWindow(QMainWindow):
         names.setPlaceholderText('Read from ONNX; e.g. orange,blue,green')
         mapping=self.field(form,'color_class_map','Class → color map','text')
         mapping.setPlaceholderText('Optional: 0:orange,1:blue,2:green')
+        variants=[('Automatic from checkpoint','auto')]+[(name.replace('_','-').upper(),name) for name in ('nano','tiny','s','m','l','x')]
+        self.combo(form,'model_architecture','Bottle architecture',variants)
+        self.combo(form,'color_architecture','Color architecture',variants)
+        self.path_field(form,'model_experiment_path','Bottle experiment','YOLOX Python experiment (*.py)')
+        self.path_field(form,'color_experiment_path','Color experiment','YOLOX Python experiment (*.py)')
         box.addWidget(advanced)
-        self.note(box,'Class names are read from ONNX metadata. Use Advanced for an export without names. The bundled model locates bottles only; choose your trained color model. Export .pth to ONNX first.')
+        self.note(box,'Model names and input size are read automatically. Use Advanced for missing labels or a modified YOLOX graph. A custom experiment runs Python model-building code; select your own training configuration. Generic COCO weights locate bottles only.')
         box.addStretch()
+
+    @staticmethod
+    def widget_value(widget):
+        if isinstance(widget,QCheckBox): return widget.isChecked()
+        if isinstance(widget,QComboBox):
+            return widget.currentText().strip().casefold() if widget.isEditable() else widget.currentData()
+        if isinstance(widget,QLineEdit): return widget.text().strip()
+        return widget.value()
+
+    def prepare_models(self):
+        if self.running or self.owns_motion or (self.model_preparer and self.model_preparer.isRunning()): return
+        for key,widget in self.fields.items(): self.settings[key]=self.widget_value(widget)
+        store.save(self.root,self.settings)
+        worker=ModelPreparationWorker(self.settings,self.root,self)
+        self.model_preparer=worker
+        def progress(message):
+            if self.model_preparer is worker: self.model_note.setText(message)
+        def prepared(info):
+            if self.model_preparer is not worker: return
+            choices=info.get('colors',[]); combo=self.fields['pass_color']
+            current=combo.currentText().strip().casefold()
+            combo.clear()
+            for choice in choices: combo.addItem(choice,choice)
+            combo.setCurrentText(current)
+            details='; '.join(f"{Path(m['path']).name}: {len(m['class_names'])} classes, {' × '.join(map(str,m['input_shape']))}" for m in info.get('models',[]))
+            self.model_note.setText('Ready • '+details+'. Choose the class that should pass, then start inspection.')
+        worker.progress.connect(progress)
+        worker.prepared.connect(prepared)
+        worker.fault.connect(lambda message:progress('Model setup: '+message))
+        worker.finished.connect(self.update_enabled)
+        worker.start(); self.update_enabled()
 
     def confidence_changed(self, _value=None):
         if self.armed or self.arming or self.owns_motion:
@@ -541,10 +589,7 @@ class MainWindow(QMainWindow):
 
     def collect_settings(self):
         for key,widget in self.fields.items():
-            if isinstance(widget,QComboBox): value = widget.currentData()
-            elif isinstance(widget,QLineEdit): value = widget.text().strip()
-            else: value = widget.value()
-            self.settings[key] = value
+            self.settings[key] = self.widget_value(widget)
         self.settings['source'] = self.source.currentData()
         self.settings['program_id'] = self.program.currentData() or self.settings.get('program_id','')
         self.settings['pass_program_id'] = self.pass_program.currentData() or ''
@@ -638,7 +683,7 @@ class MainWindow(QMainWindow):
         self.jobs.submit(discover_cameras,done)
 
     def start(self):
-        if self.running or self.owns_motion:
+        if self.running or self.owns_motion or (self.model_preparer and self.model_preparer.isRunning()):
             return
         if self.worker and self.worker.isRunning():
             self.set_status('Camera is still releasing. Wait, then start again.','#f3b252'); return
@@ -660,6 +705,7 @@ class MainWindow(QMainWindow):
                 self.worker = VideoWorker(self.settings.copy(),self.root)
                 worker = self.worker
                 worker.fault.connect(lambda message: self.camera_fault(worker,message))
+                worker.preparing.connect(lambda message: self.set_status(message,'#8dcaff') if self.worker is worker and self.running else None)
                 worker.ready.connect(lambda message: self.set_status('Running • '+message,'#54dfbb') if self.worker is worker and self.running else None)
                 self.worker.start()
                 self.set_status('Opening source and loading bottle detector…','#8dcaff')
@@ -672,6 +718,7 @@ class MainWindow(QMainWindow):
 
     def stop(self):
         self.running = False
+        if self.model_preparer and self.model_preparer.isRunning(): self.model_preparer.stop()
         if self.confidence_timer.isActive(): self.flush_confidence()
         self.generation += 1
         for _,_,event in self.pending:
@@ -704,21 +751,27 @@ class MainWindow(QMainWindow):
             self.badge.setText('LIVE CAMERA • OUTPUT DISARMED')
 
     def update_enabled(self):
-        self.start_button.setEnabled(not self.running and not self.owns_motion and not self.camera_scanning)
-        for widget in self.fields.values(): widget.setEnabled(not self.running)
-        for button in self.path_buttons.values(): button.setEnabled(not self.running)
+        preparing=bool(self.model_preparer and self.model_preparer.isRunning())
+        editable=not self.running and not preparing
+        self.start_button.setEnabled(editable and not self.owns_motion and not self.camera_scanning)
+        self.prepare_models_button.setEnabled(editable and not self.owns_motion)
+        for widget in self.fields.values(): widget.setEnabled(editable)
+        for button in self.path_buttons.values(): button.setEnabled(editable)
         two_models=self.fields['yolox_mode'].currentData()=='two_models'
         for key in ('color_model_path','color_class_names','color_image_size','model_class_id'):
-            self.fields[key].setEnabled(not self.running and two_models)
-        self.path_buttons['color_model_path'].setEnabled(not self.running and two_models)
+            self.fields[key].setEnabled(editable and two_models)
+        for key in ('color_model_path','color_experiment_path'):
+            self.path_buttons[key].setEnabled(editable and two_models)
+        for key in ('color_experiment_path','color_architecture'):
+            self.fields[key].setEnabled(editable and two_models)
         for key in ('confidence','color_confidence'):
-            self.fields[key].setEnabled(not self.armed and not self.arming and not self.owns_motion)
+            self.fields[key].setEnabled(not preparing and not self.armed and not self.arming and not self.owns_motion)
         camera_source=self.source.currentData() in ('usb','basler')
-        self.camera_picker.setEnabled(not self.running and not self.owns_motion and not self.camera_scanning and camera_source)
-        self.refresh_cameras_button.setEnabled(not self.running and not self.owns_motion and not self.camera_scanning and camera_source)
-        self.fields['camera_index'].setEnabled(not self.running and self.source.currentData()=='usb' and self.camera_picker.currentData()=='manual')
+        self.camera_picker.setEnabled(editable and not self.owns_motion and not self.camera_scanning and camera_source)
+        self.refresh_cameras_button.setEnabled(editable and not self.owns_motion and not self.camera_scanning and camera_source)
+        self.fields['camera_index'].setEnabled(editable and self.source.currentData()=='usb' and self.camera_picker.currentData()=='manual')
         for widget in (self.program,self.pass_program,self.return_program):
-            widget.setEnabled(not self.running and not self.armed and not self.arming and not self.owns_motion)
+            widget.setEnabled(editable and not self.armed and not self.arming and not self.owns_motion)
         self.connect_button.setEnabled(not self.armed and not self.arming and not self.owns_motion)
         self.reset_button.setEnabled(not self.running)
         thresholds_ready=not self.confidence_timer.isActive() and (self.last_packet or {}).get('confidence_revision',0)>=self.expected_confidence_revision
@@ -756,8 +809,12 @@ class MainWindow(QMainWindow):
                             self.fail(packet.get('inspection_error','Inspection unavailable')); return
                     elif self.last_packet and now-self.last_packet['captured'] > 1.0:
                         self.fail('No fresh camera image for 1 second. Inspection stopped.'); return
-                    elif self.last_packet is None and now-self.started_at>15:
-                        self.fail('Source did not deliver its first inspection within 15 seconds.'); return
+                    elif self.last_packet is None:
+                        if getattr(self.worker,'preparing_models',False):
+                            if now-self.started_at>600:
+                                self.fail('Model preparation exceeded 10 minutes. Check the model and configuration.'); return
+                        elif now-(getattr(self.worker,'source_started_at',None) or self.started_at)>15:
+                            self.fail('Source did not deliver its first inspection within 15 seconds.'); return
                     self.update_enabled()
                 if self.running: self.dispatch_due(now)
             except Exception as exc:
@@ -1146,6 +1203,8 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self,event):
         self.stop()
+        if self.model_preparer and self.model_preparer.isRunning() and not self.model_preparer.wait(1200):
+            event.ignore(); self.set_status('Model preparation is cancelling; close again after it finishes.','#f3b252'); return
         if self.owns_motion:
             event.ignore(); self.set_status('Waiting for EtherMotion stop acknowledgement; close again after it finishes.','#f3b252'); return
         if self.worker and self.worker.isRunning():

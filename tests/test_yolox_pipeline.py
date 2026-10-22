@@ -9,6 +9,7 @@ import numpy as np
 
 from app.vendor.inference import Detection, InferenceResult
 from app.yolox_pipeline import YoloXPipeline, _ModelBackend, _class_count
+from app.vendor.inference import DetectorConfig
 
 
 def detection(box=(10, 10, 100, 200), color_id=0, score=0.9, label="orange_bottle"):
@@ -26,7 +27,7 @@ class PipelineTests(unittest.TestCase):
         owner = self
 
         class Backend:
-            def __init__(self):
+            def __init__(self, **kwargs):
                 self.cfg = None
                 self.spec = None
 
@@ -161,8 +162,18 @@ class PipelineTests(unittest.TestCase):
 
     def test_missing_class_configuration_rejected(self):
         self.model("colors.onnx", count=3)
-        with self.assertRaisesRegex(ValueError, "at least two bottle colors"):
+        with self.assertRaisesRegex(ValueError, "named trained category"):
             self.pipeline()
+
+    def test_custom_categories_remain_supported_when_image_size_is_manual(self):
+        self.model("colors.onnx", names=["plum", "lemon"],
+                   input_shape=[1, 3, 160, 160],
+                   detections=[detection(color_id=1, label="lemon")])
+        pipe = self.pipeline(image_size=160, auto_model_config=False, pass_color="lemon")
+        result = pipe.infer(np.full((160, 160, 3), (0, 128, 255), np.uint8))
+        self.assertEqual(result["colors"], ["lemon"])
+        self.assertEqual(result["reasons"], [[]])
+        self.assertEqual(pipe.information()["colors"], ["plum", "lemon"])
 
     def test_pass_color_must_be_in_trained_classes(self):
         with self.assertRaisesRegex(ValueError, "pass color"):
@@ -372,6 +383,50 @@ class PipelineTests(unittest.TestCase):
 
 @unittest.skipUnless(importlib.util.find_spec("onnxruntime"), "ONNX Runtime is optional for unit tests")
 class BundledModelTests(unittest.TestCase):
+    def test_symbolic_output_probe_reuses_dynamic_rectangular_warmup_geometry(self):
+        if not importlib.util.find_spec("onnx"):
+            self.skipTest("Generating this test graph requires optional ONNX")
+        import onnx
+        from onnx import TensorProto, helper, numpy_helper
+
+        # This small real graph emits a stride-8 YOLOX tensor whose anchor count
+        # depends on H/W. Both spatial input axes and the output class axis are
+        # symbolic, as in several native export paths.
+        inputs = [helper.make_tensor_value_info("images", TensorProto.FLOAT, [1, 3, "height", "width"])]
+        outputs = [helper.make_tensor_value_info("output", TensorProto.FLOAT, [1, "anchors", "classes"])]
+        initializers = [numpy_helper.from_array(np.asarray(value, dtype=np.int64), name)
+                        for name, value in (("h_index", [2]), ("w_index", [3]),
+                                            ("stride", [8]), ("one", [1]), ("classes", [7]))]
+        nodes = [helper.make_node("Shape", ["images"], ["input_shape"]),
+                 helper.make_node("Gather", ["input_shape", "h_index"], ["height"], axis=0),
+                 helper.make_node("Gather", ["input_shape", "w_index"], ["width"], axis=0),
+                 helper.make_node("Div", ["height", "stride"], ["grid_h"]),
+                 helper.make_node("Div", ["width", "stride"], ["grid_w"]),
+                 helper.make_node("Mul", ["grid_h", "grid_w"], ["anchors"]),
+                 helper.make_node("Concat", ["one", "anchors", "classes"], ["output_shape"], axis=0),
+                 helper.make_node("ConstantOfShape", ["output_shape"], ["output"],
+                                  value=numpy_helper.from_array(np.asarray([0], dtype=np.float32)))]
+        graph = helper.make_graph(nodes, "dynamic_rectangular_yolox", inputs, outputs, initializer=initializers)
+        model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 17)])
+        model.ir_version = 10
+        helper.set_model_props(model, {"input_size": "[160,192]", "names": '["orange","blue"]',
+                                       "letterbox": "top_left", "yolox_decode": "raw", "yolox_strides": "[8]"})
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "dynamic.onnx"
+            onnx.save(model, str(path))
+            backend = _ModelBackend(mode="cpu")
+            backend.auto_model_config = True
+            try:
+                backend.open(DetectorConfig(model_path=str(path), img_size=640,
+                                            intra_op_threads=1, inter_op_threads=1))
+                with patch.object(backend, "infer_raw", wraps=backend.infer_raw) as probe:
+                    details = backend.model_details()
+                self.assertEqual(probe.call_args.args[0].shape, (1, 3, 160, 192))
+                self.assertEqual(details["output_shape"], [1, 480, 7])
+                self.assertEqual(_class_count(details, 640, automatic=True), 2)
+            finally:
+                backend.close()
+
     def test_real_cpu_model_symbolic_output_is_measured_and_generic_color_is_rejected(self):
         from app.vendor.inference import DetectorConfig
 

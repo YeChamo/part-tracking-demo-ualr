@@ -23,6 +23,29 @@ pypylon                 26.5.0
 zxing-cpp               3.1.1
 PyInstaller             6.21.0 (packaging tool and compiled bootloader)
 
+VERSION 1.3.0 CHECKPOINT EXPORT ADDITIONS
+
+CPU PyTorch             2.12.0 (official CPU wheel index; BSD-3-Clause)
+onnx                    1.21.0 (Apache-2.0)
+onnxscript              0.7.0 (MIT)
+onnx_ir                 0.2.1 (Apache-2.0)
+sympy                   1.14.0 (BSD)
+
+The current CPU build recipe installs torch from
+https://download.pytorch.org/whl/cpu before the pinned base requirements.
+These export dependencies are included in the portable application. Their
+installed distribution metadata and supplied license/notice files are copied
+into the packaged runtime's corresponding .dist-info directories. The older
+licenses\inventory.json predates these additions and is not their inventory.
+
+The default build uses the CPU onnxruntime 1.23.2 distribution. Optional
+Build.ps1 -TensorRT replaces it with onnxruntime-gpu 1.23.2 and installs
+tensorrt-cu12 10.9.0.34, retaining their GPU provider/runtime libraries. Those
+optional NVIDIA components remain subject to their supplied upstream license
+terms and require compatible station hardware/drivers. No NVIDIA GPU is
+available on this development laptop; no successful hardware TensorRT run is
+claimed by these notices. An advertised ORT provider is not a hardware test.
+
 These versions describe the original packaged runtime inputs. They were read
 from RemingtonVision/.venv distribution metadata, except zxing-cpp, whose
 metadata was in this demo's .builddeps folder.
@@ -31,10 +54,10 @@ The packaged application carries its runtime beside PartTrackingUALR.exe.
 Installed package names describe the build inputs; only the modules collected
 by the packaging recipe are included in the executable/runtime bundle.
 
-The original runtime's installed ONNX Runtime came from the onnxruntime-gpu
-distribution. This application selects CPUExecutionProvider; the packaging recipe
-excludes CUDA/TensorRT provider DLLs and their listed GPU dependencies. The demo
-does not require CUDA or claim GPU inference. ONNX Runtime's LICENSE and
+The original pre-1.3 runtime's installed ONNX Runtime came from the onnxruntime-gpu
+distribution. That build selected CPUExecutionProvider; its packaging recipe
+excluded CUDA/TensorRT provider DLLs and their listed GPU dependencies. The
+default demo still does not require CUDA. ONNX Runtime's LICENSE and
 ThirdPartyNotices.txt are copied verbatim. The source requirements use the CPU
 onnxruntime distribution at the same version; the retained onnxruntime-gpu
 metadata documents the original build input rather than a GPU requirement.
@@ -138,6 +161,15 @@ The source package identifies itself as version 0.1.0. SHA-256 hashes and each
 original source path are recorded in licenses\inventory.json. No separate
 LICENSE/COPYING/NOTICE file was found in that source package subtree; this file
 records the origin without assigning an unsupported license to local code.
+
+The inference-only YOLOX model definitions under app\vendor\yolox_models are
+derived from Megvii YOLOX sources in the adjacent RemingtonVision project.
+Their upstream copyright notices, Apache License 2.0 text, and modification
+record are retained in app\vendor\yolox_models\LICENSE and NOTICE and bundled
+with the runtime. These definitions reconstruct configured model graphs for
+checkpoint export; training losses, datasets, and training workflows are not
+included. experiment.py supplies an inference-only ExportExp base for explicitly
+selected custom experiments. It cannot supply unknown custom layer definitions.
 
 The standalone demo's other app code and its synthetic barcode fixtures were
 created for this project. EtherMotion remains a separate application. The

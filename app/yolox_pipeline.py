@@ -14,11 +14,13 @@ import numpy as np
 
 from .model_classes import (build_color_map, class_names_from_metadata,
                             parse_class_names)
-from .vendor.inference import Detector, DetectorConfig
-from .vendor.inference.backends.onnx_backend import ONNXBackend
+from .vendor.inference import DetectorConfig
+from .accelerated_backend import AcceleratedONNXBackend
+from .checkpoint_export import prepare_model
+from .model_runtime import ModelDetector as Detector
 
 
-class _ModelBackend(ONNXBackend):
+class _ModelBackend(AcceleratedONNXBackend):
     """Expose the open session's model description without changing vendor code."""
 
     def model_details(self) -> dict[str, Any]:
@@ -36,8 +38,15 @@ class _ModelBackend(ONNXBackend):
         if len(output) == 3 and _fixed_dimension(output[-1]) is None:
             if self._cfg is None:
                 raise RuntimeError("YOLOX backend has no input configuration.")
-            _validate_input_shape(details["input_shape"], self._cfg.img_size)
-            tensor = np.zeros((1, 3, self._cfg.img_size, self._cfg.img_size), dtype=np.float32)
+            automatic = bool(getattr(self, 'auto_model_config', False))
+            _validate_input_shape(details['input_shape'], self._cfg.img_size, automatic=automatic)
+            # Use the same shape resolver as CPU/TensorRT warmup. Symbolic
+            # spatial axes may have rectangular input_size/test_size metadata;
+            # substituting img_size twice here would violate a warmed engine's
+            # fixed profile even though its first warmup used the right shape.
+            input_shape = (self._shape(self._session, self._cfg) if automatic
+                           else (1, 3, self._cfg.img_size, self._cfg.img_size))
+            tensor = np.zeros(input_shape, dtype=np.float32)
             outputs = self.infer_raw(tensor)
             if not outputs:
                 raise ValueError("YOLOX model produced no detection output.")
@@ -59,18 +68,21 @@ def _fixed_dimension(value: Any) -> int | None:
     return value if isinstance(value, int) and not isinstance(value, bool) else None
 
 
-def _validate_input_shape(shape: list, image_size: int) -> None:
+def _validate_input_shape(shape: list, image_size: int, *, automatic=False) -> None:
     if len(shape) != 4 or _fixed_dimension(shape[1]) != 3:
         raise ValueError("YOLOX input must have shape [1, 3, height, width].")
     if _fixed_dimension(shape[0]) not in (None, 1):
         raise ValueError("Use a YOLOX model exported with batch size 1.")
     for dimension in shape[2:]:
-        if _fixed_dimension(dimension) not in (None, image_size):
+        if automatic:
+            if _fixed_dimension(dimension) is not None and dimension <= 0:
+                raise ValueError('YOLOX image dimensions must be positive.')
+        elif _fixed_dimension(dimension) not in (None, image_size):
             raise ValueError(f"YOLOX model input is {shape[2:]}; set its image size to match the square export.")
 
 
-def _class_count(details: dict, image_size: int) -> int:
-    _validate_input_shape(details["input_shape"], image_size)
+def _class_count(details: dict, image_size: int, *, automatic=False) -> int:
+    _validate_input_shape(details["input_shape"], image_size,automatic=automatic)
     output = details["output_shape"]
     channels = _fixed_dimension(output[-1]) if output else None
     if (len(output) != 3 or _fixed_dimension(output[0]) not in (None, 1)
@@ -115,27 +127,37 @@ class YoloXPipeline:
         self._mode = str(settings.get("yolox_mode", "two_models"))
         self._pass_color = str(settings.get("pass_color", "orange")).strip().lower()
         self._color_confidence = 0.50
+        self.progress = None
+        self.cancelled = None
 
     def _path(self, setting: str, default: str = "") -> Path:
         value = str(self.settings.get(setting, "") or default).strip()
         if not value:
-            raise ValueError("Select a trained YOLOX color model (.onnx) for two-model mode.")
+            raise ValueError("Select a trained YOLOX color model (.pth, .pt or .onnx) for two-model mode.")
         path = Path(value).expanduser()
         return (path if path.is_absolute() else self.root / path).resolve()
 
     def _open_model(self, path: Path, *, color: bool, second: bool = False) -> _Model:
         if not path.is_file():
             raise ValueError(f"YOLOX model was not found: {path}")
-        if path.suffix.lower() != ".onnx":
-            raise ValueError("Select a YOLOX ONNX export (.onnx), with its external data file if present.")
+        if path.suffix.lower() not in ('.onnx','.pth','.pt'):
+            raise ValueError("Select a YOLOX checkpoint (.pth/.pt) or ONNX model (.onnx).")
         bundled_locators = {(self.root / "models" / name).resolve()
                             for name in ("yolox_nano.onnx", "yolox_s.onnx")}
         if color and path in bundled_locators:
             raise ValueError("The bundled COCO YOLOX model only locates generic bottles. Select your trained bottle-color YOLOX model; generic class IDs cannot be relabeled as colors.")
         size_key = "color_image_size" if second else "image_size"
         image_size = int(self.settings.get(size_key, self.settings.get("image_size", 640)))
-        if image_size < 32 or image_size % 32:
-            raise ValueError("YOLOX image size must be a positive multiple of 32.")
+        automatic=bool(self.settings.get('auto_model_config',False))
+        names_key = "color_class_names" if second else "model_class_names"
+        original_path=path
+        path=prepare_model(path,self.root,None if automatic else image_size,
+                           class_names=self.settings.get(names_key,''),
+                           architecture=self.settings.get('color_architecture' if second else 'model_architecture','auto'),
+                           experiment_path=self.settings.get('color_experiment_path' if second else 'model_experiment_path',''),
+                           progress=self.progress,cancelled=self.cancelled)
+        if image_size < 1 or (not automatic and (image_size < 32 or image_size % 32)):
+            raise ValueError("YOLOX image size must be positive; manual square sizes must be multiples of 32.")
         confidence_key = "color_confidence" if second else "confidence"
         confidence = float(self.settings.get(confidence_key, 0.50 if second else 0.25))
         if not math.isfinite(confidence) or not 0 < confidence <= 1:
@@ -143,25 +165,32 @@ class YoloXPipeline:
         cfg = DetectorConfig(model_path=str(path), img_size=image_size, conf=confidence,
                              max_det=100, device="cpu", intra_op_threads=int(self.settings.get("inference_threads", 2)),
                              inter_op_threads=1)
-        backend = _ModelBackend()
+        backend = _ModelBackend(cache_root=self.root/'data'/'engine_cache',
+                                mode=self.settings.get('inference_backend','auto'),
+                                progress=self.progress,cancelled=self.cancelled)
+        backend.auto_model_config=automatic
         detector = Detector(cfg, backend=backend)
         try:
             detector.open()
             details = backend.model_details()
-            count = _class_count(details, image_size)
+            count = _class_count(details, image_size,automatic=automatic)
+            if automatic and all(_fixed_dimension(v) for v in details['input_shape'][2:]):
+                cfg.img_size=max(details['input_shape'][2:])
+            if hasattr(detector,'configure_model'):
+                detector.configure_model(details.get('metadata',{}),details['input_shape'])
             metadata_names = class_names_from_metadata(details.get("metadata"))
-            names_key = "color_class_names" if second else "model_class_names"
             names = parse_class_names(self.settings.get(names_key)) or metadata_names
             if names and len(names) != count:
                 raise ValueError(f"The YOLOX model has {count} classes, but {len(names)} class names were supplied.")
             # A stock COCO export sometimes carries labels even when renamed.
             if color and len(metadata_names) == 80 and "bottle" in [name.lower() for name in metadata_names]:
                 raise ValueError("This COCO YOLOX export predicts generic objects, not trained bottle colors.")
-            colors = build_color_map(names, self.settings.get("color_class_map"), count) if color else {}
-            if color and self._pass_color not in colors.values():
-                raise ValueError("The pass color must be one of the YOLOX model's configured bottle colors.")
+            colors = build_color_map(names, self.settings.get("color_class_map"), count,
+                                     allow_class_labels=True) if color else {}
+            if color and self._pass_color not in colors.values() and not self.settings.get('_inspect_models'):
+                raise ValueError("Choose a pass color/class from this model: "+', '.join(dict.fromkeys(colors.values()))+'.')
             cfg.class_names = names or [f"class_{index}" for index in range(count)]
-            return _Model(detector, cfg.class_names, count, colors, path, confidence)
+            return _Model(detector, cfg.class_names, count, colors, original_path, confidence)
         except Exception:
             detector.close()
             raise
@@ -180,6 +209,10 @@ class YoloXPipeline:
                 self._color = self._open_model(color_path, color=True, second=True)
                 self._parts = self._open_model(self._path("model_path", "models/yolox_nano.onnx"), color=False)
                 locator_class = int(self.settings.get("model_class_id", 39))
+                if self.settings.get('auto_model_config') and locator_class==39 and self._parts.class_count<=39:
+                    choices=[index for index,name in enumerate(self._parts.names) if name.casefold() in ('bottle','bottles')]
+                    locator_class=choices[0] if len(choices)==1 else 0 if self._parts.class_count==1 else -1
+                    self.settings['model_class_id']=locator_class
                 if locator_class < -1 or locator_class >= self._parts.class_count:
                     raise ValueError(f"Bottle locator class ID must be -1 (all classes), or 0 to {self._parts.class_count - 1}.")
             else:
@@ -188,6 +221,14 @@ class YoloXPipeline:
             self.close()
             raise
         return self
+
+    def information(self) -> dict:
+        color=self._color or self._parts
+        return {'colors':list(dict.fromkeys(color.colors.values())) if color else [],
+                'models':[{'path':str(model.path),'class_names':model.names,
+                           'input_shape':list(getattr(model.detector._cfg,'input_hw',(model.detector._cfg.img_size,)*2))}
+                          for model in (self._parts,self._color) if model is not None],
+                'description':self.describe()}
 
     def close(self) -> None:
         for model in (self._parts, self._color):
@@ -220,8 +261,12 @@ class YoloXPipeline:
         if self._parts is None:
             return "YOLOX bottle/color pipeline [closed]"
         if self._color is not None:
-            return f"YOLOX bottles: {self._parts.path.name}; YOLOX colors: {self._color.path.name}"
-        return f"YOLOX bottle/color: {self._parts.path.name} ({self._parts.class_count} classes)"
+            base=f"YOLOX bottles: {self._parts.path.name}; YOLOX colors: {self._color.path.name}"
+        else:
+            base=f"YOLOX bottle/color: {self._parts.path.name} ({self._parts.class_count} classes)"
+        backend=getattr(self._parts.detector,'_backend',None)
+        runtime=getattr(backend,'actual_mode','cpu')
+        return base+' • '+('ONNX CPU' if runtime=='cpu' else runtime)
 
     @staticmethod
     def _detections(result, model: _Model) -> list:
