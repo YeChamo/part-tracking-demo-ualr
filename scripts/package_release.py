@@ -16,7 +16,7 @@ def main():
         raise SystemExit('Build the application before packaging a release.')
     output = root / '.releases'
     output.mkdir(exist_ok=True)
-    archive = output / 'PartTrackingDemoUALR-v1.1.0-Windows-x64.zip'
+    archive = output / 'PartTrackingDemoUALR-v1.2.0-Windows-x64.zip'
     files = subprocess.check_output(['git','ls-files','-z'],cwd=root).decode('utf-8').split('\0')
     prefix = 'PartTrackingDemoUALR/'
     entries = []

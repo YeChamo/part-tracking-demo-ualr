@@ -15,7 +15,7 @@ def check_runtime(root: Path) -> int:
         import pypylon.pylon
         from PySide6 import QtCore, QtGui, QtWidgets, QtNetwork
         from .barcode_fixture import demo_barcode, ean13_bgr
-        from .vision import barcode_status, decode_barcodes, classify_color
+        from .vision import barcode_status, decode_barcodes
         from .vendor.inference import Detector, DetectorConfig
         checks['native_imports'] = True
         from .cameras import discover_cameras
@@ -36,11 +36,9 @@ def check_runtime(root: Path) -> int:
             checks['model_backend'] = detector.describe()
             checks['blank_detections'] = len(result.detections)
         checks['model_load_and_infer_ms'] = round((time.monotonic()-started)*1000)
-        sample = np.full((256,128,3),(15,140,245),dtype=np.uint8)
-        name, confidence = classify_color(sample,(0,0,128,256))
-        checks['color'] = name
-        if name != 'orange':
-            raise RuntimeError('Color sampler did not recognize the generated orange sample.')
+        from .model_classes import build_color_map
+        checks['yolox_color_class_map'] = build_color_map(['orange_bottle','blue_bottle'],class_count=2)
+        checks['trained_color_model_required'] = True
         from .tracking import BottleTracker, TrackingConfig
         from .simulation import Simulation, WIDTH, HEIGHT
         from .settings import DEFAULTS

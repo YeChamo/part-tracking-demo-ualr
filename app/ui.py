@@ -25,7 +25,10 @@ from PySide6.QtWidgets import (
 
 from . import settings as store
 from .cameras import CameraChoice, discover_cameras
+from .confidence_control import ConfidenceControl
+from . import diverter
 from .ethermotion import EtherMotionClient
+from .fullscreen_view import FullscreenCameraWindow
 from .simulation import HEIGHT, WIDTH, Simulation
 from .tracking import BottleTracker, TrackingConfig
 from .vision import VideoWorker
@@ -36,7 +39,7 @@ QFrame#card { background: #142034; border: 1px solid #24344a; border-radius: 10p
 QLabel { background: transparent; }
 QLabel#muted { color: #94a6bd; }
 QLabel#title { font-size: 23px; font-weight: 700; }
-QLabel#stat { font-size: 28px; font-weight: 700; }
+QLabel#stat { font-size: 24px; font-weight: 700; }
 QLabel#badge { background: #20364e; color: #8cd4ff; padding: 7px 12px; border-radius: 12px; }
 QPushButton { background: #213249; border: 1px solid #334962; border-radius: 6px; padding: 9px 13px; font-weight: 600; }
 QPushButton:hover { background: #2b425e; border-color: #5c7b9f; }
@@ -53,6 +56,10 @@ QHeaderView::section { background: #17263a; color: #93a8c1; border: none; paddin
 QScrollArea { border: none; }
 QCheckBox { spacing: 8px; padding: 5px 0; }
 QCheckBox::indicator { width: 17px; height: 17px; }
+QSlider::groove:horizontal { height: 5px; background: #2a405b; border-radius: 2px; }
+QSlider::sub-page:horizontal { background: #4389ed; border-radius: 2px; }
+QSlider::handle:horizontal { background: #9fcaff; width: 15px; margin: -5px 0; border-radius: 7px; }
+QSlider::handle:horizontal:disabled { background: #4b5c73; }
 QToolTip { color: #eaf2fc; background: #263951; border: 1px solid #65809e; }
 QSplitter::handle { background: #0c1422; }
 '''
@@ -94,6 +101,10 @@ class VisionView(QWidget):
         super().__init__()
         self.main = main
         self.setMinimumSize(620, 330)
+
+    def mouseDoubleClickEvent(self, event):
+        self.main.toggle_fullscreen()
+        event.accept()
 
     def paintEvent(self, event):
         p = QPainter(self)
@@ -166,6 +177,14 @@ class MainWindow(QMainWindow):
         self.events, self.pending = [], []
         self.running = self.armed = self.arming = self.owns_motion = self.output_busy = False
         self.active_run, self.active_event = None, None
+        self.active_program = None
+        self.sequence_plan = None
+        self.sequence_stage = 'primary'
+        self.sequence_cycle = 1
+        self.sequence_wait_until = None
+        self.sequence_next = None
+        self.phase_generation = 0
+        self.pass_clearance_until = 0.0
         self.generation = 0
         self.arm_generation = 0
         self.send_gate = threading.Event()
@@ -174,6 +193,11 @@ class MainWindow(QMainWindow):
         self.client = None
         self.camera_devices = []
         self.camera_scanning = False
+        self.fullscreen = None
+        self.expected_confidence_revision = 0
+        self.confidence_timer = QTimer(self)
+        self.confidence_timer.setSingleShot(True)
+        self.confidence_timer.timeout.connect(self.flush_confidence)
         self.network_poll = False
         self.last_poll = 0.0
         self.pass_count = self.divert_count = self.complete_count = 0
@@ -222,7 +246,7 @@ class MainWindow(QMainWindow):
         self.stats = {}
         for key, title, color in [('total','BOTTLES SORTED','#e5edf8'),('pass','0 · PASS','#54dfbb'),('divert','1 · DIVERT','#fb8b94'),('output','MOTION COMPLETED','#8dcaff')]:
             card = QFrame(); card.setObjectName('card')
-            box = QVBoxLayout(card); box.setContentsMargins(16,12,16,12)
+            box = QVBoxLayout(card); box.setContentsMargins(16,8,16,8)
             box.addWidget(self.label(title,'muted'))
             value = self.label('0','stat'); value.setStyleSheet('color:'+color)
             box.addWidget(value); self.stats[key] = value
@@ -255,9 +279,11 @@ class MainWindow(QMainWindow):
         controls.addWidget(self.stop_button)
         self.inject_button = QPushButton('Next bottle: divert color')
         self.inject_button.clicked.connect(lambda: setattr(self.sim,'next_bad',True))
-        controls.addWidget(self.inject_button)
         self.reset_button = QPushButton('Reset counts'); self.reset_button.clicked.connect(self.reset_counts)
-        controls.addWidget(self.reset_button)
+        self.fullscreen_button = QPushButton('Full screen')
+        self.fullscreen_button.setToolTip('Full-screen camera view • F11 or double-click the image')
+        self.fullscreen_button.clicked.connect(self.toggle_fullscreen)
+        controls.addWidget(self.fullscreen_button)
         layout.addLayout(controls)
         splitter = QSplitter(Qt.Orientation.Horizontal)
         left = QWidget(); ll = QVBoxLayout(left); ll.setContentsMargins(0,0,0,0); ll.setSpacing(8)
@@ -284,6 +310,8 @@ class MainWindow(QMainWindow):
         splitter.addWidget(left)
         self.tabs = QTabWidget(); self.tabs.setMinimumWidth(335); self.tabs.setMaximumWidth(440)
         self.fields = {}
+        self.path_buttons = {}
+        self.build_models_tab()
         self.build_sort_tab()
         self.build_conveyor_tab()
         self.build_reject_tab()
@@ -299,7 +327,7 @@ class MainWindow(QMainWindow):
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(3,QHeaderView.ResizeMode.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(5,QHeaderView.ResizeMode.Stretch)
-        self.table.setMaximumHeight(175)
+        self.table.setMaximumHeight(125)
         layout.addWidget(self.table)
         footer = QHBoxLayout()
         self.status = QLabel(); footer.addWidget(self.status,1)
@@ -308,6 +336,7 @@ class MainWindow(QMainWindow):
         help_button = QPushButton('Quick start'); help_button.clicked.connect(lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(self.root/'README.txt'))))
         footer.addWidget(help_button)
         layout.addLayout(footer)
+        self.fields['yolox_mode'].currentIndexChanged.connect(self.update_enabled)
 
     @staticmethod
     def label(text, name=None):
@@ -327,6 +356,7 @@ class MainWindow(QMainWindow):
         return label
 
     def field(self, form, key, title, kind='float', minimum=0, maximum=10000, decimals=0):
+        form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
         if kind == 'text':
             widget = QLineEdit(str(self.settings[key]))
         elif kind == 'int':
@@ -348,6 +378,7 @@ class MainWindow(QMainWindow):
         row = QWidget(); rl = QHBoxLayout(row); rl.setContentsMargins(0,0,0,0)
         edit = QLineEdit(self.settings[key]); self.fields[key] = edit
         browse = QPushButton('…'); browse.setMaximumWidth(34)
+        self.path_buttons[key] = browse
         def choose():
             path,_ = QFileDialog.getOpenFileName(self,title,str(self.root),filter)
             if path: edit.setText(path)
@@ -359,31 +390,91 @@ class MainWindow(QMainWindow):
         self.note(box,'Choose the color that stays on the belt. Other colors produce decision 1 and the selected divert motion.')
         form = QFormLayout(); form.setSpacing(10)
         self.combo(form,'pass_color','Pass color',[(c.title(),c) for c in ['orange','blue','green','red','yellow','purple','clear']])
-        self.combo(form,'rule','Sort rule',[('Color → 0 / 1','color'),('Every Nth (simulation)','every_n'),('Divert every bottle','all'),('Pass every bottle','none'),('Trained defect ONNX','defect_model')])
+        self.combo(form,'rule','Sort rule',[('YOLOX color → 0 / 1','color'),('Every Nth (simulation)','every_n'),('Divert all (simulation)','all'),('Pass all (simulation)','none')])
         self.field(form,'every_n','Every Nth','int',2,100)
-        self.field(form,'confidence','Bottle confidence',minimum=.05,maximum=.95,decimals=2)
         box.addLayout(form)
         self.note(box,'Live barcode reader: UPC / EAN / Code 128 / QR and more. Unread codes remain UNREAD. Codes are displayed and logged; color determines routing.')
         form = QFormLayout(); form.setSpacing(10)
         self.field(form,'camera_index','Manual USB index','int',0,63)
         self.path_field(form,'video_path','Video file','Videos (*.mp4 *.avi *.mov *.mkv);;All files (*)')
         box.addLayout(form)
-        self.note(box,'Choose the camera by name in the top toolbar. Refresh cameras after plugging one in. A saved camera that is unplugged never falls back to the laptop camera. Manual index is an advanced fallback only.')
-        self.note(box,'Bundled model finds generic bottles. Keep bottles upright and separated. Color is sampled below the label; adjust the liquid band to your view.')
-        form = QFormLayout(); form.setSpacing(10)
-        self.field(form,'color_y1','Liquid band top',minimum=.05,maximum=.94,decimals=2)
-        self.field(form,'color_y2','Liquid band bottom',minimum=.06,maximum=.99,decimals=2)
-        self.path_field(form,'model_path','Bottle ONNX (optional)','ONNX models (*.onnx)')
-        self.field(form,'model_class_id','Bottle class ID','int',0,999)
-        self.field(form,'model_class_count','Model class count','int',1,1000)
-        self.field(form,'image_size','Model input size','int',160,1920)
-        self.path_field(form,'defect_model','Defect ONNX (optional)','ONNX models (*.onnx)')
-        box.addLayout(form)
-        self.note(box,'Stop inspection to edit the recipe. Changes save when you start.')
+        self.note(box,'Pick the camera by name in the toolbar. Manual index is an advanced fallback. Live sorting uses the YOLOX models selected on the Models tab.')
+        tools=QHBoxLayout(); tools.addWidget(self.inject_button); tools.addWidget(self.reset_button)
+        box.addLayout(tools)
         box.addStretch()
 
+    def build_models_tab(self):
+        box = self.new_tab('Models')
+        self.note(box,'Choose the YOLOX models used for bottle tracking and color sorting.')
+        form = QFormLayout(); form.setSpacing(10)
+        self.combo(form,'yolox_mode','YOLOX models',[('Bottle model + color model','two_models'),('One model: colored bottles','combined')])
+        self.path_field(form,'model_path','Bottle YOLOX (.onnx)','YOLOX ONNX models (*.onnx)')
+        self.path_field(form,'color_model_path','Color YOLOX (.onnx)','YOLOX ONNX models (*.onnx)')
+        self.path_buttons['model_path'].setText('Choose'); self.path_buttons['model_path'].setMaximumWidth(70)
+        self.path_buttons['color_model_path'].setText('Choose'); self.path_buttons['color_model_path'].setMaximumWidth(70)
+        box.addLayout(form)
+        thresholds=QFormLayout(); thresholds.setSpacing(12)
+        for key,title in (('confidence','Bottle confidence'),('color_confidence','Color confidence')):
+            control=ConfidenceControl(float(self.settings[key]))
+            control.setToolTip('Adjust during live preview while reject output is disarmed.')
+            self.fields[key]=control
+            thresholds.addRow(title,control)
+            control.valueChanged.connect(self.confidence_changed)
+        box.addLayout(thresholds)
+        self.note(box,'Higher confidence requires a stronger YOLOX prediction. Sliders update live preview while output is disarmed.')
+        advanced_button=QPushButton('Advanced model settings')
+        advanced_button.setCheckable(True)
+        box.addWidget(advanced_button)
+        advanced=QWidget(); advanced.setVisible(False)
+        advanced_button.toggled.connect(advanced.setVisible)
+        form=QFormLayout(advanced); form.setContentsMargins(0,0,0,0); form.setSpacing(10)
+        self.field(form,'model_class_id','Bottle class ID (-1 = all)','int',-1,999)
+        self.field(form,'image_size','Bottle input size','int',160,1920)
+        names=self.field(form,'model_class_names','Bottle class order','text')
+        names.setPlaceholderText('Read from ONNX; or enter class order')
+        self.field(form,'color_image_size','Color input size','int',160,1920)
+        names=self.field(form,'color_class_names','Color class order','text')
+        names.setPlaceholderText('Read from ONNX; e.g. orange,blue,green')
+        mapping=self.field(form,'color_class_map','Class → color map','text')
+        mapping.setPlaceholderText('Optional: 0:orange,1:blue,2:green')
+        box.addWidget(advanced)
+        self.note(box,'Class names are read from ONNX metadata. Use Advanced for an export without names. The bundled model locates bottles only; choose your trained color model. Export .pth to ONNX first.')
+        box.addStretch()
+
+    def confidence_changed(self, _value=None):
+        if self.armed or self.arming or self.owns_motion:
+            return
+        self.settings['confidence']=self.fields['confidence'].value()
+        self.settings['color_confidence']=self.fields['color_confidence'].value()
+        self.confidence_timer.start(150)
+        self.update_enabled()
+
+    def flush_confidence(self):
+        self.confidence_timer.stop()
+        store.save(self.root,self.settings)
+        if self.running and self.worker is not None and self.settings['source']!='simulation':
+            self.expected_confidence_revision=self.worker.update_confidence(self.settings['confidence'],self.settings['color_confidence'])
+            self.tracker.reset(); self.track_meta.clear()
+            self.set_status('Applying YOLOX confidence thresholds…','#8dcaff')
+        self.update_enabled()
+
+    def toggle_fullscreen(self):
+        if self.fullscreen is not None:
+            self.fullscreen.close()
+            return
+        window=FullscreenCameraWindow(VisionView(self),self)
+        self.fullscreen=window
+        window.closed.connect(lambda: setattr(self,'fullscreen',None))
+        window.open_fullscreen()
+
+    def keyPressEvent(self,event):
+        if event.key()==Qt.Key.Key_F11:
+            self.toggle_fullscreen(); event.accept(); return
+        super().keyPressEvent(event)
+
     def build_conveyor_tab(self):
-        box = self.new_tab('Conveyor')
+        box = self.new_tab('Tracking')
+        self.note(box,'The conveyor runs from its hardware controls. These measurements only predict bottle arrival; the app controls the diverter through EtherMotion.')
         form = QFormLayout(); form.setSpacing(11)
         self.combo(form,'direction','Travel direction',[('Left → right','ltr'),('Right → left','rtl')])
         self.field(form,'entry','Entry zone fraction',minimum=.05,maximum=.60,decimals=2)
@@ -391,34 +482,60 @@ class MainWindow(QMainWindow):
         self.field(form,'confirm_frames','Confirm color frames','int',1,20)
         self.field(form,'max_miss','Track timeout (s)',minimum=.05,maximum=3,decimals=2)
         self.field(form,'field_width','Visible belt width (mm)',minimum=50,maximum=10000)
-        self.field(form,'belt_speed','Belt speed (mm/s)',minimum=5,maximum=2500)
+        self.field(form,'belt_speed','Measured belt speed (mm/s)',minimum=5,maximum=2500)
         box.addLayout(form)
         self.note(box,'Track IDs follow bottles from the entry zone to the decision line. Each bottle makes one 0 / 1 decision. A missed or stale camera frame cannot trigger a motion.')
         form = QFormLayout(); form.setSpacing(11)
         self.field(form,'distance_mm','Line → diverter (mm)',minimum=0,maximum=10000)
         self.field(form,'delay_ms','Extra delay (ms)','int',0,10000)
-        self.field(form,'lead_ms','Actuator lead (ms)','int',0,10000)
+        self.field(form,'lead_ms','Trigger lead (ms)','int',0,10000)
+        self.field(form,'move_ms','Measured gate move (ms)','int',0,10000)
+        self.field(form,'bottle_length_mm','Bottle length along belt (mm)',minimum=1,maximum=1000)
+        self.field(form,'clearance_ms','Clearance margin (ms)','int',0,10000)
         box.addLayout(form)
-        self.note(box,'Trigger delay = line-to-diverter distance ÷ belt speed + extra delay − actuator lead. Place the line upstream far enough for motion and network latency.')
-        self.note(box,'Live timing assumes a constant running belt. Stop + disarm when the conveyor stops. Re-start clears pending bottle events; this demo has no encoder or wired belt-run input.')
+        self.timing_note=self.note(box,'')
+        for key in ('belt_speed','distance_mm','delay_ms','lead_ms','move_ms','bottle_length_mm','clearance_ms'):
+            self.fields[key].valueChanged.connect(self.refresh_timing)
+        self.refresh_timing()
+        self.note(box,'Allow network/PC margin in Trigger lead. Live output requires enough upstream travel time and lead at least as long as the measured gate move. Stop + disarm when the hardware-controlled belt stops; there is no encoder or belt-run input.')
         box.addStretch()
 
+    def refresh_timing(self, _value=None):
+        values=self.settings.copy()
+        for key in ('belt_speed','distance_mm','delay_ms','lead_ms','move_ms','bottle_length_mm','clearance_ms'):
+            values[key]=self.fields[key].value()
+        try: self.timing_note.setText(diverter.preview(values))
+        except ValueError as exc: self.timing_note.setText(str(exc))
+
     def build_reject_tab(self):
-        box = self.new_tab('EtherMotion')
-        self.note(box,'Decision 0: leave the bottle on the belt.\nDecision 1: trigger one saved divert cycle.\nThe EtherMotion moves define the actual gate position and return.')
+        box = self.new_tab('Diverter')
+        self.note(box,'Set a separate action for PASS (0) and REJECT (1). Choose one complete Once cycle, or a position program followed by a timed hold and a return program.')
         form = QFormLayout(); form.setSpacing(10)
         self.field(form,'base_url','Service URL','text')
         self.program = QComboBox(); self.program.addItem('Discover Once programs…','')
-        form.addRow('Divert program',self.program); box.addLayout(form)
+        form.addRow('REJECT (1) program',self.program)
+        self.pass_program=QComboBox(); self.pass_program.addItem('Let pass / no movement','')
+        form.addRow('PASS (0) program',self.pass_program)
+        self.return_program=QComboBox(); self.return_program.addItem('Return included in main cycle','')
+        form.addRow('Return program',self.return_program)
+        for widget in (self.program,self.pass_program,self.return_program):
+            widget.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+            widget.setMinimumContentsLength(10)
+            widget.setSizePolicy(QSizePolicy.Policy.Expanding,QSizePolicy.Policy.Fixed)
+        self.field(form,'reject_cycles','REJECT cycles per bottle','int',1,10)
+        self.field(form,'pass_cycles','PASS cycles per bottle','int',1,10)
+        self.field(form,'hold_ms','Hold / repeat gap (ms)','int',0,30000)
+        box.addLayout(form)
         self.connect_button = QPushButton('Discover / check connection'); self.connect_button.clicked.connect(self.discover)
         box.addWidget(self.connect_button)
         self.connection_note = self.note(box,'Not connected. Only programs saved as Once are offered.')
-        self.arm = QCheckBox('Enable live divert output')
+        self.arm = QCheckBox('Enable live diverter actions')
         self.arm.setEnabled(False); self.arm.toggled.connect(self.toggle_arm); box.addWidget(self.arm)
         self.output_note = self.note(box,'DISARMED • Simulation and video files never move hardware.')
         self.motion_label = self.note(box,'No motion requested.')
         self.open_motion = QPushButton('Open EtherMotion'); self.open_motion.clicked.connect(self.launch_ethermotion); box.addWidget(self.open_motion)
-        self.note(box,'Connect the drive, commission a Once cycle, and enable its Ethernet triggers in EtherMotion. The demo checks readiness before each motion. A busy or uncertain reject stops inspection.')
+        self.note(box,'With a return program, the gate waits for both the configured hold and calculated bottle clearance before returning. Without one, the main EtherMotion cycle must include its own hold and return. Repeats run only after confirmed completion, never as simultaneous triggers.')
+        self.note(box,'A busy diverter or overlapping pass/reject window stops inspection and disarms output. This cannot stop the hardware-controlled conveyor; use its hardware controls. Connect and commission the diverter in EtherMotion first.')
         self.note(box,'Accepted ≠ completed. Motion completion is checked separately. Software reports controller commands; it does not prove physical gate position.')
         box.addStretch()
 
@@ -430,12 +547,12 @@ class MainWindow(QMainWindow):
             self.settings[key] = value
         self.settings['source'] = self.source.currentData()
         self.settings['program_id'] = self.program.currentData() or self.settings.get('program_id','')
+        self.settings['pass_program_id'] = self.pass_program.currentData() or ''
+        self.settings['return_program_id'] = self.return_program.currentData() or ''
         if not 0 < self.settings['entry'] < self.settings['line'] < 1:
             raise ValueError('Entry zone must be smaller than the decision line fraction.')
-        if self.settings['color_y1'] >= self.settings['color_y2']:
-            raise ValueError('Liquid band top must be smaller than its bottom.')
-        if self.settings['source'] != 'simulation' and self.settings['rule'] == 'every_n':
-            raise ValueError('Every Nth is a simulation rule. Choose Color → 0 / 1 for a camera.')
+        if self.settings['source'] != 'simulation' and self.settings['rule'] != 'color':
+            raise ValueError('Choose YOLOX color → 0 / 1 for a camera or video.')
         if self.settings['source'] in ('usb','basler'):
             selection=self.camera_picker.currentData()
             if selection == 'manual' and self.settings['source']=='usb':
@@ -527,8 +644,11 @@ class MainWindow(QMainWindow):
             self.set_status('Camera is still releasing. Wait, then start again.','#f3b252'); return
         try:
             self.collect_settings()
+            self.confidence_timer.stop()
+            self.expected_confidence_revision=0
             self.tracker = self.make_tracker()
             self.track_meta.clear(); self.pending.clear(); self.last_packet = None
+            self.pass_clearance_until=0.0
             self.generation += 1
             self.running = True
             self.started_at = time.monotonic()
@@ -552,6 +672,7 @@ class MainWindow(QMainWindow):
 
     def stop(self):
         self.running = False
+        if self.confidence_timer.isActive(): self.flush_confidence()
         self.generation += 1
         for _,_,event in self.pending:
             event['output']='CANCELLED'; self.refresh_event(event)
@@ -585,14 +706,23 @@ class MainWindow(QMainWindow):
     def update_enabled(self):
         self.start_button.setEnabled(not self.running and not self.owns_motion and not self.camera_scanning)
         for widget in self.fields.values(): widget.setEnabled(not self.running)
+        for button in self.path_buttons.values(): button.setEnabled(not self.running)
+        two_models=self.fields['yolox_mode'].currentData()=='two_models'
+        for key in ('color_model_path','color_class_names','color_image_size','model_class_id'):
+            self.fields[key].setEnabled(not self.running and two_models)
+        self.path_buttons['color_model_path'].setEnabled(not self.running and two_models)
+        for key in ('confidence','color_confidence'):
+            self.fields[key].setEnabled(not self.armed and not self.arming and not self.owns_motion)
         camera_source=self.source.currentData() in ('usb','basler')
         self.camera_picker.setEnabled(not self.running and not self.owns_motion and not self.camera_scanning and camera_source)
         self.refresh_cameras_button.setEnabled(not self.running and not self.owns_motion and not self.camera_scanning and camera_source)
         self.fields['camera_index'].setEnabled(not self.running and self.source.currentData()=='usb' and self.camera_picker.currentData()=='manual')
-        self.program.setEnabled(not self.armed and not self.arming and not self.owns_motion)
+        for widget in (self.program,self.pass_program,self.return_program):
+            widget.setEnabled(not self.running and not self.armed and not self.arming and not self.owns_motion)
         self.connect_button.setEnabled(not self.armed and not self.arming and not self.owns_motion)
         self.reset_button.setEnabled(not self.running)
-        self.arm.setEnabled(self.running and self.settings['source'] in ('usb','basler') and self.client is not None and bool(self.program.currentData()))
+        thresholds_ready=not self.confidence_timer.isActive() and (self.last_packet or {}).get('confidence_revision',0)>=self.expected_confidence_revision
+        self.arm.setEnabled(self.running and not self.owns_motion and not self.arming and self.settings['source'] in ('usb','basler') and self.client is not None and bool(self.program.currentData()) and thresholds_ready)
 
     def tick(self):
         now = time.monotonic(); dt = min(.12,max(.001,now-self.last_tick)); self.last_tick = now
@@ -607,7 +737,7 @@ class MainWindow(QMainWindow):
                         bottle = min(self.sim.bottles,key=lambda b: abs(b['x']-(track.bbox[0]+track.bbox[2])/2))
                         code = demo_barcode(bottle['seq'])
                         self.track_meta[track.id] = {'color':bottle['kind'],'barcode':code,'format':'EAN-13 (synthetic)'}
-                    self.diagnostics.setText(f"SIMULATION  •  {len(tracks)} tracked  •  Pass {self.settings['pass_color']}  •  Synthetic EAN-13 barcodes")
+                    self.diagnostics.setText(f"SIMULATION  •  YOLOX inference is not running  •  {len(tracks)} tracked  •  Pass {self.settings['pass_color']}  •  Synthetic EAN-13 barcodes")
                     for decision in decisions: self.decision(decision)
                 elif self.worker:
                     packet = self.worker.take_latest()
@@ -621,7 +751,7 @@ class MainWindow(QMainWindow):
                             tracks,decisions = self.tracker.update(packet['boxes'],packet['reasons'],packet['captured'],w,h)
                             self.update_meta(packet,tracks)
                             for decision in decisions: self.decision(decision)
-                        self.diagnostics.setText(f"{packet.get('fps',0):.1f} inspection FPS  •  {packet.get('inference_ms',0):.0f} ms model  •  frame age {age*1000:.0f} ms  •  {packet.get('barcode_decoder','barcode reader')}")
+                        self.diagnostics.setText(f"{packet.get('vision_pipeline','YOLOX')}  •  {packet.get('fps',0):.1f} FPS  •  {packet.get('inference_ms',0):.0f} ms model  •  frame age {age*1000:.0f} ms  •  {packet.get('barcode_decoder','barcode reader')}")
                         if not packet.get('inspection_ready',True):
                             self.fail(packet.get('inspection_error','Inspection unavailable')); return
                     elif self.last_packet and now-self.last_packet['captured'] > 1.0:
@@ -632,8 +762,11 @@ class MainWindow(QMainWindow):
                 if self.running: self.dispatch_due(now)
             except Exception as exc:
                 self.fail('Inspection error: '+str(exc))
-        if self.output_busy and self.owns_motion and not self.network_poll and now-self.last_poll>.18:
-            self.poll_motion()
+        if self.output_busy and self.owns_motion:
+            if self.sequence_wait_until is not None and not self.stopping_motion:
+                self.resume_sequence(now)
+            elif not self.network_poll and now-self.last_poll>.18:
+                self.poll_motion()
         self.view.update()
 
     def update_meta(self,packet,tracks):
@@ -700,14 +833,17 @@ class MainWindow(QMainWindow):
                  'source':self.settings['source'],'output':'PASS' if not decision.bad else 'DRY RUN',
                  'detail':'; '.join(decision.reasons),'request_id':'','run_id':''}
         self.events.append(event)
-        if decision.bad:
-            if self.settings['source']=='simulation':
-                self.sim.eject(decision.bbox); event['output']='SIMULATED'
-            elif self.armed:
-                delay=max(0.0,self.settings['distance_mm']/self.settings['belt_speed']+self.settings['delay_ms']/1000-self.settings['lead_ms']/1000)
-                event['output']='SCHEDULED'
-                event['request_id']=f'ualr-{event["event_id"]}'
-                heapq.heappush(self.pending,(decision.captured+delay,decision.id,event))
+        if decision.bad and self.settings['source']=='simulation':
+            self.sim.eject(decision.bbox); event['output']='SIMULATED'
+        elif self.armed and self.settings['source'] in ('usb','basler'):
+            recipe=diverter.plan(self.settings,decision.bad,decision.captured)
+            event['_plan']=recipe
+            event['_send_deadline']=min(recipe['due_at']+.25,recipe['arrival_at']-self.settings['move_ms']/1000)
+            event['program_id']=recipe['program_id']; event['return_program_id']=recipe['return_program_id']
+            event['cycles']=recipe['repeats']; event['cycles_completed']=0
+            event['output']='SCHEDULED' if recipe['program_id'] else 'PASS CHECK'
+            event['request_id']=f'ualr-{event["event_id"]}' if recipe['program_id'] else ''
+            heapq.heappush(self.pending,(recipe['due_at'],decision.id,event))
         self.add_row(event)
         self.save_events()
         self.refresh_counts()
@@ -734,25 +870,44 @@ class MainWindow(QMainWindow):
         due,tid,event=heapq.heappop(self.pending)
         if not self.armed:
             event['output']='CANCELLED'; self.refresh_event(event); return
-        if now-due>.25:
+        if now-due>.25 or (event['_plan']['program_id'] and now>event['_send_deadline']):
             event['output']='MISSED TIMING'; self.refresh_event(event); self.fail('Divert event arrived late; inspection stopped.'); return
         if self.output_busy or self.owns_motion:
-            event['output']='REJECTOR BUSY'; self.refresh_event(event); self.fail('Rejector is busy for the next bottle. Increase spacing or cycle speed.'); return
+            event['output']='REJECTOR BUSY'; self.refresh_event(event); self.fail('Diverter sequence overlaps the next bottle. Output disarmed; stop the conveyor using its hardware controls. Increase bottle spacing.'); return
+        recipe=event['_plan']
+        if not recipe['program_id']:
+            self.pass_clearance_until=max(self.pass_clearance_until,recipe['clearance_at'])
+            event['output']='PASS'; self.refresh_event(event); return
+        if now<self.pass_clearance_until:
+            event['output']='SPACING CONFLICT'; self.refresh_event(event); self.fail('A passing bottle has not cleared the diverter. Output disarmed; stop the conveyor using its hardware controls.'); return
         self.owns_motion=self.output_busy=True
         self.active_event=event; self.active_run=None
+        self.sequence_plan=recipe; self.sequence_cycle=1; self.sequence_stage='primary'
+        self.start_sequence_program(recipe['program_id'],event['_send_deadline'])
+
+    def start_sequence_program(self, program, deadline=None):
+        event=self.active_event
+        self.active_program=program
+        self.phase_generation+=1; phase=self.phase_generation
+        self.sequence_wait_until=None; self.sequence_next=None
+        self.active_run=None
         self.previous_run=None
         self.request_pending=True
-        self.output_started=now
-        program=self.settings['program_id']; client=self.client; generation=self.generation; send_gate=self.send_gate
+        self.output_started=time.monotonic()
+        client=self.client; generation=self.generation; send_gate=self.send_gate
+        request_id=event['request_id']
+        if self.sequence_cycle!=1 or self.sequence_stage!='primary':
+            request_id+=f'-c{self.sequence_cycle}-{self.sequence_stage}'
         event['output']='REQUESTING'; self.refresh_event(event)
         # Capture the pre-run identifier so an old completed run cannot be counted.
         def send():
             if not send_gate.is_set():
                 raise RuntimeError('Divert cancelled before the motion request.')
             before=client.program_status(program)
-            result=client.trigger(program,event['request_id'],allow_send=send_gate.is_set,deadline=due+.25)
+            result=client.trigger(program,request_id,allow_send=send_gate.is_set,deadline=deadline)
             return {'response':result,'before':before.get('run_id')}
         def accepted(result,error):
+            if self.active_event is not event or phase!=self.phase_generation: return
             self.request_pending=False
             if error:
                 event['output']='UNCERTAIN' if getattr(error,'uncertain',False) else 'REFUSED'
@@ -760,10 +915,43 @@ class MainWindow(QMainWindow):
                 self.fail('EtherMotion: '+str(error)); return
             self.previous_run=result['before']
             event['output']='ACCEPTED'; self.refresh_event(event)
-            self.motion_label.setText(f'Bottle #{tid}: accepted; waiting for a new run and completion.')
+            self.motion_label.setText(f"Bottle #{event['bottle_id']}: {self.sequence_stage}, cycle {self.sequence_cycle}/{self.sequence_plan['repeats']} accepted; waiting for completion.")
             if generation!=self.generation or not self.armed:
                 self.request_motion_stop()
         self.jobs.submit(send,accepted)
+
+    def sequence_program_completed(self, now):
+        recipe=self.sequence_plan
+        if self.sequence_stage=='primary' and recipe['return_program_id']:
+            self.sequence_next='return'
+            self.sequence_wait_until=max(now+recipe['hold_seconds'],recipe['clearance_at'])
+        else:
+            self.active_event['cycles_completed']=self.sequence_cycle
+            self.sequence_next='repeat' if self.sequence_cycle<recipe['repeats'] else 'complete'
+            # A complete saved cycle owns its physical dwell. This reservation
+            # still prevents another bottle's action before tail clearance.
+            self.sequence_wait_until=max(recipe['clearance_at'],now+(recipe['hold_seconds'] if self.sequence_next=='repeat' else 0))
+        self.active_event['output']='HOLD / CLEARANCE'
+        self.refresh_event(self.active_event)
+        self.motion_label.setText(f"Bottle #{self.active_event['bottle_id']}: waiting for hold / bottle clearance before {self.sequence_next}.")
+        self.resume_sequence(now)
+
+    def resume_sequence(self, now):
+        if self.sequence_wait_until is None or now<self.sequence_wait_until: return
+        if not self.running or not self.armed or not self.send_gate.is_set(): return
+        action=self.sequence_next
+        self.sequence_wait_until=None; self.sequence_next=None
+        if action=='return':
+            self.sequence_stage='return'
+            self.start_sequence_program(self.sequence_plan['return_program_id'])
+        elif action=='repeat':
+            self.sequence_cycle+=1; self.sequence_stage='primary'
+            self.start_sequence_program(self.sequence_plan['program_id'])
+        else:
+            event=self.active_event; event['output']='COMPLETED'; self.complete_count+=1
+            self.owns_motion=self.output_busy=False
+            self.motion_label.setText(f"Bottle #{event['bottle_id']}: {self.sequence_cycle} diverter cycle(s) completed; bottle clearance time reached.")
+            self.refresh_event(event); self.refresh_counts(); self.update_enabled()
 
     def discover(self):
         if self.owns_motion or self.armed: return
@@ -778,12 +966,14 @@ class MainWindow(QMainWindow):
             if error:
                 self.client=None; self.connection_note.setText(str(error)); self.update_enabled(); return
             self.client=client
-            self.program.clear()
             programs=client.list_once_programs(state)
-            for program in programs: self.program.addItem(program['name'],program['id'])
-            saved=self.settings.get('program_id',''); index=self.program.findData(saved)
-            if index>=0: self.program.setCurrentIndex(index)
-            if not programs: self.program.addItem('No Once programs available','')
+            for widget,key,empty in ((self.program,'program_id','Select REJECT program…'),
+                                     (self.pass_program,'pass_program_id','Let pass / no movement'),
+                                     (self.return_program,'return_program_id','Return included in main cycle')):
+                widget.clear(); widget.addItem(empty,'')
+                for program in programs: widget.addItem(program['name'],program['id'])
+                index=widget.findData(self.settings.get(key,''))
+                if index>=0: widget.setCurrentIndex(index)
             self.connection_note.setText(f"Connected • {len(programs)} Once program(s)." if programs else 'Connected. Save a divert cycle with Repeat = Once in EtherMotion, then discover again.')
             self.settings['base_url']=url
             self.update_enabled()
@@ -794,13 +984,22 @@ class MainWindow(QMainWindow):
             self.set_disarmed()
             for _,_,event in self.pending: event['output']='CANCELLED'; self.refresh_event(event)
             self.pending.clear(); self.request_motion_stop(); self.update_enabled(); return
+        if self.confidence_timer.isActive() or (self.last_packet or {}).get('confidence_revision',0)<self.expected_confidence_revision:
+            self.set_disarmed(); self.output_note.setText('Wait for a fresh inspection using the selected confidence thresholds.'); return
         if (not self.running or self.settings['source'] not in ('usb','basler') or not self.last_packet
                 or time.monotonic()-self.last_packet['captured']>.85 or not self.last_packet.get('inspection_ready',True)):
             self.set_disarmed(); self.output_note.setText('Start a fresh live camera before enabling output.'); return
+        if self.owns_motion:
+            self.set_disarmed(); self.output_note.setText('Wait for the current diverter sequence to stop.'); return
         program=self.program.currentData()
         if not self.client or not program:
             self.set_disarmed(); return
         self.settings['program_id']=program
+        self.settings['pass_program_id']=self.pass_program.currentData() or ''
+        self.settings['return_program_id']=self.return_program.currentData() or ''
+        try: diverter.validate_timing(self.settings)
+        except ValueError as exc:
+            self.set_disarmed(); self.output_note.setText(str(exc)); return
         store.save(self.root,self.settings)
         generation=self.generation
         self.arm_generation+=1; arm_generation=self.arm_generation
@@ -814,19 +1013,22 @@ class MainWindow(QMainWindow):
             else:
                 self.armed=True
                 self.send_gate=threading.Event(); self.send_gate.set()
-                self.output_note.setText('LIVE OUTPUT ENABLED • other colors trigger the divert cycle.')
+                self.output_note.setText('LIVE OUTPUT ENABLED • PASS / REJECT actions and bottle-clearance checks active. Conveyor remains hardware controlled.')
                 self.badge.setText('LIVE CAMERA • DIVERT ENABLED')
             self.update_enabled()
-        self.jobs.submit(lambda:self.client.check_ready(program),done)
+        programs=sorted({p for p in (program,self.settings['pass_program_id'],self.settings['return_program_id']) if p})
+        client=self.client
+        self.jobs.submit(lambda:[client.check_ready(p) for p in programs],done)
 
     def poll_motion(self):
         if self.active_event is None or getattr(self,'request_pending',False): return
+        if self.sequence_wait_until is not None and not self.stopping_motion: return
         if self.stopping_motion and not self.stop_acknowledged: return
         self.network_poll=True; self.last_poll=time.monotonic()
-        event=self.active_event; program=self.settings['program_id']; client=self.client
+        event=self.active_event; program=self.active_program; client=self.client; phase=self.phase_generation
         def done(status,error):
+            if not self.owns_motion or self.active_event is not event or phase!=self.phase_generation: return
             self.network_poll=False
-            if not self.owns_motion or self.active_event is not event: return
             # A poll queued before Stop describes the pre-stop operation. Only
             # status received after acknowledgement can release Stop ownership.
             if self.stopping_motion and not self.stop_acknowledged: return
@@ -836,9 +1038,15 @@ class MainWindow(QMainWindow):
                     self.motion_label.setText('Stop status could not be confirmed: '+str(error)+'. Use EtherMotion and retry Stop + disarm.'); return
                 self.fail('Motion status unavailable: '+str(error)); return
             if self.stopping_motion:
-                if not status.get('running') and status.get('status') not in ('running','stopping'):
+                if (not status.get('running') and status.get('status') in ('stopped','completed','idle')
+                        and not status.get('error') and not status.get('stop_errors')):
                     self.owns_motion=self.output_busy=self.stopping_motion=False
+                    self.sequence_wait_until=None; self.sequence_next=None
                     self.motion_label.setText('EtherMotion cycle stopped. Re-enable Ethernet triggers there before the next run.')
+                    self.update_enabled()
+                elif not status.get('running') and status.get('status') not in ('running','stopping'):
+                    self.output_busy=False
+                    self.motion_label.setText('EtherMotion could not confirm the stop: '+str(status.get('error') or status.get('stop_errors') or status.get('status'))+'. Review the mechanism in EtherMotion and retry Stop + disarm.')
                     self.update_enabled()
                 elif time.monotonic()-self.stop_started>10:
                     self.output_busy=False
@@ -852,14 +1060,12 @@ class MainWindow(QMainWindow):
                     self.fail('No new EtherMotion run was confirmed after acceptance.')
                 return
             if self.active_run is None:
-                self.active_run=run_id; event['run_id']=str(run_id)
+                self.active_run=run_id
+                event['run_id']=' | '.join(filter(None,(event['run_id'],str(run_id))))
             if run_id!=self.active_run:
                 self.fail('EtherMotion run changed unexpectedly. Inspection stopped.'); return
             if status.get('status')=='completed' and not status.get('running'):
-                event['output']='COMPLETED'; self.complete_count+=1
-                self.owns_motion=self.output_busy=False
-                self.motion_label.setText(f"Bottle #{event['bottle_id']}: divert command cycle completed.")
-                self.refresh_event(event); self.refresh_counts(); self.update_enabled()
+                self.sequence_program_completed(time.monotonic())
             elif status.get('error') or status.get('status') in ('failed','error','stopped','cancelled'):
                 event['output']='FAILED'; event['detail']+='; '+str(status.get('error') or status.get('status'))
                 self.refresh_event(event); self.fail('Divert motion did not complete: '+str(status.get('error') or status.get('status')))
@@ -872,7 +1078,7 @@ class MainWindow(QMainWindow):
         self.stopping_motion=True
         self.stop_acknowledged=False
         self.stop_started=time.monotonic()
-        client=self.client; program=self.settings['program_id']; event=self.active_event
+        client=self.client; program=self.active_program or self.settings['program_id']; event=self.active_event
         def done(result,error):
             if error:
                 self.motion_label.setText('Stop could not be confirmed: '+str(error)+'. Use the EtherMotion stop control.')
@@ -915,9 +1121,10 @@ class MainWindow(QMainWindow):
         self.refresh_counts()
 
     def write_csv(self,path):
-        fields=['time','session','event_id','bottle_id','color','decision','barcode','barcode_format','source','output','detail','request_id','run_id']
+        fields=['time','session','event_id','bottle_id','color','decision','barcode','barcode_format','source','output','detail','request_id','run_id','program_id','return_program_id','cycles','cycles_completed']
         with Path(path).open('w',newline='',encoding='utf-8-sig') as file:
-            writer=csv.DictWriter(file,fieldnames=fields); writer.writeheader(); writer.writerows(self.events)
+            writer=csv.DictWriter(file,fieldnames=fields); writer.writeheader()
+            writer.writerows({key:event.get(key,'') for key in fields} for event in self.events)
 
     def save_events(self):
         try: self.write_csv(self.root/'data'/f'session-{self.session}.csv')
@@ -945,6 +1152,7 @@ class MainWindow(QMainWindow):
             if not self.worker.wait(1200):
                 event.ignore(); self.set_status('Camera is releasing; close again in a moment.','#f3b252'); return
         self.timer.stop()
+        if self.fullscreen is not None: self.fullscreen.close()
         self.jobs.closed=True
         self.jobs.pool.shutdown(wait=False,cancel_futures=True)
         event.accept()
