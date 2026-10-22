@@ -11,7 +11,7 @@ A standalone Windows Gatorade conveyor demo using **YOLOX-S bottle detection**, 
 
 ## Download and run
 
-Build this version from source using the commands below, or use its v1.4.0
+Build this version from source using the commands below, or use its v1.4.1
 Windows portable ZIP when published under [Releases](https://github.com/YeChamo/part-tracking-demo-ualr/releases).
 Extract the complete folder and double-click **Start Demo.cmd**. The portable
 build needs no Python installation. Keep `_runtime`, `models`, and the other
@@ -97,6 +97,8 @@ See [EtherMotion setup](docs/ETHERMOTION_SETUP.txt) and the [complete quick star
 5. Keep bottles separated during the demo. Stop + disarm if the camera loses the bottle, color reads unknown, or motion timing differs from the measured cycle.
 
 The optional real-photo regression is `python -m unittest tests.test_gatorade_examples -v` when the supplied `examples` folder sits beside this repository. Its augmented cases support setup checks but do not replace a live conveyor trial.
+
+The [outside-photo cap check](docs/OPEN_BOTTLE_IMAGE_EVAL.md) records open-bottle results across indoor and studio scenes, along with missed and duplicate detections. Run the same inspection on additional local stills with `python scripts/evaluate_bottle_images.py <image-or-folder>`.
 
 ## Source setup and build
 

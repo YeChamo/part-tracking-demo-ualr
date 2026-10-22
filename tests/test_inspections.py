@@ -33,6 +33,15 @@ class CapInspectionTests(unittest.TestCase):
         frame[189:198,50:116] = (25,135,240)
         self.assertEqual(inspect_orange_cap(frame,box)['status'],'missing')
 
+    def test_warm_background_through_open_neck_does_not_count_as_cap(self):
+        frame = np.full((480,640,3),180,np.uint8)
+        box = (50,50,190,430)
+        amber = cv2.cvtColor(np.uint8([[[19,125,150]]]),cv2.COLOR_HSV2BGR)[0,0]
+        frame[50:118,71:169] = amber
+        ring = cv2.cvtColor(np.uint8([[[10,180,180]]]),cv2.COLOR_HSV2BGR)[0,0]
+        frame[110:120,71:169] = ring
+        self.assertEqual(inspect_orange_cap(frame,box)['status'],'missing')
+
     @unittest.skipUnless((ROOT/'data'/'live-uncapped-2026-10-22.jpg').is_file(),
                          'live uncapped sample is local workstation data')
     def test_live_uncapped_sample_with_orange_tamper_band(self):

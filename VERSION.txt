@@ -1,4 +1,4 @@
-Part Tracking Demo UALR 1.4.0
+Part Tracking Demo UALR 1.4.1
 Windows x64 portable demo
 Routing: 0 = PASS (optional program), 1 = REJECT / DIVERT
 Models: Gatorade YOLOX-S bottle/color/cap/label demo, separate trained ONNX modes
