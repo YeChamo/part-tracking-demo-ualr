@@ -6,11 +6,11 @@ A standalone Windows Gatorade conveyor demo using **YOLOX-S bottle detection**, 
 - **1 = REJECT / DIVERT:** a different or unknown color; the selected reject program.
 - Named USB/Basler camera selection, live bottle/color confidence sliders, and full-screen inspection.
 - Optional return program, timed clearance, sequential cycle repeats, and CSV logs.
-- Camera-free simulation and recorded-video dry runs never send motion commands.
+- Live inspection starts on a saved camera when present; reject output remains disarmed.
 
 ## Download and run
 
-Build this version from source using the commands below, or use its v1.3.1
+Build this version from source using the commands below, or use its v1.3.2
 Windows portable ZIP when published under [Releases](https://github.com/YeChamo/part-tracking-demo-ualr/releases).
 Extract the complete folder and double-click **Start Demo.cmd**. The portable
 build needs no Python installation. Keep `_runtime`, `models`, and the other
@@ -20,9 +20,9 @@ The repository contains editable source; ready-to-run applications and bundled r
 
 ## Camera, models, and display
 
-1. Click **Stop + disarm**, choose **USB camera** or **Basler / GigE**, and select your camera by name. Use **Refresh cameras** after connecting a device.
+1. Choose **USB camera** or **Basler / GigE** and select your camera by name. A saved connected camera opens automatically. Use **Refresh cameras** after connecting a device.
 2. In **Models**, leave **Gatorade demo** selected. A blank bottle-model field uses the included YOLOX-S file. Other modes accept trained color ONNX models.
-3. In **Color + code**, choose the pass color. Click **Start inspection** and verify the boxes, color decisions, and barcode display.
+3. In **Color + code**, choose the pass color. Watch the live bottle readout for color support and label evidence. A bottle placed beyond the entry line is marked **not tracked** until it enters the lane. The event table records a decision only after a tracked bottle crosses the decision line.
 4. Use **Tracking** for direction, entry/decision-line geometry, and measured belt speed. Use **Diverter** for EtherMotion programs and timing.
 
 A saved USB camera is followed by device identity when Windows changes its index. A missing camera blocks startup; the app does not switch to the laptop camera. Manual camera index remains an explicit advanced choice.
@@ -52,7 +52,7 @@ The separate **Bottle confidence** and **Color confidence** controls in **Models
 
 ## Barcodes
 
-The camera reads actual EAN/UPC, Code 128, QR, and other ZXing symbols. Unread codes remain `UNREAD`. Keyboard-style USB scanners can print scans through the scanner input field; those independent scans are not automatically assigned to camera tracks. Simulation codes are explicitly synthetic. Barcode display is separate from color routing.
+The camera reads actual EAN/UPC, Code 128, QR, and other ZXing symbols. Unread codes remain `UNREAD`. Keyboard-style USB scanners can print scans through the scanner input field; those independent scans are not automatically assigned to camera tracks. Barcode display is separate from color routing.
 
 ## Conveyor and diverter timing
 
@@ -85,9 +85,9 @@ See [EtherMotion setup](docs/ETHERMOTION_SETUP.txt) and the [complete quick star
 ## Demo-day run-through
 
 1. Run `PartTrackingUALR.exe --self-test` from the extracted portable folder (or `python run.py --self-test` from source). Confirm `data/runtime-check.json` reports `ok: true`.
-2. Start in **Simulation** and confirm blue passes while the other bottles divert. This mode is hardware-free.
-3. Select the actual camera by name. Keep output disarmed while you check blue, yellow, white, and any other planned color at the actual belt speed, lighting, position, and orientation. Use **Color + code** to set the pass color.
-4. Check the decision line, the measured belt speed and field width, and the EtherMotion Once cycle. Run a recorded-video dry run if useful. Arming is available only for fresh live-camera results after the timing and controller checks.
+2. Select the actual camera by name. A saved connected camera opens on launch; the app never arms output automatically.
+3. Keep output disarmed while you check blue, yellow, white, and any other planned color at the actual belt speed, lighting, position, and orientation. Use **Color + code** to set the pass color.
+4. Check the decision line, the measured belt speed and field width, and the EtherMotion Once cycle. Arming is available only for fresh live-camera results after the timing and controller checks.
 5. Keep bottles separated during the demo. Stop + disarm if the camera loses the bottle, color reads unknown, or motion timing differs from the measured cycle.
 
 The optional real-photo regression is `python -m unittest tests.test_gatorade_examples -v` when the supplied `examples` folder sits beside this repository. Its augmented cases support setup checks but do not replace a live conveyor trial.

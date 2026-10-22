@@ -36,6 +36,7 @@ from .vision import VideoWorker
 STYLE = '''
 QMainWindow, QWidget { background: #1e1e1e; color: #f2f4f7; font-family: "Segoe UI"; font-size: 12px; }
 QFrame#card { background: #2c2f36; border: 1px solid #3a3e46; border-radius: 10px; }
+QFrame#liveInspection { background: #202a38; border: 1px solid #385778; border-radius: 10px; }
 QLabel { background: transparent; }
 QLabel#muted { color: #a8adb7; }
 QLabel#title { font-size: 23px; font-weight: 700; }
@@ -142,6 +143,21 @@ class VisionView(QWidget):
         p.setFont(QFont('Segoe UI', max(10, round(11/scale)), QFont.Weight.DemiBold))
         p.setPen(QColor('#f6c671'))
         p.drawText(QRectF(max(0, line-160), h-37/scale, 315, 28/scale), Qt.AlignmentFlag.AlignCenter, 'DECISION / REJECT LINE')
+        if m.running and m.last_packet and m.settings['source'] != 'simulation':
+            for index, box in enumerate(m.last_packet.get('boxes', [])):
+                x1,y1,x2,y2 = box
+                center_x, center_y = (x1+x2)/2, (y1+y2)/2
+                if any(not track.missed and track.bbox[0]<=center_x<=track.bbox[2]
+                       and track.bbox[1]<=center_y<=track.bbox[3] for track in m.tracker.tracks):
+                    continue
+                p.setPen(QPen(QColor('#a9c8ff'), 2/scale, Qt.PenStyle.DashLine))
+                p.setBrush(Qt.BrushStyle.NoBrush)
+                p.drawRoundedRect(QRectF(x1,y1,x2-x1,y2-y1), 5/scale, 5/scale)
+                colors = m.last_packet.get('colors', [])
+                color = str(colors[index] if index<len(colors) else 'unknown').upper()
+                p.setFont(QFont('Segoe UI', max(10, round(10/scale)), QFont.Weight.DemiBold))
+                p.drawText(QRectF(max(0,x1),max(18,y1-7/scale),max(130,x2-x1),25/scale),
+                           Qt.AlignmentFlag.AlignLeft, f'BOTTLE · {color}  /  MOVE TO ENTRY')
         for track in m.tracker.tracks:
             if track.missed:
                 continue
@@ -166,8 +182,10 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.root, self.smoke_test = root, smoke_test
         self.settings = store.load(root)
-        # Every launch begins in the hardware-free demo. Saved live recipes remain in the fields.
-        self.settings['source'] = 'simulation'
+        # Normal launches are live camera inspections. The synthetic source is
+        # only exposed by the explicit --smoke-test diagnostic.
+        self.settings['source'] = ('simulation' if smoke_test else
+                                   self.settings['source'] if self.settings['source'] in ('usb', 'basler') else 'usb')
         self.settings['rule'] = 'color'
         self.sim = Simulation()
         self.tracker = self.make_tracker()
@@ -194,6 +212,7 @@ class MainWindow(QMainWindow):
         self.client = None
         self.camera_devices = []
         self.camera_scanning = False
+        self.auto_start_saved_camera = not smoke_test
         self.fullscreen = None
         self.expected_confidence_revision = 0
         self.confidence_timer = QTimer(self)
@@ -213,9 +232,13 @@ class MainWindow(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.tick)
         self.timer.start(30)
-        self.set_status('Ready • Simulation', '#a9c8ff')
-        self.log('Demo ready. Pass color = '+self.settings['pass_color']+'. Barcodes in simulation are synthetic.')
-        QTimer.singleShot(200, self.start)
+        if smoke_test:
+            self.set_status('Ready • Simulation diagnostic', '#a9c8ff')
+            QTimer.singleShot(200, self.start)
+        else:
+            self.set_status('Finding live cameras…', '#a9c8ff')
+            QTimer.singleShot(0, self.refresh_cameras)
+        self.log('Demo ready. Pass color = '+self.settings['pass_color']+'. Source = '+self.settings['source'])
 
     def make_tracker(self):
         return BottleTracker(TrackingConfig(direction=self.settings['direction'], line=self.settings['line'],
@@ -237,7 +260,7 @@ class MainWindow(QMainWindow):
         title.addWidget(self.label('RemingtonVision  /  UALR live demo', 'muted'))
         header.addLayout(title)
         header.addStretch()
-        self.badge = self.label('SIMULATION • NO HARDWARE', 'badge')
+        self.badge = self.label('SIMULATION • NO HARDWARE' if self.smoke_test else 'LIVE CAMERA • OUTPUT DISARMED', 'badge')
         header.addWidget(self.badge)
         self.export_button = QPushButton('Export CSV')
         self.export_button.clicked.connect(self.export)
@@ -256,8 +279,12 @@ class MainWindow(QMainWindow):
         controls = QHBoxLayout()
         controls.addWidget(self.label('SOURCE','muted'))
         self.source = QComboBox()
-        for name, value in [('Simulation','simulation'),('USB camera','usb'),('Basler / GigE','basler'),('Video file (dry run)','video')]:
+        sources = ([('Simulation','simulation'),('USB camera','usb'),('Basler / GigE','basler'),
+                    ('Video file (dry run)','video')] if self.smoke_test else
+                   [('USB camera','usb'),('Basler / GigE','basler')])
+        for name, value in sources:
             self.source.addItem(name, value)
+        self.source.setCurrentIndex(max(0, self.source.findData(self.settings['source'])))
         self.source.currentIndexChanged.connect(self.source_changed)
         self.source.setMaximumWidth(185)
         controls.addWidget(self.source)
@@ -290,12 +317,32 @@ class MainWindow(QMainWindow):
         left = QWidget(); ll = QVBoxLayout(left); ll.setContentsMargins(0,0,0,0); ll.setSpacing(8)
         self.view = VisionView(self)
         ll.addWidget(self.view,1)
-        self.diagnostics = self.label('Simulation • upright bottles • entry → decision → reject', 'muted')
+        self.diagnostics = self.label('Waiting for live camera inspection', 'muted')
         ll.addWidget(self.diagnostics)
+        inspection = QFrame(); inspection.setObjectName('liveInspection')
+        readout = QHBoxLayout(inspection); readout.setContentsMargins(16,10,16,10); readout.setSpacing(16)
+        self.live_swatch = QLabel('—')
+        self.live_swatch.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.live_swatch.setFixedSize(58,58)
+        readout.addWidget(self.live_swatch)
+        inspection_text = QVBoxLayout(); inspection_text.setSpacing(2)
+        self.live_title = self.label('WAITING FOR BOTTLE', 'muted')
+        self.live_title.setStyleSheet('font-weight:700;letter-spacing:1px;color:#a9c8ff;')
+        self.live_detail = self.label('Live camera inspection will appear here')
+        self.live_detail.setStyleSheet('font-size:17px;font-weight:700;')
+        self.live_evidence = self.label('YOLOX-S bottle detection + exposed drink color', 'muted')
+        inspection_text.addWidget(self.live_title)
+        inspection_text.addWidget(self.live_detail)
+        inspection_text.addWidget(self.live_evidence)
+        readout.addLayout(inspection_text,1)
+        self.live_route = self.label('AWAITING', 'badge')
+        readout.addWidget(self.live_route)
+        ll.addWidget(inspection)
+        self.update_live_inspection()
         barcode_card = QFrame(); barcode_card.setObjectName('card')
         self.barcode_card = barcode_card
         bc = QVBoxLayout(barcode_card); bc.setContentsMargins(16,10,16,10)
-        self.barcode_title = self.label('LAST BARCODE  •  SYNTHETIC DEMO DATA','muted'); bc.addWidget(self.barcode_title)
+        self.barcode_title = self.label('LAST BARCODE  •  SYNTHETIC DEMO DATA' if self.smoke_test else 'LAST BARCODE  •  LIVE DECODE','muted'); bc.addWidget(self.barcode_title)
         self.barcode_text = QLabel('Waiting for a bottle…')
         self.barcode_text.setTextFormat(Qt.TextFormat.PlainText)
         self.barcode_text.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
@@ -397,7 +444,10 @@ class MainWindow(QMainWindow):
         form = QFormLayout(); form.setSpacing(10)
         self.sort_form = form
         self.combo(form,'pass_color','Pass color',[(c.title(),c) for c in ['blue','yellow','white','orange','green','red','purple','clear']])
-        self.combo(form,'rule','Sort rule',[('Drink color → pass / divert','color'),('Every Nth (simulation)','every_n'),('Divert all (simulation)','all'),('Pass all (simulation)','none')])
+        rule_choices = ([('Drink color → pass / divert','color'),('Every Nth (simulation)','every_n'),
+                         ('Divert all (simulation)','all'),('Pass all (simulation)','none')]
+                        if self.smoke_test else [('Drink color → pass / divert','color')])
+        self.combo(form,'rule','Sort rule',rule_choices)
         self.field(form,'every_n','Every Nth','int',2,100)
         box.addLayout(form)
         box.addWidget(self.barcode_card)
@@ -405,9 +455,14 @@ class MainWindow(QMainWindow):
         form = QFormLayout(); form.setSpacing(10)
         self.field(form,'camera_index','Manual USB index','int',0,63)
         self.path_field(form,'video_path','Video file','Videos (*.mp4 *.avi *.mov *.mkv);;All files (*)')
+        if not self.smoke_test:
+            form.setRowVisible(self.fields['video_path'].parentWidget(), False)
         box.addLayout(form)
         self.note(box,'Pick the camera by name in the toolbar. Manual index is an advanced fallback. The default Gatorade mode uses YOLOX-S bottle boxes and exposed drink color; trained color models remain available on the Models tab.')
-        tools=QHBoxLayout(); tools.addWidget(self.inject_button); tools.addWidget(self.reset_button)
+        tools=QHBoxLayout()
+        if self.smoke_test:
+            tools.addWidget(self.inject_button)
+        tools.addWidget(self.reset_button)
         box.addLayout(tools)
         box.addStretch()
 
@@ -648,6 +703,10 @@ class MainWindow(QMainWindow):
             else:
                 self.set_status(f'{count} camera(s) found • choose the conveyor camera by name.','#8dcaff')
             self.update_enabled()
+            auto_start = self.auto_start_saved_camera
+            self.auto_start_saved_camera = False
+            if restored and auto_start and not self.running:
+                QTimer.singleShot(0, self.start)
         self.jobs.submit(discover_cameras,done)
 
     def start(self):
@@ -691,6 +750,7 @@ class MainWindow(QMainWindow):
             event['output']='CANCELLED'; self.refresh_event(event)
         self.pending.clear()
         self.tracker.reset()
+        self.update_live_inspection()
         if self.worker: self.worker.stop()
         self.set_disarmed()
         self.request_motion_stop()
@@ -721,7 +781,8 @@ class MainWindow(QMainWindow):
         for widget in self.fields.values(): widget.setEnabled(not self.running)
         for button in self.path_buttons.values(): button.setEnabled(not self.running)
         mode=self.fields['yolox_mode'].currentData()
-        self.sort_form.setRowVisible(self.fields['every_n'], self.fields['rule'].currentData()=='every_n')
+        self.sort_form.setRowVisible(self.fields['rule'], self.smoke_test)
+        self.sort_form.setRowVisible(self.fields['every_n'], self.smoke_test and self.fields['rule'].currentData()=='every_n')
         two_models=mode=='two_models'
         self.model_form.setRowVisible(self.fields['color_model_path'].parentWidget(), two_models)
         self.model_form.setRowVisible(self.fields['gatorade_label_check'], mode=='gatorade')
@@ -769,6 +830,7 @@ class MainWindow(QMainWindow):
                             h,w = packet['frame'].shape[:2]
                             tracks,decisions = self.tracker.update(packet['boxes'],packet['reasons'],packet['captured'],w,h)
                             self.update_meta(packet,tracks)
+                            self.update_live_inspection(tracks,packet)
                             for decision in decisions: self.decision(decision)
                         self.diagnostics.setText(f"{packet.get('vision_pipeline','YOLOX')}  •  {packet.get('fps',0):.1f} FPS  •  {packet.get('inference_ms',0):.0f} ms model  •  {packet.get('inspection_ms',0):.0f} ms color/label  •  frame age {age*1000:.0f} ms  •  {packet.get('barcode_decoder','barcode reader')}")
                         if not packet.get('inspection_ready',True):
@@ -790,6 +852,7 @@ class MainWindow(QMainWindow):
 
     def update_meta(self,packet,tracks):
         boxes = packet['boxes']; colors = packet.get('colors',[]); codes = packet.get('barcodes',[])
+        color_confidences = packet.get('color_confidences',[])
         brand_matches = packet.get('brand_matches',[])
         fresh = [t for t in tracks if not t.missed]
         for track in fresh:
@@ -799,6 +862,7 @@ class MainWindow(QMainWindow):
             if boxes:
                 i=min(range(len(boxes)),key=lambda j: abs((boxes[j][0]+boxes[j][2])/2-cx)+abs((boxes[j][1]+boxes[j][3])/2-cy))
                 if i<len(colors): meta['color']=colors[i]
+                if i<len(color_confidences): meta['color_confidence']=color_confidences[i]
                 if i<len(brand_matches) and brand_matches[i]: meta['gatorade_label_match']=True
             for code in codes:
                 box=code.get('bbox')
@@ -818,6 +882,57 @@ class MainWindow(QMainWindow):
         if codes and not fresh:
             self.barcode_text.setText(str(codes[-1]['text']))
             self.barcode_info.setText('Read in frame • not associated with a tracked bottle')
+
+    def update_live_inspection(self, tracks=None, packet=None):
+        fresh = [track for track in (tracks or []) if not track.missed]
+        if not fresh and packet and packet.get('boxes'):
+            boxes = packet['boxes']
+            index = max(range(len(boxes)), key=lambda i: (boxes[i][2]-boxes[i][0])*(boxes[i][3]-boxes[i][1]))
+            color = str(packet.get('colors',[])[index] if index<len(packet.get('colors',[])) else 'unknown').lower()
+            values = packet.get('color_confidences',[])
+            support = max(0.0,min(1.0,float(values[index]))) if index<len(values) else 0.0
+            matches = packet.get('brand_matches',[])
+            label = 'label visible' if index<len(matches) and matches[index] else 'label not confirmed'
+            self.show_live_color(color,support)
+            self.live_title.setText('BOTTLE DETECTED · NOT TRACKED')
+            self.live_evidence.setText(f'{label}  •  move across blue entry line to start sorting')
+            self.live_route.setText('MOVE TO ENTRY')
+            self.live_route.setStyleSheet('background:#35445a;color:#c8dcff;padding:9px 12px;border-radius:8px;font-weight:700;')
+            return
+        if not fresh:
+            self.live_swatch.setText('—')
+            self.live_swatch.setStyleSheet('background:#35445a;color:#a9c8ff;border-radius:10px;font-size:26px;')
+            self.live_title.setText('WAITING FOR BOTTLE' if self.running else 'INSPECTION IDLE')
+            self.live_detail.setText('Place a bottle in the camera view' if self.running else 'Start live inspection')
+            self.live_evidence.setText('YOLOX-S bottle detection + exposed drink color')
+            self.live_route.setText('AWAITING')
+            self.live_route.setStyleSheet('background:#243b61;color:#c8dcff;padding:9px 12px;border-radius:8px;font-weight:700;')
+            return
+        # Show the bottle nearest the decision line when several are visible.
+        width = self.last_packet['frame'].shape[1] if self.last_packet else WIDTH
+        target = self.settings['line'] * width
+        track = min(fresh, key=lambda item: abs((item.bbox[0]+item.bbox[2])/2-target))
+        meta = self.track_meta.get(track.id,{})
+        color = str(meta.get('color','unknown')).lower()
+        support = max(0.0,min(1.0,float(meta.get('color_confidence',0))))
+        self.show_live_color(color,support)
+        self.live_title.setText(f'LIVE BOTTLE  #{track.id:03d}')
+        label = 'label visible' if meta.get('gatorade_label_match') else 'label not confirmed'
+        self.live_evidence.setText(f'{label}  •  {track.hits} camera frame(s) tracked')
+        passing = color == self.settings['pass_color']
+        self.live_route.setText('PREDICTED 0 · PASS' if passing else 'PREDICTED 1 · DIVERT')
+        tone = '#174b3f' if passing else '#633942'
+        ink = '#75f0c7' if passing else '#ffc3cc'
+        self.live_route.setStyleSheet(f'background:{tone};color:{ink};padding:9px 12px;border-radius:8px;font-weight:700;')
+
+    def show_live_color(self,color,support):
+        palette = {'blue':('#1d5db7','#e6f0ff'),'yellow':('#f4c841','#242424'),
+                   'white':('#f0f2f5','#242424')}
+        background, foreground = palette.get(color,('#43546a','#f2f4f7'))
+        self.live_swatch.setText(color[:1].upper() if color in palette else '?')
+        self.live_swatch.setStyleSheet(f'background:{background};color:{foreground};border-radius:10px;font-size:25px;font-weight:800;')
+        evidence_name = 'color support' if self.settings['yolox_mode']=='gatorade' else 'color confidence'
+        self.live_detail.setText(f'{color.upper()}  •  {support:.0%} {evidence_name}' if color!='unknown' else 'COLOR UNCERTAIN')
 
     def show_barcode(self,tid,meta):
         self.barcode_title.setText('LAST BARCODE  •  SYNTHETIC DEMO DATA' if self.settings['source']=='simulation' else 'LAST BARCODE  •  LIVE DECODE')
@@ -848,12 +963,18 @@ class MainWindow(QMainWindow):
         self.show_barcode(decision.id,meta)
         if decision.bad: self.divert_count+=1
         else: self.pass_count+=1
+        if self.settings['source']=='simulation':
+            output = 'SIMULATED' if decision.bad else 'PASS'
+        elif not self.armed:
+            output = 'DISARMED'
+        else:
+            output = 'PENDING' if decision.bad else 'PASS'
         event = {'time':datetime.now().astimezone().isoformat(timespec='milliseconds'),'session':self.session,
                  'event_id':f'{self.session}-{self.generation}-{decision.id}',
                  'bottle_id':decision.id,'color':meta['color'],'decision':1 if decision.bad else 0,
                  'gatorade_label_match':bool(meta.get('gatorade_label_match',False)),
                  'barcode':meta.get('barcode','UNREAD'),'barcode_format':meta.get('format',''),
-                 'source':self.settings['source'],'output':'PASS' if not decision.bad else 'DRY RUN',
+                 'source':self.settings['source'],'output':output,
                  'detail':'; '.join(decision.reasons),'request_id':'','run_id':''}
         self.events.append(event)
         if decision.bad and self.settings['source']=='simulation':

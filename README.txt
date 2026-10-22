@@ -7,13 +7,15 @@ Double-click Start Demo.cmd or PartTrackingUALR.exe. Keep the complete supplied
 folder together: _runtime, models, and data belong beside the executable. The
 portable app runs independently of RemingtonVision and needs no Python install.
 
-Choose Simulation as SOURCE, choose the pass color under Color + code, and
-click Start inspection. Simulation bottles, colors, and codes are synthetic.
-Simulation and recorded video cannot send hardware motion commands.
+Choose the USB or Basler camera by name. A saved connected camera opens on
+launch. Choose the pass color under Color + code and watch the live bottle
+readout for color support, label evidence, and predicted route. A completed
+decision appears in the table when the bottle crosses the decision line.
+Reject output remains disarmed until deliberately enabled in Diverter.
 
 The controls are grouped into four tabs:
   Models       - Gatorade demo or trained YOLOX color models, confidence.
-  Color + code - pass color, video input, and barcode controls.
+  Color + code - pass color and barcode controls.
   Tracking     - direction, entry/decision lines, measured belt speed and scale.
   Diverter     - EtherMotion connection, PASS/REJECT/return programs and timing.
 
@@ -29,8 +31,8 @@ CHOOSE THE CAMERA AND VISION MODE
 
 Stop inspection before changing camera, source, model files, geometry, or timing.
 Choose USB camera or Basler / GigE, then choose the camera BY NAME in the toolbar.
-Use Refresh cameras after plugging one in. No camera is selected automatically.
-A saved USB device is found by its identity even if Windows changes its index.
+Use Refresh cameras after plugging one in. New devices require selection.
+A saved USB device opens by identity even if Windows changes its index.
 A missing selected device blocks startup; the laptop camera is not substituted.
 Manual camera index is an explicit advanced fallback.
 
@@ -74,8 +76,7 @@ so they cannot establish reliability in a new camera or conveyor environment.
 Run the included --self-test first, then verify all planned bottles in the
 disarmed live preview before enabling physical output.
 
-For a video dry run choose Video file and the file under Color + code. Close
-other software that owns the camera. Basler requires compatible pylon transport
+Close other software that owns the camera. Basler requires compatible pylon transport
 support; select its serial when multiple devices are present. Another computer
 may need Basler's transport-driver installation even with the wrapper bundled.
 
@@ -83,7 +84,7 @@ BARCODES
 
 Camera barcode text appears only when the decoder reads an actual symbol.
 Unread codes remain UNREAD. Present enough code pixels, focus, exposure, and
-contrast. Simulation codes are explicitly synthetic. Barcode display is
+contrast. Barcode display is
 separate from the color routing rule.
 
 For a keyboard-style USB scanner, click the scanner input below LAST BARCODE,
@@ -156,7 +157,7 @@ Configure/test every program in EtherMotion, connect participating drivers,
 and enable their Ethernet triggers in PC events. Discovery/readiness checks
 read state; they do not connect/enable physical drivers, set zero, or move them.
 Live output must be armed deliberately for a live USB/Basler run. Every launch
-starts in Simulation with output disarmed; saving settings never arms hardware.
+starts with output disarmed; saving settings never arms hardware.
 
 HTTP 202 means accepted, not movement completed. The matching run ID and drive
 command-counter/stopped status establish command-level completion, not actual
