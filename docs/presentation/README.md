@@ -1,6 +1,6 @@
 # Go 4th Fridays engineering presentation
 
-This folder contains Brad Daugherty's October 23, 2026 presentation and the matching slide-by-slide speaker script.
+This folder contains Brad Daugherty and Wesley Siharth's October 23, 2026 presentation and the matching slide-by-slide speaker script. Wesley helped start Remington Vision as an intern and carried the project into his engineering role.
 
 - [Presentation](Engineering_at_The_Kinetic_Group.pptx)
 - [Speaker script](Speaker_Script.md)
