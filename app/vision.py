@@ -1,7 +1,7 @@
 """Single-camera bottle vision for the portable UALR conveyor demonstration.
 
-The bundled COCO model locates generic bottles. Color checks sample exposed
-liquid below the label. Barcodes are decoded from actual camera pixels only.
+The bundled COCO model locates generic bottles. Gatorade color checks sample
+exposed drink around the shoulder. Barcodes decode from camera pixels only.
 Camera reads and inference stay on one worker. The GUI polls a one-frame mailbox
 so slow painting never queues old conveyor images.
 """
@@ -19,11 +19,12 @@ import numpy as np
 from PySide6.QtCore import QThread, Signal
 
 from .vendor.inference import Detector, DetectorConfig
+from .gatorade import GatoradeLabelMatcher, measure_drink_color
 
 
 REFERENCE_VERSION = 1
 REFERENCE_REQUIRED = "Teach a good bottle before cap / label inspection."
-PASS_COLORS = ("orange", "yellow", "green", "blue", "red", "purple", "clear", "taught")
+PASS_COLORS = ("orange", "yellow", "green", "blue", "red", "purple", "white", "clear", "taught")
 
 
 def _liquid_features(frame: np.ndarray, bbox: Sequence[float], settings: dict | None = None) -> dict:
@@ -74,6 +75,9 @@ def classify_color(frame: np.ndarray, bbox: Sequence[float],
                    settings: dict | None = None) -> tuple[str, float]:
     """Identify liquid color and confidence; ambiguous/underexposed samples are unknown."""
     try:
+        if (settings or {}).get("color_method") == "gatorade":
+            result = measure_drink_color(frame, bbox)
+            return result["name"], float(result["confidence"])
         result = _liquid_features(frame, bbox, settings)
         return result["name"], float(result["confidence"])
     except (ValueError, TypeError, cv2.error):
@@ -289,13 +293,19 @@ def _distance(current: dict, reference: dict) -> float:
 
 
 def classify(frame: np.ndarray, box: Sequence[float], settings: dict,
-             reference: dict | None) -> list[str]:
+             reference: dict | None, observed_color: tuple[str, float] | None = None) -> list[str]:
     """Return explicit reject reasons; missing teaching never silently passes."""
     problem = inspection_error(settings, reference)
     if problem:
         return [problem]
     rule = str(settings.get("rule", "color")).lower()
     if rule == "color":
+        target = str(settings.get("pass_color", "orange")).lower()
+        if target != "taught":
+            color = (observed_color or classify_color(frame, box, settings))[0]
+            if color == "unknown":
+                return ["Unknown color"]
+            return [] if color == target else [f"Color: {color} (divert)"]
         try:
             measured = _liquid_features(frame, box, settings)
         except (ValueError, TypeError, cv2.error):
@@ -303,15 +313,11 @@ def classify(frame: np.ndarray, box: Sequence[float], settings: dict,
         color = measured["name"]
         if color == "unknown":
             return ["Unknown color"]
-        target = str(settings.get("pass_color", "orange")).lower()
-        if target == "taught":
-            if reference["name"] == "clear" or color == "clear":
-                matches = reference["name"] == color
-            else:
-                delta = abs(float(measured["hue"]) - float(reference["hue"]))
-                matches = min(delta, 180.0 - delta) <= float(settings.get("color_tolerance_h", 12.0))
+        if reference["name"] == "clear" or color == "clear":
+            matches = reference["name"] == color
         else:
-            matches = color == target
+            delta = abs(float(measured["hue"]) - float(reference["hue"]))
+            matches = min(delta, 180.0 - delta) <= float(settings.get("color_tolerance_h", 12.0))
         return [] if matches else [f"Color: {color} (divert)"]
     if rule == "all":
         return ["Reject every bottle (demo rule)"]
@@ -482,8 +488,11 @@ class VideoWorker(QThread):
                 except (ValueError, OSError):
                     reference = None
             problem = inspection_error(self.settings, reference)
-            model_value = self.settings.get("model_path") or "models/yolox_nano.onnx"
+            model_value = self.settings.get("model_path") or "models/yolox_s.onnx"
             detector = self._make_detector(_resolve(self.root, model_value))
+            label_matcher = (GatoradeLabelMatcher(self.root / "models")
+                             if self.settings.get("gatorade_label_check", True)
+                             and self.settings.get("color_method") == "gatorade" else None)
             if self._stopping():
                 return
             if str(self.settings.get("rule", "color")) == "defect_model":
@@ -519,8 +528,15 @@ class VideoWorker(QThread):
                 wanted_class = int(self.settings.get("model_class_id", self.settings.get("class_id", 39)))
                 bottles = [d for d in result.detections if wanted_class < 0 or d.class_id == wanted_class]
                 boxes = [tuple(d.xyxy) for d in bottles]
+                inspection_started = time.perf_counter()
                 color_results = [classify_color(frame, box, self.settings) for box in boxes]
-                reasons = [classify(frame, box, self.settings, reference) for box in boxes]
+                reasons = [classify(frame, box, self.settings, reference, color)
+                           for box, color in zip(boxes, color_results)]
+                brand_matches = []
+                for box in boxes:
+                    x1, y1, x2, y2 = (int(round(value)) for value in box)
+                    brand_matches.append(bool(label_matcher and label_matcher.match(frame[y1:y2, x1:x2])))
+                inspection_ms = (time.perf_counter() - inspection_started) * 1000.0
                 # Coordinates belong only to the image that was decoded. The UI
                 # retains confirmed text on each track; replaying old coordinates
                 # could attach that text to the following physical bottle.
@@ -549,9 +565,11 @@ class VideoWorker(QThread):
                     "frame": frame, "boxes": boxes, "defects": defects,
                     "reasons": reasons, "captured": captured, "fps": fps,
                     "inference_ms": inference_ms, "inspection_ready": not bool(problem),
+                    "inspection_ms": inspection_ms,
                     "inspection_error": problem,
                     "colors": [item[0] for item in color_results],
                     "color_confidences": [item[1] for item in color_results],
+                    "brand_matches": brand_matches,
                     "barcodes": barcodes, "barcode_available": barcode_available,
                     "barcode_decoder": barcode_decoder, "barcode_captured": barcode_captured,
                 }

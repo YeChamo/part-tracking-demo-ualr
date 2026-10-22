@@ -27,7 +27,7 @@ def check_runtime(root: Path) -> int:
         checks['ean13_decoded'] = available and any(item['text'] == code for item in decoded)
         if not checks['ean13_decoded']:
             raise RuntimeError('Bundled decoder did not read the generated EAN-13.')
-        cfg = DetectorConfig(model_path=str(root / 'models' / 'yolox_nano.onnx'),
+        cfg = DetectorConfig(model_path=str(root / 'models' / 'yolox_s.onnx'),
                              class_names=[str(i) for i in range(80)], img_size=640,
                              conf=.25, device='cpu', intra_op_threads=2)
         started = time.monotonic()
@@ -41,6 +41,11 @@ def check_runtime(root: Path) -> int:
         checks['color'] = name
         if name != 'orange':
             raise RuntimeError('Color sampler did not recognize the generated orange sample.')
+        from .gatorade import GatoradeLabelMatcher, measure_drink_color
+        checks['gatorade_label_references'] = len(GatoradeLabelMatcher(root / 'models').references)
+        checks['gatorade_orange'] = measure_drink_color(sample, (0, 0, 128, 256))['name']
+        if checks['gatorade_orange'] != 'orange':
+            raise RuntimeError('Gatorade color sampler did not recognize orange.')
         from .tracking import BottleTracker, TrackingConfig
         from .simulation import Simulation, WIDTH, HEIGHT
         from .settings import DEFAULTS

@@ -140,7 +140,8 @@ class VisionView(QWidget):
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawRoundedRect(QRectF(x1-5,y1-5,x2-x1+10,y2-y1+10), 5/scale, 5/scale)
             meta = m.track_meta.get(track.id, {})
-            title = f"#{track.id:03d}  {meta.get('color', '').upper()}  {'1 DIVERT' if track.bad else '0 PASS'}"
+            brand = ' GATORADE' if meta.get('gatorade_label_match') else ''
+            title = f"#{track.id:03d}  {meta.get('color', '').upper()}{brand}  {'1 DIVERT' if track.bad else '0 PASS'}"
             p.setFont(QFont('Segoe UI', max(10, round(10/scale)), QFont.Weight.Bold))
             text_w = p.fontMetrics().horizontalAdvance(title) + 14/scale
             tag_y = max(0, y1-30/scale)
@@ -178,7 +179,7 @@ class MainWindow(QMainWindow):
         self.last_poll = 0.0
         self.pass_count = self.divert_count = self.complete_count = 0
         self.jobs = Jobs(self)
-        self.setWindowTitle('Part Tracking Demo UALR • Color Sort + Barcode')
+        self.setWindowTitle('Part Tracking Demo UALR • Gatorade Color Sort')
         self.setWindowIcon(QIcon(str(root/'assets'/'demo.ico')))
         self.resize(1450, 960)
         self.setMinimumSize(1180, 800)
@@ -209,7 +210,7 @@ class MainWindow(QMainWindow):
         header.addWidget(brand)
         title = QVBoxLayout()
         title.addWidget(self.label('Part tracking demo', 'title'))
-        title.addWidget(self.label('Bottle color sorting  /  Barcode reading  /  EtherMotion reject', 'muted'))
+        title.addWidget(self.label('Gatorade bottle color sorting  /  Barcode reading  /  EtherMotion reject', 'muted'))
         header.addLayout(title)
         header.addStretch()
         self.badge = self.label('SIMULATION • NO HARDWARE', 'badge')
@@ -356,9 +357,9 @@ class MainWindow(QMainWindow):
 
     def build_sort_tab(self):
         box = self.new_tab('Color + code')
-        self.note(box,'Choose the color that stays on the belt. Other colors produce decision 1 and the selected divert motion.')
+        self.note(box,'Gatorade demo: choose the color that stays on the belt. Other or uncertain colors produce decision 1. Label matching is supporting evidence; routing uses the measured drink color.')
         form = QFormLayout(); form.setSpacing(10)
-        self.combo(form,'pass_color','Pass color',[(c.title(),c) for c in ['orange','blue','green','red','yellow','purple','clear']])
+        self.combo(form,'pass_color','Pass color',[(c.title(),c) for c in ['blue','yellow','white','orange','green','red','purple','clear']])
         self.combo(form,'rule','Sort rule',[('Color → 0 / 1','color'),('Every Nth (simulation)','every_n'),('Divert every bottle','all'),('Pass every bottle','none'),('Trained defect ONNX','defect_model')])
         self.field(form,'every_n','Every Nth','int',2,100)
         self.field(form,'confidence','Bottle confidence',minimum=.05,maximum=.95,decimals=2)
@@ -369,8 +370,10 @@ class MainWindow(QMainWindow):
         self.path_field(form,'video_path','Video file','Videos (*.mp4 *.avi *.mov *.mkv);;All files (*)')
         box.addLayout(form)
         self.note(box,'Choose the camera by name in the top toolbar. Refresh cameras after plugging one in. A saved camera that is unplugged never falls back to the laptop camera. Manual index is an advanced fallback only.')
-        self.note(box,'Bundled model finds generic bottles. Keep bottles upright and separated. Color is sampled below the label; adjust the liquid band to your view.')
+        self.note(box,'Bundled YOLOX-S finds generic bottles. Gatorade mode samples the exposed upper body, including pale white drink and cropped views. The older lower-band sampler remains available for other packaging.')
         form = QFormLayout(); form.setSpacing(10)
+        self.combo(form,'color_method','Color sampling',[('Gatorade exposed body','gatorade'),('Lower liquid band','lower_band')])
+        self.combo(form,'gatorade_label_check','Gatorade label evidence',[('Check visible label',True),('Off for speed',False)])
         self.field(form,'color_y1','Liquid band top',minimum=.05,maximum=.94,decimals=2)
         self.field(form,'color_y2','Liquid band bottom',minimum=.06,maximum=.99,decimals=2)
         self.path_field(form,'model_path','Bottle ONNX (optional)','ONNX models (*.onnx)')
@@ -621,7 +624,7 @@ class MainWindow(QMainWindow):
                             tracks,decisions = self.tracker.update(packet['boxes'],packet['reasons'],packet['captured'],w,h)
                             self.update_meta(packet,tracks)
                             for decision in decisions: self.decision(decision)
-                        self.diagnostics.setText(f"{packet.get('fps',0):.1f} inspection FPS  •  {packet.get('inference_ms',0):.0f} ms model  •  frame age {age*1000:.0f} ms  •  {packet.get('barcode_decoder','barcode reader')}")
+                        self.diagnostics.setText(f"{packet.get('fps',0):.1f} inspection FPS  •  {packet.get('inference_ms',0):.0f} ms model  •  {packet.get('inspection_ms',0):.0f} ms color/label  •  frame age {age*1000:.0f} ms  •  {packet.get('barcode_decoder','barcode reader')}")
                         if not packet.get('inspection_ready',True):
                             self.fail(packet.get('inspection_error','Inspection unavailable')); return
                     elif self.last_packet and now-self.last_packet['captured'] > 1.0:
@@ -638,13 +641,16 @@ class MainWindow(QMainWindow):
 
     def update_meta(self,packet,tracks):
         boxes = packet['boxes']; colors = packet.get('colors',[]); codes = packet.get('barcodes',[])
+        brand_matches = packet.get('brand_matches', [])
         fresh = [t for t in tracks if not t.missed]
         for track in fresh:
-            meta = self.track_meta.setdefault(track.id,{'color':'unknown','barcode':'UNREAD','format':''})
+            meta = self.track_meta.setdefault(track.id,{'color':'unknown','barcode':'UNREAD','format':'',
+                                                        'gatorade_label_match':False})
             cx=(track.bbox[0]+track.bbox[2])/2; cy=(track.bbox[1]+track.bbox[3])/2
             if boxes:
                 i=min(range(len(boxes)),key=lambda j: abs((boxes[j][0]+boxes[j][2])/2-cx)+abs((boxes[j][1]+boxes[j][3])/2-cy))
                 if i<len(colors): meta['color']=colors[i]
+                if i<len(brand_matches) and brand_matches[i]: meta['gatorade_label_match']=True
             for code in codes:
                 box=code.get('bbox')
                 if box:
@@ -667,7 +673,8 @@ class MainWindow(QMainWindow):
     def show_barcode(self,tid,meta):
         self.barcode_title.setText('LAST BARCODE  •  SYNTHETIC DEMO DATA' if self.settings['source']=='simulation' else 'LAST BARCODE  •  LIVE DECODE')
         self.barcode_text.setText(str(meta.get('barcode','UNREAD')))
-        self.barcode_info.setText(f"Bottle #{tid:03d}  •  {meta.get('color','unknown').upper()}  •  {meta.get('format','')}")
+        brand = 'Gatorade label matched' if meta.get('gatorade_label_match') else 'Gatorade label unconfirmed'
+        self.barcode_info.setText(f"Bottle #{tid:03d}  •  {meta.get('color','unknown').upper()}  •  {brand}  •  {meta.get('format','')}")
 
     def scanner_read(self):
         code=self.scanner_input.text().strip()
@@ -696,6 +703,7 @@ class MainWindow(QMainWindow):
         event = {'time':datetime.now().astimezone().isoformat(timespec='milliseconds'),'session':self.session,
                  'event_id':f'{self.session}-{self.generation}-{decision.id}',
                  'bottle_id':decision.id,'color':meta['color'],'decision':1 if decision.bad else 0,
+                 'gatorade_label_match':bool(meta.get('gatorade_label_match',False)),
                  'barcode':meta.get('barcode','UNREAD'),'barcode_format':meta.get('format',''),
                  'source':self.settings['source'],'output':'PASS' if not decision.bad else 'DRY RUN',
                  'detail':'; '.join(decision.reasons),'request_id':'','run_id':''}
@@ -915,7 +923,7 @@ class MainWindow(QMainWindow):
         self.refresh_counts()
 
     def write_csv(self,path):
-        fields=['time','session','event_id','bottle_id','color','decision','barcode','barcode_format','source','output','detail','request_id','run_id']
+        fields=['time','session','event_id','bottle_id','color','decision','gatorade_label_match','barcode','barcode_format','source','output','detail','request_id','run_id']
         with Path(path).open('w',newline='',encoding='utf-8-sig') as file:
             writer=csv.DictWriter(file,fieldnames=fields); writer.writeheader(); writer.writerows(self.events)
 

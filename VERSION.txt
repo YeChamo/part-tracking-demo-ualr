@@ -1,6 +1,7 @@
-Part Tracking Demo UALR 1.1.0
+Part Tracking Demo UALR 1.2.0
 Windows x64 portable demo
 Color sorting: 0 = pass, 1 = divert
+Default bottle model: YOLOX-S COCO with Gatorade color sampling
 Barcode decoder: ZXing-C++
 Camera inputs: USB, Basler/GigE, video dry run
 Camera selection: named devices, remembered identity, no automatic fallback

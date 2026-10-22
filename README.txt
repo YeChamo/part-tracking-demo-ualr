@@ -1,5 +1,5 @@
 UALR PART TRACKING DEMO
-Color sorting, bottle tracking, barcode display, and EtherMotion reject cycles
+Gatorade color sorting, bottle tracking, barcode display, and EtherMotion reject cycles
 
 GET STARTED
 
@@ -9,8 +9,10 @@ The packaged application runs independently of the RemingtonVision checkout.
 No Python installation is needed to run the packaged Windows executable.
 
 Select Simulation as SOURCE. In Color + code, select the pass color, and click
-Start inspection. The Conveyor tab holds direction and timing. EtherMotion holds the
-live-output connection. Stop + disarm ends inspection and clears queued events.
+Start inspection. For a live run, select a USB or Basler camera by name and keep
+Color sampling on Gatorade exposed body. The Conveyor tab holds direction and
+timing. EtherMotion holds the live-output connection. Stop + disarm ends
+inspection and clears queued events.
 The colored bottles, barcodes, and inspection results in Simulation are
 synthetic demonstration data. They do not prove live detection or decoding.
 Simulation and recorded video cannot send hardware reject commands.
@@ -23,13 +25,15 @@ EtherMotion's selected saved cycle controls the actual reject mechanism.
 COLOR SORTING AND BARCODES
 
 Choose the color that should continue straight using the pass-color setting
-(pass_color). Named choices cover orange, yellow, green, blue, red, purple, and
-clear. Other colors take the divert route. Color inspection samples the
-lower liquid/body region of each detected upright bottle to reduce cap/label
-interference. Use one lane, separate bottles, a fixed camera, steady lighting,
-a simple background, and upright bottles. Reflections, transparent liquid,
-labels, tinted plastic, shadows, or changed lighting can alter the color result.
-Verify the displayed result with real examples of every color before a run.
+(pass_color). Blue is the default; yellow and white are also in the supplied
+examples. Other or unknown colors take the divert route. The default YOLOX-S
+model finds COCO bottle boxes, then Gatorade color sampling measures exposed
+drink around the bottle shoulder, with a lower-body fallback for cropped views.
+Visible-label matching is separate evidence shown and logged for future
+inspections; an unreadable or rear-facing label does not change color routing.
+Use one lane and separated upright bottles. Reflections, tinted plastic, glare,
+and changed lighting can alter the result. Verify colors and line crossings
+with the actual camera before enabling live output.
 
 Barcode text is displayed only when a decoder reads it. An unread code remains
 UNREAD; the application does not invent a barcode from the bottle's identity.
@@ -61,8 +65,8 @@ dry run and cannot actuate the rejector. Another computer may require the
 Basler pylon transport/driver installation even when the application and its
 Python camera wrapper are bundled.
 
-The bundled generic COCO bottle detector finds the COCO bottle class. It is not
-a Gatorade/Gator brand-trained detector. It can miss or merge bottles,
+The bundled generic YOLOX-S COCO bottle detector finds the COCO bottle class.
+It is not a Gatorade brand-trained detector. It can miss or merge bottles,
 particularly touching bottles, cropped
 bottles, glare, and unfamiliar viewpoints. Use the confidence control and clear
 spacing while checking the overlay. A missed bottle produces no tracked reject

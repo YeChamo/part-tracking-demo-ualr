@@ -24,7 +24,7 @@ class Simulation:
         self.until_next -= dt
         if self.until_next <= 0:
             self.sequence += 1
-            kind = ('orange', 'blue', 'orange', 'green', 'red', 'orange')[((self.sequence-1) % 6)]
+            kind = ('blue', 'yellow', 'white', 'orange', 'green', 'red', 'purple', 'clear')[((self.sequence-1) % 8)]
             if self.next_bad:
                 kind, self.next_bad = ('blue' if settings['pass_color'] != 'blue' else 'red'), False
             self.bottles.append({'x': 1260.0 if rtl else -60.0, 'kind': kind, 'seq': self.sequence, 'ejected': False})
@@ -123,7 +123,9 @@ class Simulation:
         liquid.setColorAt(.18, QColor('#e2f3ee'))
         palettes = {'orange': ('#ffac37','#e77826'), 'blue': ('#4dd7fb','#2184b8'),
                     'green': ('#b1e84a','#4a9c35'), 'red': ('#ff7881','#c53c57'),
-                    'yellow': ('#ffe866','#dbb235'), 'purple': ('#b88aff','#7d4cba')}
+                    'yellow': ('#ffe866','#dbb235'), 'purple': ('#b88aff','#7d4cba'),
+                    'white': ('#f7f8f4','#c7d2d9'),
+                    'clear': ('#e7f5f8','#acc8d0')}
         light, dark = palettes.get(kind, palettes['orange'])
         liquid.setColorAt(.30, QColor(light))
         liquid.setColorAt(.80, QColor(dark))

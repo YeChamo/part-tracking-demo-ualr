@@ -1,6 +1,6 @@
 # Part Tracking Demo UALR
 
-A standalone Windows bottle-color sorting demo with barcode reading and EtherMotion integration.
+A standalone Windows Gatorade bottle-color sorting demo with barcode reading and EtherMotion integration.
 
 - **0 = pass:** the selected color continues on the conveyor.
 - **1 = divert:** a different or unknown color requests one saved EtherMotion divert cycle.
@@ -8,18 +8,34 @@ A standalone Windows bottle-color sorting demo with barcode reading and EtherMot
 - Per-bottle tracking, conveyor timing, actual barcode decoding, USB scanner input, and CSV logs.
 - An animated simulation runs without cameras or motion hardware.
 
-## Download and run
+The bundled **YOLOX-S** COCO model detects bottles. Gatorade mode measures exposed
+drink color within each detection and separately checks for a visible Gatorade
+label. The app still makes its existing two-way decision: the selected color
+passes (`0`), and a different or uncertain color diverts (`1`). Label evidence
+is shown and logged; a rear-facing or unreadable label does not change routing.
 
-Download the **Windows portable ZIP** from [Releases](https://github.com/YeChamo/part-tracking-demo-ualr/releases/latest), extract the entire folder, and double-click **Start Demo.cmd**. No Python installation is needed. Keep `_runtime`, `models`, and the other folders beside `PartTrackingUALR.exe`.
+## Run the Gatorade demo
 
-The repository contains editable source. The ready-to-run application and bundled runtimes are release assets.
+Build this version from source using the commands below, or use its v1.2.0
+Windows portable ZIP when published under [Releases](https://github.com/YeChamo/part-tracking-demo-ualr/releases).
+Extract the whole ZIP and double-click **Start Demo.cmd**. The portable build
+needs no Python installation. Keep `_runtime`, `models`, and the other folders
+beside `PartTrackingUALR.exe`.
+
+The repository contains editable source; releases bundle the runtime.
 
 ## Choose the conveyor camera
 
 1. Click **Stop + disarm**.
 2. Set **SOURCE** to **USB camera** or **Basler / GigE**.
 3. Choose the camera by name in the top camera list. Click **Refresh cameras** after connecting a device.
-4. Set the pass color under **Color + code**, then click **Start inspection**.
+4. Set the pass color under **Color + code** (blue is the default). Leave **Color
+   sampling** on **Gatorade exposed body**, then click **Start inspection**.
+
+Blue, yellow, and white are the supplied bottle colors. The simulation includes
+these colors plus the older demo colors. For a camera run, start with output
+disarmed and check live boxes, colors, track IDs, and line crossings before
+enabling a physical diverter. A recorded video is always a dry run.
 
 USB selection follows the physical device identity when Windows changes its index. If the saved camera is unplugged, startup stops and asks for a selection. It never substitutes the built-in camera. **Manual camera index (advanced)** remains available as an explicit fallback.
 
@@ -29,7 +45,12 @@ The camera decoder reads EAN/UPC, Code 128, QR, and other ZXing formats from act
 
 For physical diversion, configure and test an EtherMotion program with **Repeat = Once**, select it in the **EtherMotion** tab, and calibrate the conveyor timing. Simulation and video playback never send hardware output. See [EtherMotion setup](docs/ETHERMOTION_SETUP.txt) and the [complete quick start](README.txt).
 
-The included generic COCO model locates bottles; it is not a Gatorade-specific trained model. Verify color sampling, barcode visibility, tracking, and timing with representative bottles and your camera/lighting. Belt timing assumes constant motion; the demo has no encoder or wired belt-run input.
+The YOLOX-S weights are a general COCO bottle detector; color and label evidence
+are separate processing. In the supplied 13 photos, the demo finds and correctly
+colors all 13 bottles; visible-label matching succeeds in 9. Those photos show
+three bottles in one setting, so live camera validation remains necessary. The
+color choice is an observation, not a calibrated probability. Belt timing assumes
+constant motion; the demo has no encoder or wired belt-run input.
 
 ## Source setup and build
 
@@ -48,7 +69,10 @@ To build the portable executable:
 .\Build.ps1 -Python .\.venv\Scripts\python.exe
 ```
 
-Both `models/yolox_nano.onnx` and its external `models/yolox_nano.onnx.data` file must stay together. Basler transport drivers may need installation on the target machine.
+`models/yolox_s.onnx` is the default model and must stay beside the executable
+with the Gatorade label-reference images in `models`. The old nano model remains
+available as an optional override. Basler transport drivers may need installation
+on the target machine.
 
 The optional isolated EtherMotion simulator test needs your separately supplied `EtherMotion.exe` in `EtherMotion/`. It uses a temporary simulator-only workspace and an ephemeral port. Routine tests never move physical hardware.
 

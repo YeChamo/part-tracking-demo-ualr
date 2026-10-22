@@ -16,7 +16,7 @@ def main():
         raise SystemExit('Build the application before packaging a release.')
     output = root / '.releases'
     output.mkdir(exist_ok=True)
-    archive = output / 'PartTrackingDemoUALR-v1.1.0-Windows-x64.zip'
+    archive = output / 'PartTrackingDemoUALR-v1.2.0-Windows-x64.zip'
     files = subprocess.check_output(['git','ls-files','-z'],cwd=root).decode('utf-8').split('\0')
     prefix = 'PartTrackingDemoUALR/'
     entries = []
@@ -43,6 +43,9 @@ def main():
         names=zf.namelist()
         assert prefix+'PartTrackingUALR.exe' in names
         assert prefix+'models/yolox_nano.onnx.data' in names
+        assert prefix+'models/yolox_s.onnx' in names
+        for label in ('logo', 'blue', 'yellow', 'white'):
+            assert prefix+f'models/gatorade_{label}_reference.png' in names
         assert prefix+'Start Demo.cmd' in names
         assert all(not name.startswith(prefix+'data/') or name in (prefix+'data/',prefix+'data/.gitkeep') for name in names)
         assert prefix+'EtherMotion/EtherMotion.exe' not in names

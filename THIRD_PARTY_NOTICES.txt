@@ -84,6 +84,19 @@ includes locally available notices for its own vendored components.
 
 MODEL AND INFERENCE SOURCE PROVENANCE
 
+models\yolox_s.onnx is the YOLOX-S ONNX asset from the official YOLOX
+0.1.1rc0 GitHub release:
+https://github.com/Megvii-BaseDetection/YOLOX/releases/tag/0.1.1rc0
+Asset size: 35,858,002 bytes. SHA-256:
+c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063
+
+This is a generic COCO bottle detector. Gatorade color and visible-label
+inspection are implemented separately in app\gatorade.py. The four
+models\gatorade_*_reference.png crops were derived from the user-supplied
+Gatorade bottle photos in the adjacent RemingtonVision demo workspace.
+They support optional label evidence; they are not model-training data.
+The new model and crops are not part of the older licenses\inventory.json.
+
 models\yolox_nano.onnx and models\yolox_nano.onnx.data were copied from:
 RemingtonVision/models/yolox/
 Both files were verified byte-for-byte by SHA-256 against those local originals:
