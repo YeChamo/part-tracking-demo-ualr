@@ -1,0 +1,4 @@
+Package: opencv-python
+Version: 4.10.0.84
+Local metadata source: RemingtonVision/.venv/Lib/site-packages/opencv_python-4.10.0.84.dist-info
+License and notice files copied verbatim; see METADATA.txt for installed wheel declarations.

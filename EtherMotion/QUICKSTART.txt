@@ -1,0 +1,88 @@
+ETHERMOTION — FIRST USE
+
+Open Start.cmd. Keep the EtherMotion service running while using the app.
+Start with Demo turntable to practice without moving hardware.
+
+1. CONNECT
+   Choose your driver, then Connect. One EPR60 can use a direct Ethernet cable;
+   multiple drivers need a switch and different IP addresses.
+   If connection fails, check power, cable and the driver's IP address. A VPN
+   can intercept its address. Connections > Edit > Local Ethernet IP selects
+   this PC's address on the adapter connected to the driver; it is not the
+   driver's address. Leaving it blank lets Windows choose the route.
+
+2. CHOOSE YOUR START
+   At the intended starting position, with the motor stopped, click
+   Set this position as 0°. This records a reference without moving the motor.
+   Set zero once, not before every move or cycle.
+
+3. TRY A MOVE, THEN SAVE IT
+   Move by adds your signed angle to the current position.
+   Go to total position targets a coordinate from your saved zero.
+   Enter any angle and motor RPM; Move once runs it immediately.
+   Save stores the editor in a numbered slot. Load only fills the editor;
+   Run immediately executes that saved slot. Add move creates more slots.
+
+4. RETURN TO YOUR ZERO ANGLE
+   Leave Return direction on Retrace current turn for normal use.
+   It combines all travel, ignores complete turns and reverses the remainder:
+      +350° then −40°  -> return −310°
+      +760° then −60°  -> return −340° (total 360°, within-turn angle 0°)
+   The preview shows achievable travel before you click. Microstep resolution
+   can make the actual number slightly different.
+   A saved Go to total position 0° move includes all accumulated turns.
+
+5. MAKE A CYCLE
+   Open Cycles. Add saved moves in any order, including repeated slots or moves
+   on different drivers. For example: 1, 2, 6, 7, 8. Add pauses if needed.
+   Choose once, a repeat count, or Repeat until stopped; save, then start.
+   Steps run one after another. Stop cycle cancels the remaining steps.
+   Each step keeps a Done count across repetitions, including fast steps that
+   finish between screen updates. Counts reset at the start of each run.
+   Already at target means that step needed no travel to reach its position.
+   Home offers Return to saved rotary zero or Find physical home switch.
+   Saved-zero return needs an existing zero and preserves completed turns.
+   Physical Home needs an EPR60 with a tested wired switch and physical stop.
+   Set timeout/travel limits; the next step waits for Home and saved zero.
+   A repeated cycle performs its Home step every time. Stop or Home failure
+   ends the cycle. Go to 0° alone returns to a coordinate; it does not home.
+
+6. LET YOUR PC START IT
+   Open PC events. Choose a move, saved cycle or Return to zero, enable Ethernet
+   triggers for its drivers, and copy the generated command into your PC's
+   automation. Use 127.0.0.1 when the sending program runs on this PC.
+   Only use Start LAN triggers.cmd when another PC/controller sends the events.
+   A busy driver rejects a new event; events are not queued. TRIGGERS.md has
+   examples for checking completion and retrying one event without duplicating it.
+
+7. EPR60 CURRENT AND PHYSICAL HOME
+   Select the intended driver and open Advanced. Read current settings, edit
+   running current / idle percentage / idle delay, then review and apply.
+   Each driver has its own settings. These adjust current, not supply voltage.
+   Apply changes drive RAM; Save to drive is a separate, explicit EEPROM save.
+   Re-establish zero after changes. The motor's size label alone does not tell
+   you its rated current. EPR60-ADVANCED.md explains the settings.
+   Load an .rtcfg file to inspect it; importing never writes to a drive.
+   For physical homing by Modbus, first commission a wired home/limit switch in
+   RTConfigurator. Read all parameters, confirm the switch and physical stop
+   have been tested, choose timeout/travel threshold, then Review Home movement.
+   The sampled travel threshold can overshoot; it is not a physical stop.
+   Without a known working switch, continue using manually chosen zero.
+   The Home choice defaults to saved-zero return; choose physical explicitly.
+
+   During movement, Stop and disconnect requests Stop and waits for confirmed
+   idle before closing the connection. If Stop cannot be confirmed, the app
+   shows an error and keeps the connection open when possible. Stop remains
+   available. Use the physical stopping system if rotation continues.
+
+IF SOMETHING IS UNAVAILABLE
+The message beside the control explains what is missing. Stop remains available
+while a command is pending. After restarting the service, reload the page or
+follow its session-refreshed message; the app never retries a move automatically.
+
+AFTER POWER-OFF OR A PC CHANGE
+This PC can restore its last confirmed stopped position, assuming the mechanism
+did not move while off. It cannot prove physical shaft position. After uncertain
+movement or manual repositioning, establish zero again at the intended start.
+For another PC, follow TRANSFER.txt; import the saved workspace, check the local
+Ethernet settings and establish zero on that installation.

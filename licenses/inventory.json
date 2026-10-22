@@ -1,0 +1,525 @@
+{
+  "packages": [
+    {
+      "name": "charset-normalizer",
+      "version": "3.4.7",
+      "source": "RemingtonVision/.venv/Lib/site-packages/charset_normalizer-3.4.7.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/charset_normalizer-3.4.7.dist-info/licenses/LICENSE",
+          "copy": "licenses/charset-normalizer/charset_normalizer-3.4.7.dist-info/licenses/LICENSE",
+          "sha256": "18577485d3704f1a479ded8e573c0976cfed315fd2fd17983fa988da4c2f70d1",
+          "bytes": 1092
+        }
+      ],
+      "metadata": "licenses/charset-normalizer/METADATA.txt"
+    },
+    {
+      "name": "coloredlogs",
+      "version": "15.0.1",
+      "source": "RemingtonVision/.venv/Lib/site-packages/coloredlogs-15.0.1.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/coloredlogs-15.0.1.dist-info/LICENSE.txt",
+          "copy": "licenses/coloredlogs/coloredlogs-15.0.1.dist-info/LICENSE.txt",
+          "sha256": "0bef4ffb1855b65570304f2018c6d44e4bab97bd5df8716ecd7800014d717267",
+          "bytes": 1056
+        }
+      ],
+      "metadata": "licenses/coloredlogs/METADATA.txt"
+    },
+    {
+      "name": "flatbuffers",
+      "version": "25.12.19",
+      "source": "RemingtonVision/.venv/Lib/site-packages/flatbuffers-25.12.19.dist-info",
+      "copied_notices": [],
+      "metadata": "licenses/flatbuffers/METADATA.txt"
+    },
+    {
+      "name": "humanfriendly",
+      "version": "10.0",
+      "source": "RemingtonVision/.venv/Lib/site-packages/humanfriendly-10.0.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/humanfriendly-10.0.dist-info/LICENSE.txt",
+          "copy": "licenses/humanfriendly/humanfriendly-10.0.dist-info/LICENSE.txt",
+          "sha256": "4ac48f4117809f2734066150450f120b3bb110ac1d3b32170795e0560dbbc1f5",
+          "bytes": 1056
+        }
+      ],
+      "metadata": "licenses/humanfriendly/METADATA.txt"
+    },
+    {
+      "name": "numpy",
+      "version": "2.2.0",
+      "source": "RemingtonVision/.venv/Lib/site-packages/numpy-2.2.0.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/numpy-2.2.0.dist-info/LICENSE.txt",
+          "copy": "licenses/numpy/numpy-2.2.0.dist-info/LICENSE.txt",
+          "sha256": "14256cc3a2c9d32ac284da96b937feb44f72dd90bee2317ac3020166846ad99d",
+          "bytes": 47709
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/numpy/_core/include/numpy/random/LICENSE.txt",
+          "copy": "licenses/numpy/numpy/_core/include/numpy/random/LICENSE.txt",
+          "sha256": "d544761558b510866c21f7e8a2d5716fca76e0b98117e3b6b86314db7244d150",
+          "bytes": 1039
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/numpy/ma/LICENSE",
+          "copy": "licenses/numpy/numpy/ma/LICENSE",
+          "sha256": "d78dbb208b80d92b4d333e41a4baae50d12444f46e53199fa7726a91de6e2da7",
+          "bytes": 1616
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/numpy/random/LICENSE.md",
+          "copy": "licenses/numpy/numpy/random/LICENSE.md",
+          "sha256": "b4bc2f4fa1c95778f1ed3dd8f14706bece399475b978f9f34b5d3cd72521b48a",
+          "bytes": 3582
+        }
+      ],
+      "metadata": "licenses/numpy/METADATA.txt"
+    },
+    {
+      "name": "onnxruntime-gpu",
+      "version": "1.23.2",
+      "source": "RemingtonVision/.venv/Lib/site-packages/onnxruntime_gpu-1.23.2.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/onnxruntime/LICENSE",
+          "copy": "licenses/onnxruntime-gpu/onnxruntime/LICENSE",
+          "sha256": "c250d6278f0b47a6439fb7592b08b58a55eb9f535aa49a1db63211c3f982b674",
+          "bytes": 1094
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/onnxruntime/ThirdPartyNotices.txt",
+          "copy": "licenses/onnxruntime-gpu/onnxruntime/ThirdPartyNotices.txt",
+          "sha256": "e00f828e0a33de591a355ae6606d2625f5758da7d2c844db7821c9dd3e3647b6",
+          "bytes": 333022
+        }
+      ],
+      "metadata": "licenses/onnxruntime-gpu/METADATA.txt"
+    },
+    {
+      "name": "opencv-python",
+      "version": "4.10.0.84",
+      "source": "RemingtonVision/.venv/Lib/site-packages/opencv_python-4.10.0.84.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/opencv_python-4.10.0.84.dist-info/LICENSE-3RD-PARTY.txt",
+          "copy": "licenses/opencv-python/opencv_python-4.10.0.84.dist-info/LICENSE-3RD-PARTY.txt",
+          "sha256": "0b33c5be17819d10ecad11360c6f2bd5a7df7c0f80a3314a81e28070d93818e2",
+          "bytes": 155450
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/opencv_python-4.10.0.84.dist-info/LICENSE.txt",
+          "copy": "licenses/opencv-python/opencv_python-4.10.0.84.dist-info/LICENSE.txt",
+          "sha256": "edef0fac1eb08d29d34563f724742e078da2513e196133a12c6ad9ff01e26107",
+          "bytes": 1090
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/cv2/LICENSE.txt",
+          "copy": "licenses/opencv-python/cv2/LICENSE.txt",
+          "sha256": "edef0fac1eb08d29d34563f724742e078da2513e196133a12c6ad9ff01e26107",
+          "bytes": 1090
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/cv2/LICENSE-3RD-PARTY.txt",
+          "copy": "licenses/opencv-python/cv2/LICENSE-3RD-PARTY.txt",
+          "sha256": "0b33c5be17819d10ecad11360c6f2bd5a7df7c0f80a3314a81e28070d93818e2",
+          "bytes": 155450
+        }
+      ],
+      "metadata": "licenses/opencv-python/METADATA.txt"
+    },
+    {
+      "name": "packaging",
+      "version": "26.2",
+      "source": "RemingtonVision/.venv/Lib/site-packages/packaging-26.2.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/packaging-26.2.dist-info/licenses/LICENSE",
+          "copy": "licenses/packaging/packaging-26.2.dist-info/licenses/LICENSE",
+          "sha256": "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48",
+          "bytes": 197
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/packaging-26.2.dist-info/licenses/LICENSE.APACHE",
+          "copy": "licenses/packaging/packaging-26.2.dist-info/licenses/LICENSE.APACHE",
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+          "bytes": 10174
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/packaging-26.2.dist-info/licenses/LICENSE.BSD",
+          "copy": "licenses/packaging/packaging-26.2.dist-info/licenses/LICENSE.BSD",
+          "sha256": "b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5",
+          "bytes": 1344
+        }
+      ],
+      "metadata": "licenses/packaging/METADATA.txt"
+    },
+    {
+      "name": "protobuf",
+      "version": "7.35.0",
+      "source": "RemingtonVision/.venv/Lib/site-packages/protobuf-7.35.0.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/protobuf-7.35.0.dist-info/LICENSE",
+          "copy": "licenses/protobuf/protobuf-7.35.0.dist-info/LICENSE",
+          "sha256": "6e5e117324afd944dcf67f36cf329843bc1a92229a8cd9bb573d7a83130fea7d",
+          "bytes": 1732
+        }
+      ],
+      "metadata": "licenses/protobuf/METADATA.txt"
+    },
+    {
+      "name": "psutil",
+      "version": "7.1.0",
+      "source": "RemingtonVision/.venv/Lib/site-packages/psutil-7.1.0.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/psutil-7.1.0.dist-info/LICENSE",
+          "copy": "licenses/psutil/psutil-7.1.0.dist-info/LICENSE",
+          "sha256": "c7adc4d5d1337a548b967421f1fbe258b93033a0417708fd6f4e38f8ecbceb80",
+          "bytes": 1577
+        }
+      ],
+      "metadata": "licenses/psutil/METADATA.txt"
+    },
+    {
+      "name": "pyinstaller",
+      "version": "6.21.0",
+      "source": "RemingtonVision/.venv/Lib/site-packages/pyinstaller-6.21.0.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/pyinstaller-6.21.0.dist-info/licenses/COPYING.txt",
+          "copy": "licenses/pyinstaller/pyinstaller-6.21.0.dist-info/licenses/COPYING.txt",
+          "sha256": "dcf75fdb959db1e3b41c0f8505069d2ece781b5ec6b3d0a4d30975cfc6580245",
+          "bytes": 32138
+        }
+      ],
+      "metadata": "licenses/pyinstaller/METADATA.txt"
+    },
+    {
+      "name": "pypylon",
+      "version": "26.5.0",
+      "source": "RemingtonVision/.venv/Lib/site-packages/pypylon-26.5.0.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/pypylon-26.5.0.dist-info/LICENSE",
+          "copy": "licenses/pypylon/pypylon-26.5.0.dist-info/LICENSE",
+          "sha256": "202fa575a53152a2157f0d009eefffea9fd591d1e62fbb9596a6e409680c0e63",
+          "bytes": 1528
+        }
+      ],
+      "metadata": "licenses/pypylon/METADATA.txt"
+    },
+    {
+      "name": "pyreadline3",
+      "version": "3.5.6",
+      "source": "RemingtonVision/.venv/Lib/site-packages/pyreadline3-3.5.6.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/pyreadline3-3.5.6.dist-info/licenses/LICENSE.md",
+          "copy": "licenses/pyreadline3/pyreadline3-3.5.6.dist-info/licenses/LICENSE.md",
+          "sha256": "8fc4d8de61b40533023b16e64528d13371a2e9c68677df79ed5e93ba570471bd",
+          "bytes": 2250
+        }
+      ],
+      "metadata": "licenses/pyreadline3/METADATA.txt"
+    },
+    {
+      "name": "PySide6",
+      "version": "6.10.0",
+      "source": "RemingtonVision/.venv/Lib/site-packages/pyside6-6.10.0.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/pyside6-6.10.0.dist-info/licenses/LicenseRef-Qt-Commercial.txt",
+          "copy": "licenses/pyside6/pyside6-6.10.0.dist-info/licenses/LicenseRef-Qt-Commercial.txt",
+          "sha256": "4f54763ac0fe2abd8f7f8d8fe370a94a08ebf84786aa0b91045bd6628deb08a3",
+          "bytes": 470
+        }
+      ],
+      "metadata": "licenses/pyside6/METADATA.txt"
+    },
+    {
+      "name": "PySide6_Addons",
+      "version": "6.10.0",
+      "source": "RemingtonVision/.venv/Lib/site-packages/pyside6_addons-6.10.0.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/pyside6_addons-6.10.0.dist-info/licenses/LicenseRef-Qt-Commercial.txt",
+          "copy": "licenses/pyside6-addons/pyside6_addons-6.10.0.dist-info/licenses/LicenseRef-Qt-Commercial.txt",
+          "sha256": "4f54763ac0fe2abd8f7f8d8fe370a94a08ebf84786aa0b91045bd6628deb08a3",
+          "bytes": 470
+        }
+      ],
+      "metadata": "licenses/pyside6-addons/METADATA.txt"
+    },
+    {
+      "name": "PySide6_Essentials",
+      "version": "6.10.0",
+      "source": "RemingtonVision/.venv/Lib/site-packages/pyside6_essentials-6.10.0.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/pyside6_essentials-6.10.0.dist-info/licenses/LicenseRef-Qt-Commercial.txt",
+          "copy": "licenses/pyside6-essentials/pyside6_essentials-6.10.0.dist-info/licenses/LicenseRef-Qt-Commercial.txt",
+          "sha256": "4f54763ac0fe2abd8f7f8d8fe370a94a08ebf84786aa0b91045bd6628deb08a3",
+          "bytes": 470
+        }
+      ],
+      "metadata": "licenses/pyside6-essentials/METADATA.txt"
+    },
+    {
+      "name": "PyYAML",
+      "version": "6.0.3",
+      "source": "RemingtonVision/.venv/Lib/site-packages/pyyaml-6.0.3.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/pyyaml-6.0.3.dist-info/licenses/LICENSE",
+          "copy": "licenses/pyyaml/pyyaml-6.0.3.dist-info/licenses/LICENSE",
+          "sha256": "8d3928f9dc4490fd635707cb88eb26bd764102a7282954307d3e5167a577e8a4",
+          "bytes": 1101
+        }
+      ],
+      "metadata": "licenses/pyyaml/METADATA.txt"
+    },
+    {
+      "name": "setuptools",
+      "version": "81.0.0",
+      "source": "RemingtonVision/.venv/Lib/site-packages/setuptools-81.0.0.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools-81.0.0.dist-info/licenses/LICENSE",
+          "copy": "licenses/setuptools/setuptools-81.0.0.dist-info/licenses/LICENSE",
+          "sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741",
+          "bytes": 1023
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/config/NOTICE",
+          "copy": "licenses/setuptools/setuptools/config/NOTICE",
+          "sha256": "2dddf08818297a3b89d43d95ff659d8da85741108c9136dfa3a4d856c0623bd8",
+          "bytes": 493
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/config/_validate_pyproject/NOTICE",
+          "copy": "licenses/setuptools/setuptools/config/_validate_pyproject/NOTICE",
+          "sha256": "5d300dbfa643138b013b75ac9caeee591f951b8b0ee24288c34ccd926c4780c8",
+          "bytes": 18737
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/_vendor/autocommand-2.2.2.dist-info/LICENSE",
+          "copy": "licenses/setuptools/setuptools/_vendor/autocommand-2.2.2.dist-info/LICENSE",
+          "sha256": "ade78d04982d69972d444a8e14a94f87a2334dd3855cc80348ea8e240aa0df2d",
+          "bytes": 7634
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/_vendor/backports.tarfile-1.2.0.dist-info/LICENSE",
+          "copy": "licenses/setuptools/setuptools/_vendor/backports.tarfile-1.2.0.dist-info/LICENSE",
+          "sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741",
+          "bytes": 1023
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/_vendor/jaraco.text-4.0.0.dist-info/LICENSE",
+          "copy": "licenses/setuptools/setuptools/_vendor/jaraco.text-4.0.0.dist-info/LICENSE",
+          "sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741",
+          "bytes": 1023
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/_vendor/importlib_metadata-8.7.1.dist-info/licenses/LICENSE",
+          "copy": "licenses/setuptools/setuptools/_vendor/importlib_metadata-8.7.1.dist-info/licenses/LICENSE",
+          "sha256": "458502e12d97bbf64438606a20044aa85eb05fb0a8a807bb35dbec253fd1fc04",
+          "bytes": 10278
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/_vendor/jaraco_context-6.1.0.dist-info/licenses/LICENSE",
+          "copy": "licenses/setuptools/setuptools/_vendor/jaraco_context-6.1.0.dist-info/licenses/LICENSE",
+          "sha256": "9755a18519666e5f0f4cae3daad3d7012bcae48a600b31237d75e9fe134e6683",
+          "bytes": 1076
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/_vendor/jaraco_functools-4.4.0.dist-info/licenses/LICENSE",
+          "copy": "licenses/setuptools/setuptools/_vendor/jaraco_functools-4.4.0.dist-info/licenses/LICENSE",
+          "sha256": "5a57cb4db85e2a2dd88c290628908add57e3451449e0a9a71fdfb38776fd759d",
+          "bytes": 1076
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/_vendor/more_itertools-10.8.0.dist-info/licenses/LICENSE",
+          "copy": "licenses/setuptools/setuptools/_vendor/more_itertools-10.8.0.dist-info/licenses/LICENSE",
+          "sha256": "09f1c8c9e941af3e584d59641ea9b87d83c0cb0fd007eb5ef391a7e2643c1a46",
+          "bytes": 1053
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/_vendor/packaging-26.0.dist-info/licenses/LICENSE",
+          "copy": "licenses/setuptools/setuptools/_vendor/packaging-26.0.dist-info/licenses/LICENSE",
+          "sha256": "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48",
+          "bytes": 197
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/_vendor/platformdirs-4.4.0.dist-info/licenses/LICENSE",
+          "copy": "licenses/setuptools/setuptools/_vendor/platformdirs-4.4.0.dist-info/licenses/LICENSE",
+          "sha256": "29e0fd62e929850e86eb28c3fdccf0cefdf4fa94879011cffb3d0d4bed6d4db6",
+          "bytes": 1089
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/_vendor/tomli-2.4.0.dist-info/licenses/LICENSE",
+          "copy": "licenses/setuptools/setuptools/_vendor/tomli-2.4.0.dist-info/licenses/LICENSE",
+          "sha256": "b80816b0d530b8accb4c2211783790984a6e3b61922c2b5ee92f3372ab2742fe",
+          "bytes": 1072
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/_vendor/wheel-0.46.3.dist-info/licenses/LICENSE.txt",
+          "copy": "licenses/setuptools/setuptools/_vendor/wheel-0.46.3.dist-info/licenses/LICENSE.txt",
+          "sha256": "30c23618679108f3e8ea1d2a658c7ca417bdfc891c98ef1a89fa4ff0c9828654",
+          "bytes": 1107
+        },
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/setuptools/_vendor/zipp-3.23.0.dist-info/licenses/LICENSE",
+          "copy": "licenses/setuptools/setuptools/_vendor/zipp-3.23.0.dist-info/licenses/LICENSE",
+          "sha256": "5a57cb4db85e2a2dd88c290628908add57e3451449e0a9a71fdfb38776fd759d",
+          "bytes": 1076
+        }
+      ],
+      "metadata": "licenses/setuptools/METADATA.txt"
+    },
+    {
+      "name": "shiboken6",
+      "version": "6.10.0",
+      "source": "RemingtonVision/.venv/Lib/site-packages/shiboken6-6.10.0.dist-info",
+      "copied_notices": [
+        {
+          "source": "RemingtonVision/.venv/Lib/site-packages/shiboken6-6.10.0.dist-info/licenses/LicenseRef-Qt-Commercial.txt",
+          "copy": "licenses/shiboken6/shiboken6-6.10.0.dist-info/licenses/LicenseRef-Qt-Commercial.txt",
+          "sha256": "4f54763ac0fe2abd8f7f8d8fe370a94a08ebf84786aa0b91045bd6628deb08a3",
+          "bytes": 470
+        }
+      ],
+      "metadata": "licenses/shiboken6/METADATA.txt"
+    },
+    {
+      "name": "zxing-cpp",
+      "version": "3.1.1",
+      "source": "part-tracking-demo-UALR/.builddeps/zxing_cpp-3.1.1.dist-info",
+      "copied_notices": [
+        {
+          "source": "part-tracking-demo-UALR/.builddeps/zxing_cpp-3.1.1.dist-info/licenses/LICENSE",
+          "copy": "licenses/zxing-cpp/zxing_cpp-3.1.1.dist-info/licenses/LICENSE",
+          "sha256": "2e54cd84a645bea25943c75dd8ae67cb291e66a47a11578333c9b4b3b6b86c85",
+          "bytes": 11560
+        }
+      ],
+      "metadata": "licenses/zxing-cpp/METADATA.txt"
+    }
+  ],
+  "model_assets": [
+    {
+      "file": "models/yolox_nano.onnx",
+      "source": "RemingtonVision/models/yolox/yolox_nano.onnx",
+      "sha256": "25ba3c2777ddd852c0771363bbbbc9015208e1b4a1f79e376e1a64943fe960f4",
+      "bytes": 3731491,
+      "source_matches": true
+    },
+    {
+      "file": "models/yolox_nano.onnx.data",
+      "source": "RemingtonVision/models/yolox/yolox_nano.onnx.data",
+      "sha256": "f57d43a8aadb3b4072a2e884e572a5f89848bc778f611d8ae3de58cefc5b7746",
+      "bytes": 3768064,
+      "source_matches": true
+    }
+  ],
+  "vendor_sources": [
+    {
+      "file": "app/vendor/inference/config.py",
+      "source": "RemingtonVision/packages/inference/config.py",
+      "source_exists": true,
+      "sha256": "16914ac7ec8f0661209dde0ad098eb431415047f918a208dc40de9b6001645c2",
+      "source_sha256": "16914ac7ec8f0661209dde0ad098eb431415047f918a208dc40de9b6001645c2"
+    },
+    {
+      "file": "app/vendor/inference/detector.py",
+      "source": "RemingtonVision/packages/inference/detector.py",
+      "source_exists": true,
+      "sha256": "fb44e4a060fc72ccccd56f1d1a3bd70fc7fb001acbbf8a4f87dc4e09c32042c1",
+      "source_sha256": "fb44e4a060fc72ccccd56f1d1a3bd70fc7fb001acbbf8a4f87dc4e09c32042c1"
+    },
+    {
+      "file": "app/vendor/inference/types.py",
+      "source": "RemingtonVision/packages/inference/types.py",
+      "source_exists": true,
+      "sha256": "a2387b0749866c8b835fd4a446fb8c07eca878c56592b922af8f208f1e78fee5",
+      "source_sha256": "a2387b0749866c8b835fd4a446fb8c07eca878c56592b922af8f208f1e78fee5"
+    },
+    {
+      "file": "app/vendor/inference/__init__.py",
+      "source": "RemingtonVision/packages/inference/__init__.py",
+      "source_exists": true,
+      "sha256": "5cd5033c02b1382826590a151afe7bd0b98f4bdd13c314ac0f2e21754e210093",
+      "source_sha256": "5cd5033c02b1382826590a151afe7bd0b98f4bdd13c314ac0f2e21754e210093"
+    },
+    {
+      "file": "app/vendor/inference/backends/base.py",
+      "source": "RemingtonVision/packages/inference/backends/base.py",
+      "source_exists": true,
+      "sha256": "89a7d890be19fc89e25d92f0a2054479fbe715b6c2b1471eae8124d6e76ff682",
+      "source_sha256": "89a7d890be19fc89e25d92f0a2054479fbe715b6c2b1471eae8124d6e76ff682"
+    },
+    {
+      "file": "app/vendor/inference/backends/mock_backend.py",
+      "source": "RemingtonVision/packages/inference/backends/mock_backend.py",
+      "source_exists": true,
+      "sha256": "f9c5b09e2a9e96aec653351147a5ddbc71659f053d5967466116e1f243c18335",
+      "source_sha256": "f9c5b09e2a9e96aec653351147a5ddbc71659f053d5967466116e1f243c18335"
+    },
+    {
+      "file": "app/vendor/inference/backends/onnx_backend.py",
+      "source": "RemingtonVision/packages/inference/backends/onnx_backend.py",
+      "source_exists": true,
+      "sha256": "2f303ab977e3f6bdceed3b44ce0aec5600bd6ba94265b0256c3a345f868b597c",
+      "source_sha256": "2f303ab977e3f6bdceed3b44ce0aec5600bd6ba94265b0256c3a345f868b597c"
+    },
+    {
+      "file": "app/vendor/inference/backends/__init__.py",
+      "source": "RemingtonVision/packages/inference/backends/__init__.py",
+      "source_exists": true,
+      "sha256": "d286af246fbc58c02e621dfbf9f5db817a078a3791a142f046f0e1603c6e871e",
+      "source_sha256": "d286af246fbc58c02e621dfbf9f5db817a078a3791a142f046f0e1603c6e871e"
+    },
+    {
+      "file": "app/vendor/inference/postprocess/base.py",
+      "source": "RemingtonVision/packages/inference/postprocess/base.py",
+      "source_exists": true,
+      "sha256": "344ad5740f0b90dfa7d5a0d6188269bfd671d97bf801904a00ddd89634bb68f6",
+      "source_sha256": "344ad5740f0b90dfa7d5a0d6188269bfd671d97bf801904a00ddd89634bb68f6"
+    },
+    {
+      "file": "app/vendor/inference/postprocess/nms.py",
+      "source": "RemingtonVision/packages/inference/postprocess/nms.py",
+      "source_exists": true,
+      "sha256": "a06e01c5f125f78bb56f707797b1d1659fdf3449fbfe0579991580d500d45072",
+      "source_sha256": "a06e01c5f125f78bb56f707797b1d1659fdf3449fbfe0579991580d500d45072"
+    },
+    {
+      "file": "app/vendor/inference/postprocess/passthrough.py",
+      "source": "RemingtonVision/packages/inference/postprocess/passthrough.py",
+      "source_exists": true,
+      "sha256": "538ed6ef9eeb4f97a929f6202daec4e88b6f552c2b3ae37cd35bc79849126060",
+      "source_sha256": "538ed6ef9eeb4f97a929f6202daec4e88b6f552c2b3ae37cd35bc79849126060"
+    },
+    {
+      "file": "app/vendor/inference/postprocess/yolox.py",
+      "source": "RemingtonVision/packages/inference/postprocess/yolox.py",
+      "source_exists": true,
+      "sha256": "ed51428f3dc5ed65b242df42d3ed568f05fad61e15e8b9c3f7b6f6ba760ad3ec",
+      "source_sha256": "ed51428f3dc5ed65b242df42d3ed568f05fad61e15e8b9c3f7b6f6ba760ad3ec"
+    },
+    {
+      "file": "app/vendor/inference/postprocess/__init__.py",
+      "source": "RemingtonVision/packages/inference/postprocess/__init__.py",
+      "source_exists": true,
+      "sha256": "6db05c54a565e47cf23e5cef6da965b0f2da7696da3b901c811ca63cf4d6959e",
+      "source_sha256": "6db05c54a565e47cf23e5cef6da965b0f2da7696da3b901c811ca63cf4d6959e"
+    }
+  ],
+  "provenance_note": "Source locations are logical references from the original packaging workstation. Source-existence and source-match fields record the original copy-time checks; these references are not absolute paths on the reader's computer."
+}

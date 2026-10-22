@@ -1,0 +1,115 @@
+UALR PART TRACKING DEMO - THIRD-PARTY NOTICES
+
+This file records the local build inputs and the license/notice files available
+in those installed distributions. Exact supplied notices are copied under
+licenses\<package>\. Each package has METADATA.txt and SOURCE.txt. The machine-
+readable licenses\inventory.json records logical source locations, versions,
+copied-file hashes, and local model/inference source provenance. Workstation
+user/profile prefixes have been removed from generated provenance records;
+the copied upstream license and notice texts are unchanged. Existence and
+source-match fields record checks made when the files were originally copied.
+
+CORE COMPONENTS
+
+CPython                 3.11.5
+PySide6                 6.10.0
+PySide6_Essentials      6.10.0
+PySide6_Addons          6.10.0
+shiboken6               6.10.0
+opencv-python           4.10.0.84
+numpy                   2.2.0
+onnxruntime-gpu         1.23.2
+pypylon                 26.5.0
+zxing-cpp               3.1.1
+PyInstaller             6.21.0 (packaging tool and compiled bootloader)
+
+These versions describe the original packaged runtime inputs. They were read
+from RemingtonVision/.venv distribution metadata, except zxing-cpp, whose
+metadata was in this demo's .builddeps folder.
+CPython's runtime license was copied from that environment's base installation.
+The packaged application carries its runtime beside PartTrackingUALR.exe.
+Installed package names describe the build inputs; only the modules collected
+by the packaging recipe are included in the executable/runtime bundle.
+
+The original runtime's installed ONNX Runtime came from the onnxruntime-gpu
+distribution. This application selects CPUExecutionProvider; the packaging recipe
+excludes CUDA/TensorRT provider DLLs and their listed GPU dependencies. The demo
+does not require CUDA or claim GPU inference. ONNX Runtime's LICENSE and
+ThirdPartyNotices.txt are copied verbatim. The source requirements use the CPU
+onnxruntime distribution at the same version; the retained onnxruntime-gpu
+metadata documents the original build input rather than a GPU requirement.
+
+OpenCV's own LICENSE.txt and LICENSE-3RD-PARTY.txt are included. NumPy's supplied
+license includes notices for its bundled numerical/runtime components; additional
+installed NumPy component license files are preserved too. PyInstaller's supplied
+COPYING.txt includes its Bootloader Exception and related licensing terms.
+
+Qt/PySide and Shiboken wheel metadata declares LGPL-3.0-only OR GPL-2.0-only OR
+GPL-3.0-only. The installed wheel license directories contain a
+LicenseRef-Qt-Commercial.txt notice; that exact notice is copied for each wheel.
+Full LGPL/GPL text files were not present in those local wheel directories.
+This inventory does not replace applicable upstream license terms or assert
+that the commercial notice grants a commercial Qt license.
+
+pypylon's wheel License field says Other/Proprietary License. Its actual supplied
+LICENSE text begins Copyright (C) 2017-2023 Basler AG and includes redistribution
+conditions. Both the exact LICENSE and complete metadata are preserved without
+substituting an inferred license label. Other computers may need compatible
+Basler pylon drivers/transport components for camera access.
+
+The zxing-cpp wheel's License-Expression is Apache-2.0; its supplied LICENSE is
+copied. Package notices and upstream project URLs are retained in METADATA.txt.
+
+ADDITIONAL LOCAL DEPENDENCY NOTICES
+
+Available notices/metadata were also preserved for these installed build/runtime
+helpers, including helpers found in the collected runtime or imported dependency
+tree. This list does not mean every file in each installed distribution is
+bundled:
+
+charset-normalizer      3.4.7
+coloredlogs             15.0.1
+flatbuffers             25.12.19
+humanfriendly           10.0
+packaging               26.2
+protobuf                7.35.0
+psutil                  7.1.0
+pyreadline3             3.5.6
+PyYAML                  6.0.3
+setuptools              81.0.0
+
+Flatbuffers supplied local METADATA but no separate license/notice file in its
+installed dist-info directory. Its metadata declaration is retained. Setuptools
+includes locally available notices for its own vendored components.
+
+MODEL AND INFERENCE SOURCE PROVENANCE
+
+models\yolox_nano.onnx and models\yolox_nano.onnx.data were copied from:
+RemingtonVision/models/yolox/
+Both files were verified byte-for-byte by SHA-256 against those local originals:
+
+yolox_nano.onnx
+25ba3c2777ddd852c0771363bbbbc9015208e1b4a1f79e376e1a64943fe960f4
+
+yolox_nano.onnx.data
+f57d43a8aadb3b4072a2e884e572a5f89848bc778f611d8ae3de58cefc5b7746
+
+This is the existing generic YOLOX nano COCO bottle-detection model used for
+this demo, not a newly trained Gatorade/Gator brand model. No separate model-
+specific license or attribution file was found beside those local model files;
+no additional model license is inferred here.
+
+The 13 Python files under app\vendor\inference were copied unchanged from:
+RemingtonVision/packages/inference/
+The source package identifies itself as version 0.1.0. SHA-256 hashes and each
+original source path are recorded in licenses\inventory.json. No separate
+LICENSE/COPYING/NOTICE file was found in that source package subtree; this file
+records the origin without assigning an unsupported license to local code.
+
+The standalone demo's other app code and its synthetic barcode fixtures were
+created for this project. EtherMotion remains a separate application. The
+public release includes its integration and a documentation subset from
+YeChamo/EtherMotion; see EtherMotion/README-DEMO.txt for the full source
+location. The simulator workspace is example configuration and contains no
+original machine state or trigger token. No additional license is assigned to
+EtherMotion or the local project sources by this provenance record.

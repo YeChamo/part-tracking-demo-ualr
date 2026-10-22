@@ -1,0 +1,12 @@
+* text=auto
+*.py text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.onnx binary
+*.onnx.data binary
+*.ico binary
+# Preserve verbatim upstream notices and the corresponding inventory hashes.
+licenses/** -text

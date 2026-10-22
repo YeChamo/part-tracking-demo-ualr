@@ -1,0 +1,4 @@
+Package: shiboken6
+Version: 6.10.0
+Local metadata source: RemingtonVision/.venv/Lib/site-packages/shiboken6-6.10.0.dist-info
+License and notice files copied verbatim; see METADATA.txt for installed wheel declarations.

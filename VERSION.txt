@@ -1,0 +1,12 @@
+Part Tracking Demo UALR 1.1.0
+Windows x64 portable demo
+Color sorting: 0 = pass, 1 = divert
+Barcode decoder: ZXing-C++
+Camera inputs: USB, Basler/GigE, video dry run
+Camera selection: named devices, remembered identity, no automatic fallback
+Inference: portable ONNX Runtime CPU
+Motion bridge: EtherMotion authenticated local HTTP Once programs
+
+Keep _runtime, models, data, and EtherMotion beside PartTrackingUALR.exe.
+Runtime checks: Verify Demo.cmd (does not open cameras or send motion).
+Editable source: app/ and run.py. Rebuild: Build.ps1.

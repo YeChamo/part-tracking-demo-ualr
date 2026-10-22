@@ -1,0 +1,134 @@
+UALR DEMO - ETHERMOTION REJECT SETUP
+
+0/1 are part-routing decisions:
+  0 PASS   -> leave the bottle on the straight route; no reject cycle.
+  1 DIVERT -> request the selected EtherMotion saved Once cycle.
+They do not mean 0 degrees/1 degree, and do not directly select an electrical
+output. The saved EtherMotion moves determine actual motion and return travel.
+
+1. PREPARE THE SAVED REJECT CYCLE
+
+Open the existing EtherMotion installation, normally:
+%USERPROFILE%\Desktop\EtherMotion\EtherMotion.exe
+Its local screen and service normally use http://127.0.0.1:8765.
+Keep EtherMotion running while using live reject output.
+
+Use the actual reject driver and mechanism. Configure the driver's address,
+gearing/pulse scale, permitted speed, acceleration, deceleration, and travel
+limits for that mechanism. Verify direction and usable travel on the machine.
+This demo does not supply a physical reject angle or a universal actuator
+default; a safe extended/retracted position depends on the mechanism.
+
+Save an EXTEND move and a RETURN move in that driver's move library. The return
+must restore the intended clear/retracted state. For repeatable position-based
+cycles, establish a valid EtherMotion zero and use positions appropriate to the
+mechanism. A relative out-and-back pair must have a verified matching return.
+EtherMotion does not automatically undo a move or return after an interruption.
+
+In Cycles, create a named reject program with these steps:
+  - Move: actual reject driver / saved EXTEND move.
+  - Delay: enough dwell to divert the bottle, as measured on the conveyor.
+  - Move: actual reject driver / saved RETURN move.
+Set the cycle's repeat mode to Once. Save it. The cycle runs its sequence once
+for one accepted event. Do not choose Repeat or Until stopped for per-bottle
+sorting. A Home step is not required for every bottle; establish any required
+zero/reference using the mechanism's commissioned procedure.
+
+Test the complete cycle deliberately in EtherMotion and confirm its physical
+extended position, dwell, retraction, and total cycle time before connecting
+automatic bottle events. Keep the mechanism clear during that commissioning.
+EtherMotion Stop is a network deceleration request; the machine's physical stop
+remains necessary if the PC, network, or drive communication fails.
+
+2. PREPARE ETHERMOTION FOR PC EVENTS
+
+Connect every driver referenced by the program. Resolve alarms and require
+enabled, ready, configured, identity-verified, idle status. If an absolute move
+or saved-zero return is used, its driver must have a valid zero/reference.
+In PC events, enable Ethernet triggers for every participating driver. This is
+the runtime remote_enabled gate. Saving a cycle does not enable that gate.
+Stops, disconnects, or faults can disable it; check status after each fault.
+
+The demo never connects physical drivers, changes motion modes, establishes
+zero, enables Ethernet triggers, or installs a cycle automatically. Perform
+those actions in EtherMotion with the actual mechanism visible.
+
+3. CONNECT THE UALR APPLICATION
+
+Enter http://127.0.0.1:8765 as the EtherMotion base address when both applications
+run on this PC. In the EtherMotion tab, Open EtherMotion opens the application;
+Discover / check connection reads the running service. Select the saved Once
+program.
+Discovery reads /api/state, including local authentication and runtime. The
+demo keeps the token in its backend; do not paste it into a public log.
+The bridge checks each participant's readiness and checks that the program is
+Once and idle. No hardware movement is sent by discovery/readiness checks.
+
+Select a live USB or Basler source, verify bottle/color results, calibrate the
+decision-line travel timing, and use Enable live divert output. Output is disarmed
+at application startup. Simulation and recorded video never send hardware
+commands, even if a program was previously selected.
+
+4. CALIBRATE THE REJECT TIME
+
+Measure actual steady belt speed in mm/s and the distance from the decision
+line to the physical reject point in mm. Travel delay is:
+
+  distance_mm / belt_speed_mm_per_second * 1000 milliseconds
+
+Use additional delay and actuator lead to align the mechanism with the bottle.
+Actuator lead accounts for command, communication, and physical extension time;
+verify it experimentally at the intended speed. The model uses time and steady
+speed, not an encoder. Changing speed invalidates a prior timing calibration.
+Leave enough gap for out/dwell/return to complete before the next route-1 bottle.
+The bridge sends one unique event per tracked crossing. It does not queue cycles
+behind a busy actuator or retry an uncertain command automatically.
+
+5. UNDERSTAND ACCEPTANCE, COMPLETION, AND ERRORS
+
+Reject request:
+  POST /program-trigger/<program_id>
+  Authorization: Bearer <local EtherMotion trigger token>
+  JSON body: {"request_id": "<unique bottle event ID>"}
+
+HTTP 202 is acceptance, not movement completion. Poll for the new run ID with:
+  GET /program-trigger/<program_id>/status
+The demo uses the matching run ID to follow accepted work. EtherMotion checks
+drive command counter and stopped status for command-level completion. An
+open-loop drive cannot independently prove shaft position or that a bottle
+physically diverted.
+
+HTTP 409 is a refused command (for example busy/disconnected/not ready). An
+alarm, lost link, missing zero, disabled trigger gate, or busy program must be
+resolved before output resumes. A network timeout after a POST can be uncertain:
+the motion request may already have reached EtherMotion. Inspect that run's
+state before doing anything else; sending the same bottle as a new event can
+create a second physical cycle.
+
+Use Stop + disarm when making changes. If a cycle is still
+moving or its result is uncertain, inspect/stop it in EtherMotion and establish
+the mechanism's clear state before restarting bottle flow. Clearing a tracker
+or closing the camera does not independently establish physical retraction.
+
+SIMULATOR WORKSPACE (NO PHYSICAL DRIVER)
+
+EtherMotion\UALR-simulator-workspace.json is a portable schema-version-1 example
+validated by the installed EtherMotion workspace exporter. It has only driver
+ualr-sim, kind simulator, and Once program ualr-sim-reject. The sequence is:
+SIM +12 degrees -> 0.18 second dwell -> SIM -12 degrees.
+The degree/rate values illustrate an out-and-return cycle solely in simulation.
+They are not presets for a physical driver. No original EtherMotion state,
+trigger tokens, position checkpoints, or physical profiles are included.
+
+To view it in EtherMotion, export anything you want to keep, stop all programs,
+disconnect all drivers, then use Import workspace and choose that JSON file.
+Import replaces the current workspace. Reconnect the simulator for local cycle
+tests. This document does not auto-import, launch a service, or move a drive.
+The UALR application's Simulation source remains a hardware-free dry run; use
+EtherMotion's own simulator controls to inspect its motion-cycle behavior.
+
+For an isolated copy with no changes to your existing workspace, double-click
+Start EtherMotion Simulator.cmd in the demo folder. This creates its own data
+in data\ethermotion-simulator and opens port 8766. The real workspace on port
+8765 is separate. For a live-camera / simulated-actuator trial, use the demo's
+service URL http://127.0.0.1:8766 and enable that simulator's Ethernet triggers.

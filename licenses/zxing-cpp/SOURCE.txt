@@ -1,0 +1,4 @@
+Package: zxing-cpp
+Version: 3.1.1
+Local metadata source: part-tracking-demo-UALR/.builddeps/zxing_cpp-3.1.1.dist-info
+License and notice files copied verbatim; see METADATA.txt for installed wheel declarations.

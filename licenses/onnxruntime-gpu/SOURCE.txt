@@ -1,0 +1,4 @@
+Package: onnxruntime-gpu
+Version: 1.23.2
+Local metadata source: RemingtonVision/.venv/Lib/site-packages/onnxruntime_gpu-1.23.2.dist-info
+License and notice files copied verbatim; see METADATA.txt for installed wheel declarations.

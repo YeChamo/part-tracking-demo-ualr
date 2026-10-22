@@ -1,0 +1,4 @@
+Package: packaging
+Version: 26.2
+Local metadata source: RemingtonVision/.venv/Lib/site-packages/packaging-26.2.dist-info
+License and notice files copied verbatim; see METADATA.txt for installed wheel declarations.

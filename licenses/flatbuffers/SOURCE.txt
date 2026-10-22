@@ -1,0 +1,4 @@
+Package: flatbuffers
+Version: 25.12.19
+Local metadata source: RemingtonVision/.venv/Lib/site-packages/flatbuffers-25.12.19.dist-info
+License and notice files copied verbatim; see METADATA.txt for installed wheel declarations.

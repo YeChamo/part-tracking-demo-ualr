@@ -1,0 +1,4 @@
+Package: coloredlogs
+Version: 15.0.1
+Local metadata source: RemingtonVision/.venv/Lib/site-packages/coloredlogs-15.0.1.dist-info
+License and notice files copied verbatim; see METADATA.txt for installed wheel declarations.

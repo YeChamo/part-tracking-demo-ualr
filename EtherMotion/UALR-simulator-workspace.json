@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "profiles": [
+    {
+      "id": "ualr-sim",
+      "name": "UALR reject SIMULATOR ONLY",
+      "kind": "simulator",
+      "host": "192.168.0.11",
+      "port": 502,
+      "unit_id": 1,
+      "local_ip": "",
+      "gear_ratio": 1.0,
+      "max_rpm": 60,
+      "max_degrees": 3600.0,
+      "pulses_per_rev": 4000
+    }
+  ],
+  "presets": {
+    "ualr-sim": [
+      {
+        "name": "SIM out +12 deg",
+        "mode": "relative",
+        "degrees": 12.0,
+        "speed_rpm": 10,
+        "accel_rps2": 10,
+        "decel_rps2": 10
+      },
+      {
+        "name": "SIM return -12 deg",
+        "mode": "relative",
+        "degrees": -12.0,
+        "speed_rpm": 10,
+        "accel_rps2": 10,
+        "decel_rps2": 10
+      },
+      {
+        "name": "SIM +6 deg",
+        "mode": "relative",
+        "degrees": 6.0,
+        "speed_rpm": 10,
+        "accel_rps2": 10,
+        "decel_rps2": 10
+      },
+      {
+        "name": "SIM -6 deg",
+        "mode": "relative",
+        "degrees": -6.0,
+        "speed_rpm": 10,
+        "accel_rps2": 10,
+        "decel_rps2": 10
+      },
+      {
+        "name": "SIM +3 deg",
+        "mode": "relative",
+        "degrees": 3.0,
+        "speed_rpm": 10,
+        "accel_rps2": 10,
+        "decel_rps2": 10
+      },
+      {
+        "name": "SIM -3 deg",
+        "mode": "relative",
+        "degrees": -3.0,
+        "speed_rpm": 10,
+        "accel_rps2": 10,
+        "decel_rps2": 10
+      }
+    ]
+  },
+  "selected_id": "ualr-sim",
+  "programs": [
+    {
+      "id": "ualr-sim-reject",
+      "name": "UALR SIMULATOR reject out - dwell - return",
+      "steps": [
+        {
+          "type": "move",
+          "driver_id": "ualr-sim",
+          "slot": 1
+        },
+        {
+          "type": "delay",
+          "seconds": 0.18
+        },
+        {
+          "type": "move",
+          "driver_id": "ualr-sim",
+          "slot": 2
+        }
+      ],
+      "repeat_mode": "once",
+      "repeat_count": 1,
+      "cycle_delay_s": 0.0
+    }
+  ],
+  "input_triggers": []
+}

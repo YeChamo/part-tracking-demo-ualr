@@ -1,0 +1,4 @@
+Package: charset-normalizer
+Version: 3.4.7
+Local metadata source: RemingtonVision/.venv/Lib/site-packages/charset_normalizer-3.4.7.dist-info
+License and notice files copied verbatim; see METADATA.txt for installed wheel declarations.
