@@ -93,6 +93,14 @@ def measure_drink_color(frame: np.ndarray, bbox: Sequence[float]) -> dict:
         return {"name": "unknown", "confidence": 0.0, "roi": (0, 0, 0, 0)}
     crop, roi = _sample(frame, bbox, .22, .35)
     reading = _classify_patch(crop, roi)
+    # On a tall or bottom-clipped camera view, this band can be the clear
+    # shoulder. A saturated liquid band just below it is stronger evidence
+    # than a pale reflection for a white-bottle verdict.
+    if reading["name"] == "white":
+        middle_crop, middle_roi = _sample(frame, bbox, .30, .43)
+        middle = _classify_patch(middle_crop, middle_roi)
+        if middle["name"] not in ("unknown", "white") and middle["confidence"] >= .85:
+            reading = middle
     if reading["name"] == "unknown" and y1 <= .02 * frame.shape[0]:
         crop, roi = _sample(frame, bbox, .10, .22)
         reading = _classify_patch(crop, roi)

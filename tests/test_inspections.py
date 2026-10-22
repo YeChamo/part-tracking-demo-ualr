@@ -27,6 +27,36 @@ class CapInspectionTests(unittest.TestCase):
         self.assertEqual(inspect_orange_cap(frame,box)['status'],'missing')
         self.assertEqual(inspect_orange_cap(frame,(40,0,160,300))['status'],'unknown')
 
+    def test_thin_tamper_band_does_not_count_as_cap(self):
+        frame = np.full((480,640,3),180,np.uint8)
+        box = (29,168,135,450)
+        frame[189:198,50:116] = (25,135,240)
+        self.assertEqual(inspect_orange_cap(frame,box)['status'],'missing')
+
+    @unittest.skipUnless((ROOT/'data'/'live-uncapped-2026-10-22.jpg').is_file(),
+                         'live uncapped sample is local workstation data')
+    def test_live_uncapped_sample_with_orange_tamper_band(self):
+        frame = cv2.imread(str(ROOT/'data'/'live-uncapped-2026-10-22.jpg'))
+        pipeline = GatoradePipeline({**DEFAULTS,'label_ocr':False},ROOT).open()
+        try:
+            result = pipeline.infer(frame)
+            self.assertEqual(result['colors'],['yellow'])
+            self.assertEqual(result['caps'][0]['status'],'missing')
+        finally:
+            pipeline.close()
+
+    @unittest.skipUnless((ROOT/'data'/'live-uncapped-1280.jpg').is_file(),
+                         'higher-resolution camera sample is local workstation data')
+    def test_high_resolution_uncapped_sample_retains_yellow_color(self):
+        frame = cv2.imread(str(ROOT/'data'/'live-uncapped-1280.jpg'))
+        pipeline = GatoradePipeline({**DEFAULTS,'label_ocr':False},ROOT).open()
+        try:
+            result = pipeline.infer(frame)
+            self.assertEqual(result['colors'],['yellow'])
+            self.assertEqual(result['caps'][0]['status'],'missing')
+        finally:
+            pipeline.close()
+
     def test_missing_cap_is_informational_even_with_stale_setting(self):
         frame = np.full((320,200,3),180,np.uint8)
         box = (40,30,160,300)

@@ -35,9 +35,9 @@ Press **F11** or double-click the inspection view for full screen. Press **Esc**
 
 The default **Gatorade demo** mode uses the bundled YOLOX-S COCO detector for bottle boxes, then measures exposed drink color within each box. Blue, yellow, and white are represented in the supplied examples. A separate visible-label check is shown and logged as supporting evidence; a rear-facing or unreadable label does not change routing. The model weights are a generic bottle detector, not a Gatorade-trained detector.
 
-The cap inspection looks for the orange closure shown on the supplied bottles. It reports **present**, **missing**, or **unknown** when the top is clipped or visual evidence is inconclusive. Its result is logged for every primary-camera decision but never changes routing. Real uncapped bottles are needed to finalize this check. Other cap styles need their own inspection profile.
+The cap inspection looks for the orange closure shown on the supplied bottles. It reports **present**, **missing**, or **unknown** when the top is clipped or visual evidence is inconclusive. Its result is logged for every primary-camera decision but never changes routing. A live uncapped bottle with its orange tamper band still attached reported **missing** across 12 consecutive frames; check more bottles and viewpoints before finalizing the rule. Other cap styles need their own inspection profile.
 
-RapidOCR reads actual visible label text in the background. Recognized words appear in the live readout and CSV when they can be associated with the same bottle region. Label text and geometric Gatorade-label matches are evidence, not routing rules; rear-facing or blurred labels can remain unread. Background OCR keeps camera detection responsive.
+RapidOCR reads actual visible label text in the background. Recognized words appear in the live readout and CSV when they can be associated with the same bottle region. Label text and geometric Gatorade-label matches are evidence, not routing rules; rear-facing, small, or blurred labels can remain unread. The current 640×480 view of the uncapped bottle shows a large stylized G but yielded no readable text. Background OCR keeps camera detection responsive.
 
 The detector and color inspection found the expected bottle color in all 13
 supplied photos (6 blue, 4 yellow, 3 white) and in tests with reduced exposure,

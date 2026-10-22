@@ -28,11 +28,21 @@ def inspect_orange_cap(frame: np.ndarray, bbox: Sequence[float]) -> dict:
     hue, saturation, value = cv2.split(cv2.cvtColor(patch, cv2.COLOR_BGR2HSV))
     orange = (hue >= 3) & (hue <= 25) & (saturation >= 75) & (value >= 70)
     coverage = float(orange.mean())
-    widest_row = float(orange.mean(axis=1).max())
-    if coverage >= .10 and widest_row >= .35:
-        result.update(status='present',confidence=min(1.0,coverage/.20))
+    row_coverage = orange.mean(axis=1)
+    widest_row = float(row_coverage.max())
+    active = row_coverage >= .35
+    edges = np.flatnonzero(np.diff(np.r_[False,active,False]))
+    runs = [(int(start),int(end-start)) for start,end in zip(edges[::2],edges[1::2])]
+    start, span = max(runs,key=lambda item:item[1]) if runs else (0,0)
+    # An uncapped bottle can retain a thin orange tamper band. Require the
+    # taller closure near the detected bottle top before reporting PRESENT.
+    min_cap_span = max(8,.045*bh)
+    if coverage >= .08 and span >= min_cap_span and start <= .045*bh:
+        result.update(status='present',confidence=min(1.0,span/min_cap_span-0.2))
     elif coverage <= .025 and widest_row < .15:
         result.update(status='missing',confidence=min(1.0,1.0-coverage/.05))
+    elif span >= 3 and span < min_cap_span and start >= .05*bh:
+        result.update(status='missing',confidence=.75)
     return result
 
 
