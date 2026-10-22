@@ -16,7 +16,7 @@ Matches the 17-slide corporate deck. Practice the thought and handoff on each sl
 | 0:47–0:48 | 16–17 | Ideas, contact, and close |
 | 0:48–1:00 | 17 held | Open questions |
 
-This gives roughly **20 minutes of prepared speaking**, **20 minutes of live demo**, **8 minutes for the activity**, and **12 minutes of open questions**. Brad advances slides and watches the clock. Wesley can add his own story where it helps the audience.
+This gives roughly **20 minutes of prepared speaking**, a **20-minute demo block** (about 10–12 minutes of demonstration and 8–10 minutes of guided questions), **8 minutes for the activity**, and **12 minutes of open questions**. Brad advances slides and watches the clock. Wesley can add his own story where it helps the audience.
 
 ## The message to return to
 
@@ -104,19 +104,19 @@ Tell this in your own voice. Your four points: **early software intern → AI an
 
 Add one specific moment that feels like yours: a problem you owned, an experiment that changed direction, or something you learned from the floor. If it fits, say how it felt to carry an idea beyond a prototype. **Brad:** “That ownership—from first question through a system people can use—is why we want more people here. Let us show you the approach live.”
 
-## 12. Live demonstration — Brad + Wesley, 20 minutes
+## 12. Live demonstration — Brad + Wesley, 20-minute block
 
-**Opening (1 minute). Brad:** “We will demonstrate the same sense–decide–act pattern with something familiar: Gatorade bottles. This setup is for this event and is separate from our production inspection systems. As you watch, think like our engineering team: what question are we trying to answer, what evidence do we have, and what would make the result useful to someone running a line?”
+**Before the event:** Choose one pass color and one contrasting bottle, plus one variation you have tested in the event lighting and camera position. Decide whether you will show an on-screen decision or a prevalidated physical divert. Keep cap status, OCR, and barcodes out of the core sequence; add one only if it makes a specific point. The demo uses a general bottle detector and exposed-color measurement for the Gatorade sort decision. Describe those parts accurately.
 
-**Round 1 (4 minutes):** Brad defines the task in one sentence, then places a bottle. Wesley narrates the camera view and on-screen classification or sorting decision. Brad asks what the system had to notice. Repeat once so the pattern is clear. **Point:** A project starts with a decision someone needs to make.
+**Opening (2 minutes). Brad:** “These bottles stand in for a production decision. The task is easy to see: identify a bottle and decide where it should go. The real engineering question is how we carry that decision from an idea to something a person can use and trust. Watch how we define the job, see the evidence, test a change, and decide what more the system would need in real production. This event setup is separate from the inspection systems live at Remington.”
 
-**Round 2 (5 minutes):** Wesley changes one visible condition or selects another bottle or feature. Brad asks the audience to predict the result before running it. Wesley explains what changed. If surprised, say: “That gives us something useful to test.” **Point:** Testing variation exposes what a successful first run cannot tell us.
+**Baseline (4 minutes):** Brad states the selected pass color, places the first bottle, and asks for a prediction. Wesley points to the camera view, bottle detection, exposed-color result, and sort decision. Repeat with the contrasting bottle. Say exactly what happened. If a physical diverter is connected and has been validated for the event setup, show the movement; otherwise call the displayed result an **on-screen sort decision**. **Point:** A project begins with a decision someone needs to make, and the audience can see the evidence behind this one.
 
-**Engineering questions (5 minutes):** Ask: “If this had to work all day on a real line, what would you test next?” Take answers. Wesley discusses variation, timing, observability, and user feedback at a public-safe level. Brad connects the answers to the people who would depend on the result. **Point:** A result becomes an engineering capability when it can be used, checked, and improved in real conditions.
+**One planned variation (4 minutes):** Change one condition you have already tested: bottle orientation, position, or another visible factor. Ask the room to predict what will happen. Wesley shows the result and explains what changed in the evidence. If the outcome is uncertain, name it honestly: “That gives us something useful to test.” Do not improvise a failure case or change several variables at once. **Point:** A successful first run cannot tell us how a system will handle variation.
 
-**Optional feature (3 minutes):** Show one additional feature only if it adds a new lesson. Keep cause and result visible; avoid a feature tour.
+**Guided engineering discussion (7–8 minutes):** Brad asks, “If this had to run all day on a real line, what would you test next? Who would rely on the result?” Take a few answers. Wesley connects one to timing or changing conditions and one to what an operator would need to see. Ask what should happen when evidence is unclear. Explain the system's actual unknown behavior only if you have demonstrated it reliably in the event setup. **Point:** Completion means a result is usable, checkable, and improvable in the real workflow.
 
-**Transition (2 minutes). Brad:** “You have just seen the beginning of how we approach a project: define the real decision, make a system that can respond, change the conditions, and learn from the result. In production, we take it further. We work with the people on the line until that capability is reliable and useful in their workflow. That is what we mean by writing new rules for how engineering work gets done.”
+**Transition (2 minutes). Brad:** “You have seen the beginning of our approach: define the decision, build a response, change the conditions, and learn from the result. The bottle demo illustrates that method. Our SCADA and inspection work shows what it takes to carry a system into a real plant. We work with the people who use it until it is reliable and useful in their workflow. That is what we mean by writing new rules for how engineering work gets done.”
 
 **If the demo stalls:** Show the camera view and last successful result. Ask the room what they would inspect first. Move on after two minutes instead of troubleshooting for the whole session.
 
@@ -152,7 +152,7 @@ Give the room **4–5 minutes**. Wesley helps with access; Brad keeps this slide
 
 **Wesley:** Invite questions and projects in your own words.
 
-**Brad:** “Remington's people paved the way before us. Our responsibility is to build the capabilities that the next generation will stand on. Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.” Hold this slide for open questions.
+**Brad:** “Grace Hopper warned, ‘Probably the most dangerous phrase that can be used in any computer installation is, “But we’ve always done it that way.”’ I think about that here with respect for the generations who built Remington. Their work paved the way. We carry forward what works and use today's tools to solve what comes next. Our responsibility is to bring the same courage and care to the problems in front of us, and build capabilities the next generation will stand on. Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.” Hold this slide for open questions.
 
 ## Staying on track
 
@@ -167,3 +167,5 @@ Give the room **4–5 minutes**. Wesley helps with access; Brad keeps this slide
 ## Source and status notes
 
 Remington's [company history](https://www.remington.com/about-us.html) supports the 1816 origin, TKG's five-brand structure, and Lonoke ammunition focus. Its [employee history](https://www.remington.com/big-green-blog/labor-day-special.html) supports the 1969 Lonoke start. Brad confirmed SCADA, centerfire inspection, and shotshell inspection are live and being polished. The Remington Systems Lab showcase narration informed the project descriptions. Wesley's shotshell story remains his to choose.
+
+The closing uses Grace Hopper's wording as recorded in Richard Seltzer's [1983 account of her remarks](https://www.seltzerbooks.com/snap3.html). The familiar “most dangerous phrase in the language” wording is a later variant; this script uses the attested “computer installation” version. This line is Hopper's, not Marie Curie's.

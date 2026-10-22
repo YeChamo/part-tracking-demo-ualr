@@ -1,7 +1,7 @@
 # Engineering at The Kinetic Group — phone cues
 
 **Brad + Wesley · 17 slides · one-hour session**  
-**Clock:** 0:00 talk → 0:16 live demo → 0:36 hard problems + join us → 0:39 4Founders → 0:48 questions.  
+**Clock:** 0:00 talk → 0:16 demo block (10–12 minutes live + guided questions) → 0:36 hard problems + join us → 0:39 4Founders → 0:48 open questions.  
 **Core line:** Remington's people paved the way. We carry that legacy forward by changing how engineering projects reach the floor and become useful. We want to write the next rules of manufacturing engineering for the generations after us.
 
 **Project route to remember:** Real need → build with users → test in real conditions → put it to work → keep improving.
@@ -76,12 +76,13 @@ Use your own words. Add one moment when you owned an idea beyond its first proto
 
 ## 12 · LIVE DEMO — BRAD + WESLEY · TO 0:36
 
-**Define the decision → first bottle → vary one thing → ask what makes it ready.**  
-**Brad:** Introduce event demo; place bottles and ask for predictions.  
-**Wesley:** Point to camera view, on-screen result, and what changed.  
-**Question:** “If this had to run all day on a real line, what would you test next? Who would need to trust it?”  
+**Define the decision → two clear outcomes → one planned variation → ask what makes it ready.**  
+**Brad:** “These bottles stand in for a production decision. Watch how we define the job, see the evidence, and test a change.” State the pass color; ask for predictions.  
+**Wesley:** Show bottle detection, exposed-color result, and the sort decision. Say **on-screen decision** unless a tested physical diverter moves a bottle.  
+**Change one thing:** Use one pretested orientation, position, or other visible variation. Ask the room to predict the result.  
+**Question:** “If this had to run all day on a real line, what would you test next? Who would rely on it?”  
 **If surprised:** “That gives us something useful to test.”  
-**Exit at 0:36:** “A controlled demo is the beginning. We carry a project into production, learn from users, and improve it there.”
+**Exit at 0:36:** “The bottle demo shows our method. The live Remington systems show the work of carrying it into production with the people who use it.”
 
 ## 13 · HARD PROBLEMS — WESLEY → BRAD
 
@@ -110,7 +111,7 @@ Give 4–5 minutes to try it, then ask for two or three reactions. Ask how their
 **Email: awhite@tkghunt.com. Hold for questions.**  
 **Brad:** “Tell us what you want to build or ask. We will be here afterward.”  
 **Wesley:** Invite questions your way.  
-**Brad:** “Remington's people paved the way. We build what the next generation will stand on. Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.”
+**Brad:** Grace Hopper: “Probably the most dangerous phrase that can be used in any computer installation is, ‘But we’ve always done it that way.’” Respect the generations who built Remington; bring their courage and care to today's problems. “Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.”
 
 ## If you lose the thread
 
