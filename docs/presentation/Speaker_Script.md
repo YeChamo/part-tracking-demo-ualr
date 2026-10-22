@@ -10,7 +10,7 @@ This script follows the ten slide deck. Spoken lines are a draft; the marked gap
 
 **Brad:** Good afternoon. I’m Brad Daugherty. I lead small engineering teams across The Kinetic Group, and most of my work is at Remington in Lonoke. I’m joined by Wesley Siharth. Wesley helped start Remington Vision, and he’ll show you the work firsthand. Wesley, introduce yourself.
 
-**Wesley:** Hi, I’m Wesley Siharth. Remington Vision was first assigned to me when I was an intern, and I’ve carried it forward into my role as an engineer. It has given me a chance to learn by working on a real problem and to keep improving what we build.
+**Wesley:** Hi, I’m Wesley Siharth. I started here as one of the first software interns. Remington Vision was one of the first projects I was asked to take on, and I’ve carried it forward into my role as an engineer.
 
 > **Wesley’s introduction gap — 15 to 20 seconds:** Add one sentence about what you work on now or what first drew you into engineering. Use your own words.
 
@@ -40,11 +40,11 @@ The strongest solutions come when those pieces are designed together. A clever a
 
 **Brad:** Here is why I love this work: the problems do not all look alike. We can move from a mechanical question to a software question, then walk onto the floor and see whether the answer helps. We stay close enough to the work to see the result. Wesley has experienced that from the start of Remington Vision, so I want him to tell you why he loves it.
 
-**Wesley:** For me, it is the chance to own a problem and keep learning as the answer improves. I started on Remington Vision as an intern and continued with it as an engineer. The work crosses disciplines, and we get to see what happens when an idea meets real conditions.
+**Wesley:** I got involved in some interesting work with AI and different machines. What I enjoy most is the variety, the freedom to explore ideas, and the chance to take ownership. There is always something new to figure out.
 
-> **Wesley’s main talking gap — 45 to 60 seconds:** Tell one specific story: a problem you faced on Remington Vision, what you tried, and the moment you saw progress. Explain why that experience made you want to keep doing this work. Keep production details out of the example.
+> **Wesley’s main talking gap — 30 to 45 seconds:** Give one concrete example from Remington Vision or another project: the machine or problem, what you explored, and what you learned. Use only details you are comfortable sharing publicly.
 
-**Wesley:** That is what I love about it. We do not just hand over an idea. We stay with what we build, learn from it, and make it better.
+**Wesley:** I’ve had opportunities here that I would not have expected coming in. That freedom to learn and take ownership is what keeps this work exciting for me.
 
 ## Slide 5 Live demonstration
 
