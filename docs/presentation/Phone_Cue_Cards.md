@@ -6,17 +6,18 @@
 
 **One thought to return to:** We want Remington and The Kinetic Group to write the rules for the future of manufacturing. That work has to succeed on the floor.
 
-Read the **bold anchors**, then speak naturally. Each numbered section matches one slide.
+Read the **bold anchors**, then speak naturally. Each numbered section matches one slide. **Wesley chooses his own words and examples throughout.**
 
 ---
 
-## 1 · INTRO — BRAD
+## 1 · INTRO — BRAD → WESLEY → BRAD
 
-**Me → Wesley → Why we are here**
+**Brad opens → Wesley introduces himself → Brad frames the talk**
 
 - I lead small engineering teams across TKG, mainly at Remington in Lonoke.
-- Wesley helped start Remington Vision as a software intern and carried it into his engineering role.
-- Today: meet us, understand the work, see it live, and tell us what you want to build.
+- “This is Wesley Siharath. Wesley, I’ll let you introduce yourself.”
+- **Wesley:** Your path, your current work, and what drew you in. Choose your own words.
+- **Brad:** Today: understand the work, see it live, and tell us what you want to build.
 
 ---
 
@@ -48,7 +49,7 @@ Read the **bold anchors**, then speak naturally. Each numbered section matches o
 
 - From one of the first software interns to an engineer working with AI and machines.
 - Different problems, room to explore, and ownership of the result.
-- **Personal example:** the problem → what you tried → what you learned.
+- **Your example:** the problem → what you tried → what you learned.
 - Unexpected opportunities are why the work stays exciting.
 
 **Handoff:** Both move to the demo.
@@ -60,7 +61,7 @@ Read the **bold anchors**, then speak naturally. Each numbered section matches o
 **First bottle → Change it → Ask the room**
 
 - **Brad:** Set up camera → decision → on-screen sorting. Show bottle one.
-- **Wesley:** Point out what the camera saw and the decision. Show a different bottle.
+- **Wesley:** Narrate what matters to you on screen. Choose the next bottle or feature.
 - **Brad:** Ask the room to predict the next result. Close with **sense → decide → act**.
 
 If something surprises us: “Good. That tells us what to test next.”
@@ -71,7 +72,7 @@ If something surprises us: “Good. That tells us what to test next.”
 
 **Variation → Timing → Trust**
 
-- **Wesley:** Light, angle, speed, uncertainty. Give one concrete example from the demo.
+- **Wesley:** Choose the hard parts that best connect to the demo. Possible cues: light, angle, speed, uncertainty, trust.
 - **Brad:** A promising result must become dependable in the real operation.
 - **Point to land:** Writing the future rules means solving what happens outside the perfect demo.
 
@@ -113,7 +114,7 @@ If something surprises us: “Good. That tells us what to test next.”
 **Email → Careers → 4Founders**
 
 - **Brad:** Invite follow-up and point to the three paths on screen.
-- **Wesley:** Invite technical questions and things people are building.
+- **Wesley:** Invite technical questions and ideas in your own words.
 - **Brad, close:** “Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.”
 
 ---
