@@ -1,6 +1,6 @@
 """Single-camera bottle vision for the portable UALR conveyor demonstration.
 
-YOLOX predictions supply both bottle locations and bottle colors.
+YOLOX predictions supply bottle locations and optional trained bottle colors.
 Barcodes are decoded from actual camera pixels only.
 Camera reads and inference stay on one worker. The GUI polls a one-frame mailbox
 so slow painting never queues old conveyor images.
@@ -253,8 +253,6 @@ class VideoWorker(QThread):
     def run(self) -> None:
         source = pipeline = None
         try:
-            if self.settings.get("rule", "color") != "color":
-                raise RuntimeError("Live inspection requires the YOLOX color sorting rule.")
             pipeline = YoloXPipeline(self.settings, self.root)
             pipeline.progress = self.preparing.emit
             pipeline.cancelled = self._stopping
@@ -317,6 +315,8 @@ class VideoWorker(QThread):
                     "inspection_error": "",
                     "colors": result["colors"],
                     "color_confidences": result["color_confidences"],
+                    "confidences": result.get("confidences", []),
+                    "visual_only": result.get("visual_only", bool(self.settings.get("visual_only", False))),
                     "model_labels": result["model_labels"], "vision_pipeline": pipeline.describe(),
                     "confidence_revision": confidence_revision,
                     "barcodes": barcodes, "barcode_available": barcode_available,

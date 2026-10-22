@@ -124,7 +124,11 @@ class YoloXPipeline:
         self.root = Path(root)
         self._parts: _Model | None = None
         self._color: _Model | None = None
-        self._mode = str(settings.get("yolox_mode", "two_models"))
+        self._mode = str(settings.get("yolox_mode", "tracking"))
+        self._visual_only = bool(settings.get("visual_only", self._mode == "tracking")) or self._mode == "tracking"
+        if self._visual_only:
+            self._mode = "tracking"
+        self.settings.update(visual_only=self._visual_only, yolox_mode=self._mode)
         self._pass_color = str(settings.get("pass_color", "orange")).strip().lower()
         self._color_confidence = 0.50
         self.progress = None
@@ -180,6 +184,11 @@ class YoloXPipeline:
                 detector.configure_model(details.get('metadata',{}),details['input_shape'])
             metadata_names = class_names_from_metadata(details.get("metadata"))
             names = parse_class_names(self.settings.get(names_key)) or metadata_names
+            if count == 80 and original_path in bundled_locators:
+                if not names:
+                    names = [f"class_{index}" for index in range(count)]
+                if len(names) == count and names[39].casefold() in {"39", "class_39"}:
+                    names[39] = "bottle"
             if names and len(names) != count:
                 raise ValueError(f"The YOLOX model has {count} classes, but {len(names)} class names were supplied.")
             # A stock COCO export sometimes carries labels even when renamed.
@@ -199,14 +208,15 @@ class YoloXPipeline:
         self.close()
         self.set_confidence(self.settings.get("confidence", 0.25),
                             self.settings.get("color_confidence", 0.50))
-        if self._mode not in {"combined", "two_models"}:
-            raise ValueError("Choose combined or two_models for the YOLOX pipeline.")
-        if str(self.settings.get("rule", "color")) != "color":
+        if self._mode not in {"tracking", "combined", "two_models"}:
+            raise ValueError("Choose tracking, combined, or two_models for the YOLOX pipeline.")
+        if not self._visual_only and str(self.settings.get("rule", "color")) != "color":
             raise ValueError("Live YOLOX bottle sorting requires the color rule.")
         try:
-            if self._mode == "two_models":
-                color_path = self._path("color_model_path")
-                self._color = self._open_model(color_path, color=True, second=True)
+            if self._mode in {"tracking", "two_models"}:
+                if self._mode == "two_models":
+                    color_path = self._path("color_model_path")
+                    self._color = self._open_model(color_path, color=True, second=True)
                 self._parts = self._open_model(self._path("model_path", "models/yolox_nano.onnx"), color=False)
                 locator_class = int(self.settings.get("model_class_id", 39))
                 if self.settings.get('auto_model_config') and locator_class==39 and self._parts.class_count<=39:
@@ -225,6 +235,7 @@ class YoloXPipeline:
     def information(self) -> dict:
         color=self._color or self._parts
         return {'colors':list(dict.fromkeys(color.colors.values())) if color else [],
+                'visual_only':self._visual_only,
                 'models':[{'path':str(model.path),'class_names':model.names,
                            'input_shape':list(getattr(model.detector._cfg,'input_hw',(model.detector._cfg.img_size,)*2))}
                           for model in (self._parts,self._color) if model is not None],
@@ -245,7 +256,8 @@ class YoloXPipeline:
         color unknown when no class prediction reaches the color threshold.
         """
         try:
-            bottle, color = float(bottle), float(color)
+            bottle = float(bottle)
+            color = self._color_confidence if self._visual_only else float(color)
         except (TypeError, ValueError):
             raise ValueError("YOLOX confidence must be greater than 0 and at most 1.") from None
         if any(not math.isfinite(value) or not 0 < value <= 1 for value in (bottle, color)):
@@ -260,7 +272,9 @@ class YoloXPipeline:
     def describe(self) -> str:
         if self._parts is None:
             return "YOLOX bottle/color pipeline [closed]"
-        if self._color is not None:
+        if self._visual_only:
+            base=f"YOLOX bottle tracking: {self._parts.path.name}"
+        elif self._color is not None:
             base=f"YOLOX bottles: {self._parts.path.name}; YOLOX colors: {self._color.path.name}"
         else:
             base=f"YOLOX bottle/color: {self._parts.path.name} ({self._parts.class_count} classes)"
@@ -299,11 +313,17 @@ class YoloXPipeline:
         parts_result = self._parts.detector.infer(frame)
         parts = self._detections(parts_result, self._parts)
         inference_ms = float(parts_result.inference_ms)
-        if self._mode == "two_models":
+        if self._mode in {"tracking", "two_models"}:
             locator_class = int(self.settings.get("model_class_id", 39))
             parts = [item for item in parts if locator_class == -1 or item.class_id == locator_class]
         groups = _groups(parts)
         boxes = [tuple(float(value) for value in group[0].xyxy) for group in groups]
+        if self._visual_only:
+            return {"boxes": boxes, "colors": ["unknown"] * len(boxes),
+                    "color_confidences": [0.0] * len(boxes),
+                    "confidences": [float(group[0].score) for group in groups],
+                    "reasons": [[] for _ in boxes], "inference_ms": inference_ms,
+                    "model_labels": [group[0].label for group in groups], "visual_only": True}
         if self._color is None:
             predictions = [self._prediction([item for item in group if item.score >= self._color_confidence],
                                             self._parts.colors, strict=False) for group in groups]

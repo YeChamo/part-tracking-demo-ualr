@@ -1,11 +1,11 @@
 # Part Tracking Demo UALR
 
-A standalone Windows conveyor demo using **YOLOX bottle and color models**, per-bottle tracking, barcode display, and saved EtherMotion programs.
+A standalone Windows **visual bottle-tracking demo** using YOLOX detections, persistent bottle IDs, confidence scores, camera selection, and barcode display. Visual mode sends no motion commands.
 
-Version **1.3.0 candidate** packages as `PartTrackingDemoUALR-v1.3.0-Windows-x64.zip`.
+Version **1.4.0 preview** packages as `PartTrackingDemoUALR-v1.4.0-Windows-x64.zip`.
 
-- **0 = PASS:** the selected color; no movement by default, or a selected pass program.
-- **1 = REJECT / DIVERT:** a different or unknown color; the selected reject program.
+- Visual tracking starts with the included real COCO YOLOX-Nano bottle detector; a separate color model is not required.
+- Bottles receive IDs anywhere in the camera image, including stationary bottles in the center.
 - Named USB/Basler camera selection, live bottle/color confidence sliders, and full-screen inspection.
 - Optional return program, timed clearance, sequential cycle repeats, and CSV logs.
 - Camera-free simulation and recorded-video dry runs never send motion commands.
@@ -14,16 +14,18 @@ Version **1.3.0 candidate** packages as `PartTrackingDemoUALR-v1.3.0-Windows-x64
 
 Download the **Windows portable ZIP** from [Releases](https://github.com/YeChamo/part-tracking-demo-ualr/releases/latest), extract the complete folder, and double-click **Start Demo.cmd**. No Python installation is needed. Keep `_runtime`, `models`, and the other supplied folders beside `PartTrackingUALR.exe`.
 
-Checkpoint conversion and custom-configuration support are available in the [1.3.0 preview](https://github.com/YeChamo/part-tracking-demo-ualr/releases/tag/v1.3.0-rc1).
+Visual tracking and checkpoint conversion are available in the [1.4.0 preview](https://github.com/YeChamo/part-tracking-demo-ualr/releases/tag/v1.4.0-rc1).
 
 The repository contains editable source; ready-to-run applications and bundled runtimes are release assets.
 
 ## Camera, models, and display
 
-1. Click **Stop + disarm**, choose **USB camera** or **Basler / GigE**, and select your camera by name. Use **Refresh cameras** after connecting a device.
-2. In **Models**, choose your **Bottle YOLOX** and **Color YOLOX** files: `.pth`, `.pt`, or `.onnx`. Leave **Read saved model settings** checked, then click **Load / convert models**. Model names, input dimensions, and recorded settings are read automatically. Use advanced options when your training export needs an override or custom experiment.
-3. In **Color + code**, choose the pass color. Click **Start inspection** and verify the boxes, color decisions, and barcode display.
-4. Use **Tracking** for direction, entry/decision-line geometry, and measured belt speed. Use **Diverter** for EtherMotion programs and timing.
+1. Choose **USB camera** or **Basler / GigE**, then select your camera by name. A saved, connected camera starts automatically. Use **Refresh cameras** after connecting another device.
+2. Leave **Visual bottle tracking** selected. The bundled **YOLOX-Nano** bottle model is ready to use. The optional YOLOX-S model is larger and slower on CPU. A trained color model is not required for boxes and IDs.
+3. Place a bottle in view. The live image shows its box, ID, and model confidence; the live readout shows current detections. Bottles do not need to cross an entry or reject line.
+4. Adjust **Bottle confidence** if needed. Press **F11** for full-screen view. Barcode results remain real decoded values; unread symbols stay `UNREAD`.
+
+The default visual-only setup hides motion controls and blocks connection, arming, and dispatch. Optional trained-color and legacy sorting settings remain available in the source; they are not needed for this demo.
 
 A saved USB camera is followed by device identity when Windows changes its index. A missing camera blocks startup; the app does not switch to the laptop camera. Manual camera index remains an explicit advanced choice.
 
@@ -31,7 +33,7 @@ Press **F11** or double-click the inspection view for full screen. Press **Esc**
 
 ## YOLOX models and confidence
 
-The default **Bottle model + color model** mode uses one YOLOX detector for bottle boxes and one for trained color/category predictions. Select your trained `.pth`, `.pt`, or `.onnx` file in the color/category picker. Exact trained category names can be used independently of automatic input sizing. A blank bottle-model selection uses the bundled generic COCO **YOLOX-Nano** locator. For the optional larger generic locator, select `models/yolox_s.onnx` in the bottle model picker. Both use COCO bottle class ID **39**; neither is a color-trained or Gatorade brand-trained model.
+The default **Visual bottle tracking** mode uses one included YOLOX detector for bottle boxes. In the optional **Bottle model + color model** mode, select your trained `.pth`, `.pt`, or `.onnx` file in the color/category picker. Exact trained category names can be used independently of automatic input sizing. A blank bottle-model selection uses the bundled generic COCO **YOLOX-Nano** locator. For the optional larger generic locator, select `models/yolox_s.onnx` in the bottle model picker. Both use COCO bottle class ID **39**; neither is a color-trained or Gatorade brand-trained model.
 
 The color model's class order is read from checkpoint or ONNX metadata. If names are absent, enter the exact trained order, for example `orange,blue,green`. The advanced class map accepts explicit IDs such as `0:orange,1:blue,2:green`. The bottle locator class ID selects its bottle class; `-1` accepts all locator classes. For one model already trained on `orange_bottle`, `blue_bottle`, etc., choose **One model: colored bottles** and select it in the bottle model picker.
 

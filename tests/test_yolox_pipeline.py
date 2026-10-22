@@ -175,6 +175,32 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(result["reasons"], [[]])
         self.assertEqual(pipe.information()["colors"], ["plum", "lemon"])
 
+    def test_tracking_mode_uses_only_bottle_model_and_preserves_detector_confidence(self):
+        self.model("bottles.onnx", count=80, detections=[
+            detection(color_id=39, score=.83, label="bottle"),
+            detection((130, 10, 200, 190), 0, .95, "person"),
+        ])
+        pipe = self.pipeline(visual_only=True, yolox_mode="tracking", rule="tracking",
+                             model_path="bottles.onnx", color_model_path="", pass_color="unused")
+        result = pipe.infer(np.zeros((240, 320, 3), np.uint8))
+        self.assertEqual(result["boxes"], [(10., 10., 100., 200.)])
+        self.assertEqual(result["confidences"], [.83])
+        self.assertEqual(result["model_labels"], ["bottle"])
+        self.assertEqual(result["colors"], ["unknown"])
+        self.assertEqual(result["reasons"], [[]])
+        self.assertTrue(result["visual_only"])
+        self.assertIsNone(pipe._color)
+        self.assertEqual(len(self.seen), 1)
+
+    def test_visual_only_flag_bypasses_a_saved_two_model_color_requirement(self):
+        self.model("bottles.onnx", names=["bottle"], detections=[detection(label="bottle")])
+        pipe = self.pipeline(visual_only=True, yolox_mode="two_models", auto_model_config=True,
+                             model_path="bottles.onnx", color_model_path="missing.onnx", color_confidence=None)
+        self.assertEqual(pipe.settings["model_class_id"], 0)
+        self.assertEqual(len(self.opened), 1)
+        self.assertEqual(pipe.information()["colors"], [])
+        self.assertEqual(pipe.infer(np.zeros((240, 320, 3), np.uint8))["model_labels"], ["bottle"])
+
     def test_pass_color_must_be_in_trained_classes(self):
         with self.assertRaisesRegex(ValueError, "pass color"):
             self.pipeline(pass_color="green")

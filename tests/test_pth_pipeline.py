@@ -67,7 +67,7 @@ class PthPipelineTests(unittest.TestCase):
 
     def settings(self, **values):
         from app.settings import DEFAULTS
-        return {**DEFAULTS, "rule": "color", "yolox_mode": "combined",
+        return {**DEFAULTS, "visual_only": False, "rule": "color", "yolox_mode": "combined",
                 "auto_model_config": True, "inference_backend": "cpu",
                 "confidence": .5, "color_confidence": .5, **values}
 

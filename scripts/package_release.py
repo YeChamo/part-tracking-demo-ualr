@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import zipfile
 
-VERSION = '1.3.0'
+VERSION = '1.4.0'
 
 def main():
     root = Path(__file__).resolve().parents[1]

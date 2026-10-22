@@ -49,6 +49,7 @@ class CameraPickerTests(unittest.TestCase):
         self.folder = tempfile.TemporaryDirectory(prefix="ualr-camera-picker-")
         self.root = Path(self.folder.name)
         (self.root / "data").mkdir()
+        (self.root / 'data' / 'settings.json').write_text('{"visual_only":false,"yolox_mode":"two_models","rule":"color"}',encoding='utf-8')
         self.laptop = CameraChoice("usb", "usb:laptop", "Laptop built-in", 0)
         self.external = CameraChoice("usb", "usb:conveyor", "Conveyor USB camera", 1)
         self.basler = CameraChoice("basler", "basler:12345", "Basler ace (12345)", serial="12345")

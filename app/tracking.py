@@ -1,9 +1,10 @@
 """Small, dependency-free tracker for a single conveyor lane.
 
 Coordinates are image pixels. ``line`` and ``entry`` are fractions measured
-from the incoming side, so the same recipe works in either direction. A track
-must first appear in the entry zone. Only a fresh detection crossing the line
-can produce a decision; extrapolation is used solely for association.
+from the incoming side, so the same recipe works in either direction. Sorting
+tracks first appear in the entry zone and decide only on a fresh line crossing.
+Visual-only tracks can begin anywhere and never produce sorting decisions.
+Extrapolation is used solely for association.
 """
 
 from __future__ import annotations
@@ -23,8 +24,11 @@ class TrackingConfig:
     entry: float = 0.30
     confirm_frames: int = 3
     max_miss: float = 0.40
+    visual_only: bool = False
 
     def __post_init__(self) -> None:
+        if type(self.visual_only) is not bool:
+            raise ValueError("visual_only must be a boolean")
         if self.direction not in {"ltr", "rtl"}:
             raise ValueError("direction must be ltr or rtl")
         for name in ("line", "entry", "max_miss"):
@@ -105,6 +109,12 @@ class BottleTracker:
         return progress <= self.config.entry and self._leading(box, width) < self.config.line
 
     def _inspect(self, track: Track, reasons: list[str]) -> None:
+        if self.config.visual_only:
+            track.bad = False
+            track.reasons.clear()
+            track._streak = 0
+            track._pending.clear()
+            return
         # Unavailable inspection is a fail-closed state, never a good bottle.
         unavailable = any(reason.casefold().startswith(("inspection unavailable", "unknown inspection", "unknown color", "not inspected", "vision unavailable")) for reason in reasons)
         if reasons:
@@ -127,8 +137,8 @@ class BottleTracker:
         new_w, new_h = box[2] - box[0], box[3] - box[1]
         dt = captured - track.last_seen
         forward = nx - cx if self.config.direction == "ltr" else cx - nx
-        # Small detector jitter is fine; moving back a bottle width is not.
-        if forward < -max(3.0, min(old_w, new_w) * 0.22):
+        # Sorting follows a one-way belt; a visual demonstration may reverse.
+        if not self.config.visual_only and forward < -max(3.0, min(old_w, new_w) * 0.22):
             return None
         if max(old_w, new_w) / min(old_w, new_w) > 2.0 or max(old_h, new_h) / min(old_h, new_h) > 1.8:
             return None
@@ -207,7 +217,7 @@ class BottleTracker:
             self._tracks.clear()
             self._paused_at = None
         self._shape = (width, height)
-        if not moving:
+        if not moving and not self.config.visual_only:
             if self._paused_at is None:
                 self._paused_at = captured
             return self.tracks, []
@@ -240,7 +250,8 @@ class BottleTracker:
             track.last_seen = captured
             track.missed = False
             self._inspect(track, reasons[index])
-            if not track.decided and previous_edge < self.config.line <= self._leading(box, width):
+            if (not self.config.visual_only and not track.decided
+                    and previous_edge < self.config.line <= self._leading(box, width)):
                 # Confirmation filters transient upstream noise, but evidence
                 # still unresolved at the deadline cannot become a PASS merely
                 # because too few camera frames remain for confirmation.
@@ -258,7 +269,7 @@ class BottleTracker:
                 track._streak = 0
                 track._pending.clear()
         for index, box in enumerate(boxes):
-            if index in used or not self._at_entry(box, width):
+            if index in used or (not self.config.visual_only and not self._at_entry(box, width)):
                 continue
             # An unassociated duplicate around an existing bottle must not
             # create a second identity (including detector duplicate boxes).

@@ -140,6 +140,35 @@ class MailboxTests(unittest.TestCase):
 
 
 class YoloXWorkerTests(unittest.TestCase):
+    def test_visual_tracking_forwards_detector_confidence_without_color_requirements(self):
+        frame = np.full((100, 100, 3), 127, np.uint8)
+        pipeline = FakePipeline({"boxes": [(20, 10, 80, 90)], "colors": ["unknown"],
+                                 "color_confidences": [0.0], "confidences": [.77],
+                                 "model_labels": ["bottle"], "visual_only": True,
+                                 "reasons": [[]], "inference_ms": 3.0})
+        with tempfile.TemporaryDirectory() as folder:
+            worker = VideoWorker({"source": "usb", "visual_only": True, "rule": "tracking"}, Path(folder))
+            packets = []
+            reads = 0
+            def read(_source):
+                nonlocal reads
+                reads += 1
+                if reads == 1:
+                    return frame, 10.0
+                packets.append(worker.take_latest())
+                raise EOFError("Test source ended")
+            with patch("app.vision.YoloXPipeline", return_value=pipeline), patch.object(
+                    worker, "_open_source", return_value=(("usb", object(), None), "Fake camera")), patch.object(
+                    worker, "_read_source", side_effect=read), patch.object(worker, "_close_source"), patch(
+                    "app.vision.barcode_status", return_value=(False, "Unavailable")):
+                worker.run()
+            self.assertEqual(len(packets), 1)
+            self.assertTrue(packets[0]["visual_only"])
+            self.assertTrue(packets[0]["inspection_ready"])
+            self.assertEqual(packets[0]["confidences"], [.77])
+            self.assertEqual(packets[0]["model_labels"], ["bottle"])
+            self.assertEqual(packets[0]["reasons"], [[]])
+
     def test_worker_uses_model_predictions_instead_of_pixel_color(self):
         # The visible pixels are orange. The model reports blue, and its class
         # prediction and routing decision must arrive at the UI unchanged.

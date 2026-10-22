@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 
@@ -79,6 +80,30 @@ def check_runtime(root: Path) -> int:
         configured=prepare_model(checkpoint,root,image_size=None,experiment_path=str(experiment))
         checks['checkpoint_export']['custom_experiment_exported']=configured.is_file()
         from .tracking import BottleTracker, TrackingConfig
+        visual=YoloXPipeline({'visual_only':True,'yolox_mode':'tracking','rule':'tracking',
+                              'model_path':'models/yolox_nano.onnx','model_class_id':39,
+                              'auto_model_config':True,'inference_backend':'cpu','confidence':.20},root)
+        try:
+            visual.open()
+            fixture=os.environ.get('UALR_BOTTLE_TEST_IMAGE','')
+            frame=cv2.imread(fixture) if fixture else np.zeros((480,640,3),dtype=np.uint8)
+            if frame is None: raise RuntimeError('Visual tracking test image could not be read.')
+            tracker=BottleTracker(TrackingConfig(visual_only=True))
+            identities=[]
+            for step in range(4):
+                prediction=visual.infer(frame)
+                tracks,decisions=tracker.update(prediction['boxes'],prediction['reasons'],
+                                               1+step/15,frame.shape[1],frame.shape[0])
+                if decisions or any(prediction['reasons']):
+                    raise RuntimeError('Visual tracking must not emit routing decisions.')
+                identities.append([track.id for track in tracks if not track.missed])
+            if fixture and (not identities[0] or any(ids!=identities[0] for ids in identities)):
+                raise RuntimeError('The supplied real-bottle fixture did not retain stable IDs.')
+            checks['visual_tracking']={'ready':True,'color_model_required':False,
+                                       'routing_decisions':0,'frames':4,'track_ids':identities,
+                                       'real_photo_tested':bool(fixture)}
+        finally:
+            visual.close()
         from .simulation import Simulation, WIDTH, HEIGHT
         from .settings import DEFAULTS
         for direction in ('ltr','rtl'):

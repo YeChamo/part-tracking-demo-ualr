@@ -41,6 +41,7 @@ class ModelSetupTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory(); self.root=Path(self.temp.name)
         (self.root/'data').mkdir()
+        (self.root/'data'/'settings.json').write_text('{"visual_only":false,"yolox_mode":"two_models","rule":"color"}',encoding='utf-8')
         with patch('app.ui.QTimer.singleShot'): self.window=MainWindow(self.root,smoke_test=True)
         self.window.timer.stop(); self.window.jobs.pool.shutdown(wait=True,cancel_futures=True)
         self.window.jobs=Mock()
