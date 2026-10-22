@@ -1,120 +1,108 @@
-# Engineering at The Kinetic Group Speaker Script
+# Engineering at The Kinetic Group — Practice Script
 
-Brad Daugherty and Wesley Siharth · Go 4th Fridays · October 23, 2026
+**Brad Daugherty and Wesley Siharath**
 
-This script follows the ten slide deck. Spoken lines are a draft; the marked gaps are for Wesley’s own examples. Allow about 12 to 14 minutes of speaking, 5 to 6 minutes for the live demonstration, and about 3 minutes for the interactive challenge.
+Go 4th Fridays · October 23, 2026
 
-## Talk at a glance
+This follows the ten-slide corporate deck. Speaker labels are spoken lines; italic text is a stage cue. Aim for about **10–12 minutes of remarks**, plus **5–6 minutes for the live demo** and **3 minutes for the audience activity**. Practice the handoffs more than the exact wording.
 
-| Slide | Lead | Point to land |
+| Slide | Lead | Main idea |
 | --- | --- | --- |
-| 1 | Brad → Wesley → Brad | Who we are and why we are here |
-| 2 | Brad | Honor Remington’s history; set the ambition for the next decades |
-| 3 | Brad | Engineering connects sensing, decisions, and action on the floor |
-| 4 | Brad → Wesley | Why we love the variety, freedom, ownership, and growth |
-| 5 | Wesley | Show the Gatorade bottle sorting demonstration |
-| 6 | Wesley → Brad | A promising result must survive variation, timing, and real use |
-| 7 | Brad | Invite people to join teams across Remington and TKG |
-| 8 | Brad | Run the separate 4Founders interactive challenge |
-| 9 | Brad | Invite ideas beyond the roles described; explore a possible fit |
-| 10 | Brad → Wesley → Brad | Give follow-up paths and close on the factory floor |
+| 1 · Engineering at The Kinetic Group | Wesley → Brad | Meet the people and set the purpose |
+| 2 · Writing the next rules | Brad | Honor the legacy; name the ambition |
+| 3 · Engineering that reaches the floor | Brad | Sense → decide → act |
+| 4 · Why we love this work | Wesley | Variety, freedom, ownership, opportunity |
+| 5 · Live demonstration | Wesley | Show the bottle sorting decision |
+| 6 · The hard problems | Wesley → Brad | Make the result useful in real conditions |
+| 7 · Come fight for what is next | Brad | Invite talent across Remington and TKG |
+| 8 · Try it yourself | Brad | Let the audience explore the 4Founders activity |
+| 9 · Bring us your idea | Brad | Invite interests beyond the roles described |
+| 10 · Let us connect | Brad → Wesley → Brad | Give clear follow-up paths and close |
 
-## Slide 1 Introduction
+## Slide 1 — Engineering at The Kinetic Group
 
-*About 1 minute*
+**Wesley:** Good afternoon. I’m Wesley Siharath. I started at Remington as one of the first software interns. One of my first assignments was Remington Vision. I got to help build it, learn from the people around it, and carry that work forward into my role as an engineer. Today, Brad and I want to show you what engineering can look like when an idea makes its way onto the factory floor.
 
-**Brad:** Good afternoon. I’m Brad Daugherty. I lead small engineering teams across The Kinetic Group, and most of my work is at Remington in Lonoke. I’m joined by Wesley Siharth. Wesley helped start Remington Vision, and he’ll show you the work firsthand. Wesley, introduce yourself.
+*Wesley turns to Brad.*
 
-**Wesley:** Hi, I’m Wesley Siharth. I started here as one of the first software interns. Remington Vision was one of the first projects I was asked to take on, and I’ve carried it forward into my role as an engineer.
+**Brad:** I’m Brad Daugherty. I lead small engineering teams across The Kinetic Group, with most of my work at Remington in Lonoke. We are here to introduce our organization, show you some of the work, and meet people who might want to build with us. We’ll keep the explanation simple, show you a live demonstration, and then make time to hear what you are interested in.
 
-> **Wesley’s introduction gap — 15 to 20 seconds:** Add one sentence about what you work on now or what first drew you into engineering. Use your own words.
+## Slide 2 — Writing the next rules
 
-**Brad:** Today we want to introduce the work, show you something live, and leave time for questions. We also want to meet people who might help shape where this goes next. You do not need a manufacturing background to see the opportunity. The interesting work often starts when someone from a different discipline asks why we do something a certain way.
+**Brad:** Remington’s story goes back to 1816. The Lonoke operation has been part of that story since 1969. That is a remarkable history in American manufacturing, and we are proud to be part of it.
 
-## Slide 2 Writing the next rules
+The world around manufacturing has changed. Machines can now give us a clearer picture of what is happening. Software can make that information useful in the moment. And engineers from different disciplines can work together in ways that were much harder before.
 
-*About 2 minutes*
+We want Remington and The Kinetic Group to **keep writing the rules for manufacturing for decades to come**. That is an ambitious goal. It means developing capabilities that help people solve real problems on the floor, then proving those capabilities in the conditions where they have to work. We have a strong foundation. Our job is to build the next chapter.
 
-**Brad:** Remington’s story reaches back to 1816. Manufacturing in Lonoke became part of that story in 1969. There is a deep history here, in Arkansas and in American manufacturing, built by people who knew how to turn hard engineering problems into things that worked every day.
+## Slide 3 — Engineering that reaches the floor
 
-We want to honor that history and be just as ambitious about what comes next. The world has changed. We have new ways for machines to sense what is happening, for controls to respond, and for software to make information useful to the people running an operation. Those tools create a chance to rethink how engineering and manufacturing work together.
+**Brad:** The system we are going to show you is easy to describe: **sense, decide, act**. A camera or a machine captures what is happening. Software turns that information into a decision. Then a person or a piece of equipment can take action.
 
-Our ambition is for Remington and The Kinetic Group to keep writing the rules for manufacturing for decades to come. That means building capabilities that matter on the floor: systems that help people see a problem sooner, make a better decision, and keep improving the process. The legacy gives us a strong foundation. What we build from here is our responsibility.
+The interesting engineering is in connecting those steps. Can we get a clear view? Can we make a useful decision in time? Can the person running the process understand and trust the result? Our teams work across machines, software, controls, and the operation itself to answer those questions. We build, test, learn from the floor, and improve.
 
-## Slide 3 Engineering that reaches the floor
+*Brad turns toward Wesley.*
 
-*About 2 minutes*
+**Brad:** Wesley has lived that process from the beginning of Remington Vision. I want him to tell you what makes the work exciting.
 
-**Brad:** The teams I lead are small, but the system we build crosses disciplines. In simple terms, it has to sense what is happening, make a decision, and help someone or something act. A machine might capture a signal. Software interprets it. Then a person or a control system responds.
+## Slide 4 — Why we love this work
 
-The engineering challenge is making those pieces work together in real conditions. A clever model cannot rescue a poor view of a part. A machine can capture data, but the result only matters if someone can use it. We build the full chain, test it beside the operation, and improve it with the people who use it. That is how an idea becomes a capability on the floor.
+**Wesley:** That first project pulled me into some interesting work with AI and different machines. What I enjoy most is the variety, the freedom to explore ideas, and the chance to take ownership.
 
-## Slide 4 Why we love this work
+One day we might be working through a software problem. The next, we are at a machine trying to understand what is actually happening. We get to follow an idea far enough to see whether it helps. There is always something new to figure out.
 
-*Brad hands off to Wesley · about 2 minutes, including Wesley’s example*
+**Wesley’s example — 30 to 45 seconds:** *Describe one specific moment from Remington Vision or another project: What did you try? What surprised you? What did you change? Use your own words and only details you can share publicly.*
 
-**Brad:** Here is why I love this work: the problems do not all look alike. We can move from a mechanical question to a software question, then walk onto the floor and see whether the answer helps. We have room to explore, but we also own the result. Wesley has experienced that from the start of Remington Vision, so I want him to tell you why he loves it.
+**Wesley:** I’ve had opportunities here that I would not have expected when I came in. I was trusted to learn, to explore, and to own a piece of the work. That is why I love doing it, and it is the kind of opportunity we want more people to have.
 
-**Wesley:** I got involved in some interesting work with AI and different machines. What I enjoy most is the variety, the freedom to explore ideas, and the chance to take ownership. There is always something new to figure out.
+*Wesley advances to the demo slide.*
 
-> **Wesley’s main talking gap — 30 to 45 seconds:** Give one concrete example from Remington Vision or another project: the machine or problem, what you explored, and what you learned. Use only details you are comfortable sharing publicly.
+## Slide 5 — Live demonstration
 
-**Wesley:** I’ve had opportunities here that I would not have expected coming in. That freedom to learn and take ownership is what keeps this work exciting for me.
+**Wesley:** Let’s show you what this looks like. We’ll put Gatorade bottles in front of a camera. The application will identify what it sees and show the sorting decision on screen. You can watch the path from an image to a decision to a visible result.
 
-## Slide 5 Live demonstration
+*Show one bottle. Pause for the result. Show a different bottle and invite the audience to predict the result. If time permits, show one other feature or let someone choose the next bottle.*
 
-*Wesley leads · allow about 5 to 6 minutes for the live demonstration*
+**Wesley:** This is a demonstration setup, so the sorting action you see is on screen. The point is to make the engineering visible: what the system sees, what it decides, and what we can learn when the conditions change.
 
-**Wesley:** Let me show you a simple version of that idea. We will put ordinary Gatorade bottles in front of a camera. The application will identify what it sees and show an on-screen sorting decision. You can follow the path from the image, to the decision, to a visible result.
+*If a result is unexpected: “That is useful to see. Let’s look at what the camera saw and talk through what we would test next.”*
 
-What you are seeing is a demonstration setup. It does not control a production sorting line. We chose an everyday object so the engineering is easy to see and the questions are easy to ask.
+## Slide 6 — The hard problems
 
-*Delivery cue: Brad hands Wesley the floor and operates the slides. Wesley demonstrates one bottle, then a different color. If the setup supports it, let someone choose the next bottle or show another visible feature. Pause after each result. Explain details only when they help the audience understand what changed.*
+**Wesley:** A live result is exciting. The deeper challenge is making it useful again and again. Lighting changes. Objects arrive at different angles. A decision may need to happen quickly. And if the result is hard to understand, the people using it cannot rely on it.
 
-## Slide 6 The hard problems
+That is why we test variation, timing, and reliability together. We have to know how a system behaves when it is uncertain, and we have to make that behavior clear to the person who needs to act.
 
-*Wesley, then Brad · about 2 minutes*
+**Wesley’s technical example — 20 to 30 seconds:** *Point to something the audience just saw. Explain one practical issue you had to solve or would test next. Keep it concrete.*
 
-**Wesley:** The live result is the exciting part. The hard engineering is making a system useful when conditions change. A camera may see a different angle or different light. The pace of an operation may give you only a short time to decide. And if a result varies unpredictably, people will stop trusting it, even when it often looks impressive.
+**Brad:** That is what we mean by engineering that reaches the floor. A promising idea is the beginning. Making it dependable in the real operation is the work. Those are some of the most interesting engineering challenges of our time, and solving them will help shape what manufacturing becomes next.
 
-So we have to think about variation, timing, and reliability together. We test the conditions a system will really encounter. We decide what it should do when it is uncertain. We make the result clear to the person who needs to act on it.
+## Slide 7 — Come fight for what is next
 
-> **Wesley’s technical talking gap — 20 to 30 seconds:** Point to one behavior the audience just saw. Explain a practical challenge you had to solve to make that result repeatable, using only details you are comfortable sharing publicly.
+**Brad:** We are looking for people who want to take on that work with us. There are opportunities across Remington and The Kinetic Group. It takes mechanical engineers, controls engineers, software builders, people who love testing, and people who see connections between all of those fields.
 
-**Brad:** That is the future we mean when we talk about writing the next rules. Better sensing and software open the door, but disciplined engineering makes the capability useful in manufacturing. These are some of the most interesting engineering challenges of our time because the answer has to work beyond a single good demonstration.
+We want teammates who are curious enough to ask why something works the way it does, willing to get close to the real problem, and determined to make the answer better. If that sounds like you, come talk to us. Tell us what you have built, what you are learning, and what you want to tackle next. We want people who are ready to help write the next rules with us.
 
-## Slide 7 Come fight for what is next
+## Slide 8 — Try it yourself
 
-*About 2 minutes*
+**Brad:** Now it is your turn to try something. Scan the code, or use the link and PIN on the screen. You can draw something, test it, and change it. Take a couple of minutes to explore, and then tell us what you noticed.
 
-**Brad:** We are looking for people who want to take on work like this. There are opportunities across Remington and The Kinetic Group, and the work needs many kinds of talent. Mechanical engineering, controls, software, and testing all have a place in it. Just as important, we need people who are curious enough to find the real problem and persistent enough to keep improving the answer.
+*Pause for the audience activity. Call out one visible change and invite a few reactions. The 4Founders activity is separate from the bottle demonstration.*
 
-If that sounds like the kind of challenge you want, I would like to talk with you. You can explore current employment opportunities through The Kinetic Group careers page. If you are still a student, tell me what you have built, what you are learning, and what you want to try next. We are trying to build the capabilities that manufacturing will need for decades, and we want people who want to come fight for that future with us.
+**Brad:** If this gets you thinking about something you want to build, we would like to hear about it after the talk. You can also connect through 4Founders to keep that conversation going.
 
-## Slide 8 Interactive challenge
+## Slide 9 — Bring us your idea
 
-*Allow about 3 minutes for participation*
+**Brad:** We have talked about a few engineering fields today, but your interests may go well beyond that list. We want to know what you are interested in pursuing. Maybe you have an idea for a tool, a process, or a product. Maybe you see a problem we have not named.
 
-**Brad:** Now we want to give you a chance to participate. Scan the code or use the link and event PIN on the screen. You can draw something, test it, and change it. This interactive challenge runs through 4Founders, an independent project platform. It is a way to keep exploring ideas and connect after today; company job applications still go through the official careers page.
+Tell us what you want to build and why it matters to you. If there is a fit, we would be interested in exploring it with you. That could mean shaping a first use case together. In the right situation, we might even become your first customer. The first step is a conversation.
 
-*Delivery cue: Give the audience time to scan and try the challenge. Narrate one visible change, then invite a few reactions or questions. Keep the activity separate from the bottle sorting demonstration.*
+## Slide 10 — Let us connect
 
-## Slide 9 Bring us your idea
+**Brad:** My email is on the screen. Wesley and I will be here afterward, and we would love to hear from you. If you are interested in a role at Remington or elsewhere in The Kinetic Group, the careers page is the place to look. If you want to keep developing an idea, connect with us through 4Founders.
 
-*About 1 minute*
+**Wesley:** And if you want to ask how the system works, or show us something you are building, please come find us. We enjoy talking through the hard parts with people who are curious about them.
 
-**Brad:** We listed a few engineering fields, but your interest may be somewhere else entirely. We want to know what you are interested in pursuing. Maybe you see a problem we have not named. Maybe you are building a product or a capability that could matter in manufacturing.
+**Brad:** Remington’s history was made by people willing to build. Its future will be, too. **Come build and fight with us on the floor. Turn AI into action.**
 
-Tell us about it. If there is a real fit, we would be interested in exploring it with you. We might help shape a use case or work together on a first step. In the right situation, we could even become your first customer. That starts with a conversation about the problem, what you want to build, and whether it makes sense for both sides.
-
-## Slide 10 Follow up
-
-*About 1 minute*
-
-**Brad:** My email is on the screen, and Wesley and I would be glad to talk after this. For roles at Remington or elsewhere in The Kinetic Group, use the careers link. If you want to keep building an idea, connect through 4Founders as well.
-
-**Wesley:** If you want to ask about the engineering or show us something you are building, come find us afterward.
-
-**Brad:** All of this comes back to people willing to build. Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.
-
-*Delivery cue: Hold the final slide through applause and questions so the email, careers page, and 4Founders address remain visible.*
+*Hold the final slide through questions so the email, careers link, and 4Founders address stay visible.*
