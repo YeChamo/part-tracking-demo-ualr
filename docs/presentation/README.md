@@ -1,9 +1,9 @@
 # Go 4th Fridays engineering presentation
 
-This folder contains Brad Daugherty and Wesley Siharath's October 23, 2026 presentation, speaker script, and phone cue cards. Wesley helped start Remington Vision as an intern and carried the project into his engineering role.
+Brad Daugherty and Wesley Siharath present **Engineering at The Kinetic Group** on October 23, 2026. The 16-slide deck uses the corporate format and covers Remington's manufacturing history, live floor systems, broader engineering projects, the Gatorade bottle demonstration, and ways to connect.
 
 - [Presentation](Engineering_at_The_Kinetic_Group.pptx)
-- [Speaker script](Speaker_Script.md)
+- [Focused speaker script and run of show](Speaker_Script.md)
 - [Phone cue cards](Phone_Cue_Cards.md)
 
-The bottle sorting segment is a live demonstration with an on-screen result. The 4Founders activity is a separate interactive follow-up. Company employment opportunities use The Kinetic Group's official careers path.
+The script has slide-by-slide handoffs, time checkpoints, and short reset lines to help Brad and Wesley stay focused. Wesley can adapt his own stories and wording. The bottle sorter is an on-screen demonstration; the 4Founders activity is a separate audience follow-up.

@@ -1,122 +1,147 @@
-# Engineering at The Kinetic Group
+# Engineering at The Kinetic Group — expanded phone cues
 
-## Phone cue cards · Brad + Wesley
+**Brad + Wesley · 16 slides**
 
-**The story:** Who we are → Our history → How it works → Why we love it → Show it → Make it reliable → Join us → Try it → Bring your idea → Connect.
+**Memory route:** History → stakes → system → three live floor examples → two broader tools → why we love it → demo → hard problems → invitation.
 
-**One thought to return to:** We want Remington and The Kinetic Group to write the rules for the future of manufacturing. That work has to succeed on the floor.
+**Return to this line:** We want Remington and The Kinetic Group to keep writing the rules for manufacturing. We earn that ambition by making systems work on the floor.
 
-Each numbered section matches one slide. Use the **bold anchors** if you lose your place. The lines below are short enough to say as written; Wesley can change his wording and examples wherever he wants.
+**Short-notice route:** Read the large statement on each slide, use the gold line as your next question or action, and land on the smaller closing line. These cues are backup; you do not need to memorize the full practice script.
 
 ---
 
 ## 1 · INTRO — BRAD → WESLEY → BRAD
 
-**Brad opens → Wesley introduces himself → Brad frames the talk**
+**Brad:** “I lead small engineering teams across TKG, mainly at Remington in Lonoke. Wesley, I'll let you introduce yourself.”
 
-- **Brad:** “I’m Brad Daugherty. I lead small engineering teams across The Kinetic Group, mainly at Remington in Lonoke. I’m here with Wesley Siharath. Wesley, I’ll let you introduce yourself.”
-- **Wesley:** Start with your path from software intern to engineer. Mention Remington Vision and what drew you into the work. About 30 seconds; use your own words.
-- **Brad returns:** “Today we’ll explain the work in simple terms, show it live, and hear what you want to build next.”
+**Wesley:** Your path: early software intern → Remington Vision → engineer. Your own words.
 
----
+**Brad:** “We will show what engineering looks like when it reaches a real factory floor.”
 
-## 2 · THE NEXT RULES — BRAD
+## 2 · HISTORY — BRAD
 
-**1816 → 1969 → the next decades**
+**1816 → Lonoke since 1969 → the next decades**
 
-- **Brad:** “Remington’s story reaches back to 1816. Manufacturing in Lonoke became part of that story in 1969. We are proud of that history.”
-- “The world has changed. We can now connect machines, software, and people in ways that create new capabilities on the floor.”
-- **Land this line:** “We want Remington and The Kinetic Group to write the rules for the future of manufacturing for decades to come.”
+“Generations in Arkansas built this reputation. Manufacturing has changed. We want Remington and TKG to keep writing the rules for what comes next.”
 
----
+**Bridge:** “To understand that ambition, you need to understand the plant.”
 
-## 3 · THE SYSTEM — BRAD
+## 3 · THE STAKES — BRAD
 
-**Sense → Decide → Act**
+**Ammunition plant → energetic materials → dependable systems**
 
-- **Brad:** “The system is simple to describe. A camera or machine senses what is happening. Software makes a decision. A person or piece of equipment can act on it.”
-- “Our engineering work is making the whole chain useful and dependable in real conditions.”
+“People work with propellants, primers, and moving machinery. We build with operators, quality, and safety teams. A prototype matters when it can serve the real operation.”
 
-**Handoff:** “Wesley has lived that process from the start of Remington Vision. Wesley, what makes this work exciting for you?”
+**Land:** The software supports production; established safeguards and qualified people remain essential.
 
----
+## 4 · THE SYSTEM — BRAD
 
-## 4 · WHY WE LOVE IT — WESLEY
+**Sense → decide → act**
 
-**Variety → Freedom → Ownership → Growth**
+“Signals or images tell us what is happening. Software makes that useful. People and equipment respond through the right workflow.”
 
-- **Wesley, a possible start:** “I came in as one of the first software interns and got involved with AI and different machines. I enjoy the variety, the freedom to explore ideas, and the chance to own a problem.”
-- **Then your example:** Name one problem → what you tried → what surprised you or what you learned. Keep it to 30–45 seconds.
-- **Possible finish:** “I’ve had opportunities I didn’t expect when I started. That’s what keeps this work exciting for me.”
+**Question to hold:** Can someone understand and trust the result in time?
 
-**Handoff:** Both move to the demo. Brad begins the setup.
+## 5 · SCADA — BRAD
 
----
+**What is happening? What happened earlier?**
 
-## 5 · LIVE DEMO — BRAD + WESLEY
+“Machine signals become a shared, time-stamped history. Operators and engineers can see changing conditions and investigate them.”
 
-**First bottle → Change it → Ask the room**
+**Story:** One safe example of a question the production history helped answer. **Status:** Live, being refined. Supervisory information, not safety control.
 
-- **Brad:** “Watch what happens when we put a Gatorade bottle in front of the camera. The application identifies it and shows a sorting decision on screen.” Show bottle one.
-- **Wesley:** Point to the camera view and result. Choose the next bottle or feature. Tell the room what changed and what the system decided.
-- **Brad:** Before the next result, ask: “What do you think it will do?” Then recap: “That’s the path: sense, decide, act.”
-- **Be clear:** This is an on-screen sorting demonstration, not a production sorting line.
+## 6 · CENTERFIRE INSPECTION — BRAD → WESLEY
 
-If something surprises us: “Good. That tells us what to test next.”
+**Camera → decision → trust on the floor**
 
----
+**Brad:** “This inspection runs in line with centerfire production. A timely decision matters, and the people relying on it need to understand and trust it.”
 
-## 6 · THE HARD PROBLEMS — WESLEY + BRAD
+**Wesley:** “A lab result is the start. On the floor we listen to operators, show what the system sees, and improve it from their feedback.” Add one moment with the people who use it. **Status:** Live, being polished.
 
-**Variation → Timing → Trust**
+**Brad lands:** “Trust does not arrive with installation. We earn it through use and refinement.”
 
-- **Wesley, a possible start:** “The result you just saw is exciting. The harder question is whether it still works when the light changes, the bottle arrives at another angle, or the decision has to happen faster.”
-- **Then your example:** Pick one issue you actually solved or would test next. Explain what the system should do when it is uncertain.
-- **Brad:** “A promising result is the beginning. To write the rules for the future of manufacturing, we have to make it dependable when people rely on it.”
+## 7 · SHOTSHELL INSPECTION — WESLEY → BRAD
 
----
+**Different product → different visual problem**
 
-## 7 · JOIN US — BRAD
+**Wesley:** “Shotshells gave us a different visual problem. We adapted how we see and evaluate the product so the result fits the line.” Add one practical adjustment.
 
-**Opportunity → Many disciplines → Invitation**
+**Brad:** “We are building a repeatable inspection capability, with each system fitted to the product and operation.” **Status:** Live, being polished.
 
-- **Brad:** “We are looking for people who want to work on problems like these. There are opportunities across Remington and TKG, and this work needs mechanical, controls, software, and testing talent.”
-- “We value curiosity, ownership, and the willingness to get close to the real problem.”
-- **Invite:** “What have you built? What are you learning? What do you want to tackle next?”
+## 8 · SENTIMENT — BRAD
 
----
+**Hear the market → inspect the source**
 
-## 8 · TRY IT — BRAD
+“Public comments become themes. Product teams can open the original posts and understand the story behind a change.”
 
-**Scan → Try → React**
+**Land:** This supports product and business decisions; it is separate from the floor systems.
 
-- **Brad:** “Now it’s your turn. Scan the code, or use the link and PIN. Draw something, test it, and change it.” Pause so the room can participate.
-- Backup: [4founders.dev/demo/ai-in-action/](https://4founders.dev/demo/ai-in-action/) · **PIN 877262**.
-- Ask: “What changed when you tried a different idea?” Take one or two reactions.
-- This 4Founders activity is separate from the bottle demo. Point people to your email on the final slide for follow-up.
+## 9 · REMI — WESLEY → BRAD
 
----
+**Local model + project material + tools + verification**
 
-## 9 · YOUR IDEA — BRAD
+**Wesley:** “An engineer asks a question. Remi helps find relevant project material and prepares an answer. The engineer checks the source before acting.” Present it as work in development.
 
-**Beyond these roles → Tell us → Explore a fit**
+**Brad:** “That is the range of our work. Wesley, what makes you love it?”
 
-- **Brad:** “Your interests might be outside the roles we described. We still want to know what you want to pursue and why it matters to you.”
-- “If there is a real fit, we would be interested in exploring it together. We might help shape a first use case, and in the right situation, we could even become your first customer.”
-- **Point to land:** It starts with a conversation, not a formal pitch.
+## 10 · WHY WE LOVE IT — WESLEY
 
----
+**Variety → freedom → ownership → growth**
 
-## 10 · CONNECT — BRAD → WESLEY → BRAD
+Your story: one problem → what you tried → what surprised you. Mention your intern-to-engineer path and opportunities you did not expect.
 
-**One follow-up path → Brad’s email**
+**Handoff:** Both move to the bottle demo.
 
-- **Brad:** “My email is on the screen. Wesley and I will be here after the talk. If you want to join a team, explore an idea, or ask about the work, email me and tell me what you want to pursue.”
-- **Wesley:** Invite questions about the engineering and ask people to show you what they are building. Your own words.
-- **Brad, close:** “Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.”
+## 11 · LIVE DEMO — BRAD + WESLEY
+
+**First bottle → change it → ask the room**
+
+**Brad:** Introduce on-screen Gatorade sorting and place bottle one.
+
+**Wesley:** Point out camera view and result; choose second bottle or feature.
+
+**Brad:** Ask for a prediction. Recap **sense, decide, act**. This is a demonstration setup, separate from production inspection.
+
+If surprised: “That gives us something to test.”
+
+## 12 · HARD PROBLEMS — WESLEY → BRAD
+
+**Variation → timing → human trust**
+
+**Wesley:** Choose one real issue and say how the team tested it with the people who rely on the result.
+
+**Brad:** “A promising result is the beginning. The real work is making it useful as conditions change and earning people's trust in it.”
+
+## 13 · JOIN US — BRAD
+
+**Opportunity across TKG → many disciplines → invitation**
+
+“Mechanical, controls, software, and testing talent all belong here. Tell us what you have built and what you want to tackle next.”
+
+**Land:** “Come help write the next rules.”
+
+## 14 · TRY IT — BRAD
+
+**Scan → draw → test → react**
+
+Invite the room to the 4Founders activity. Backup: [4founders.dev/demo/ai-in-action/](https://4founders.dev/demo/ai-in-action/) · **PIN 877262**. Take one or two reactions.
+
+## 15 · YOUR IDEA — BRAD
+
+**Beyond listed roles → tell us → explore fit**
+
+“Your interests may be outside these roles. We still want to know what you want to pursue. If it fits, we might explore it together and could even become your first customer.”
+
+## 16 · CONNECT — BRAD → WESLEY → BRAD
+
+**Brad:** “Email me with what you want to pursue. Wesley and I will be here afterward.”
+
+**Wesley:** Invite questions and projects, your own words.
+
+**Brad:** “Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.”
 
 ---
 
 ## If time gets short
 
-Use one personal example on slide 4, two bottles on slide 5, and one audience reaction on slide 8. Keep the invitation and closing.
+Give one sentence each on sentiment and Remi, and one real example across the two inspection slides. Preserve the plant context, demo, invitation, and final email.

@@ -1,102 +1,146 @@
-# Engineering at The Kinetic Group — Practice Script
+# Engineering at The Kinetic Group — focused speaker script
 
-**Brad Daugherty and Wesley Siharath**
+**Brad Daugherty + Wesley Siharath · Go 4th Fridays · October 23, 2026**  
+Matches the 16-slide guided deck. Target: **about 12 minutes of speaking, 5 minutes of live demo, and 3 minutes for the audience activity.** These are words to practice, not lines to recite exactly. Wesley can use his own phrasing and examples.
 
-Go 4th Fridays · October 23, 2026
+## The thread to keep
 
-This follows the ten-slide corporate deck. Brad’s lines are a draft to practice. Wesley’s sections are prompts: he chooses his own words and examples throughout. Italic text is a stage cue. Aim for about **10–12 minutes of remarks**, plus **5–6 minutes for the live demo** and **3 minutes for the audience activity**. Practice the handoffs more than the exact wording.
+> Remington's history was built by people who solved hard manufacturing problems. We are building the next capabilities on a live ammunition plant floor, and we want others to help write the rules for what comes next.
 
-| Slide | Lead | Main idea |
+**Stay focused:** Make one point per slide. Use one short example in the floor-systems section and one during the demo. Save technical depth for questions. Brad advances the slides and keeps the pace; Wesley owns his stories and the technical demo view.
+
+| Checkpoint | Slides | Target |
 | --- | --- | --- |
-| 1 · Engineering at The Kinetic Group | Brad → Wesley → Brad | Brad opens; Wesley introduces himself |
-| 2 · Writing the next rules | Brad | Honor the legacy; name the ambition |
-| 3 · Engineering that reaches the floor | Brad | Sense → decide → act |
-| 4 · Why we love this work | Wesley | Variety, freedom, ownership, opportunity |
-| 5 · Live demonstration | Brad + Wesley | Show the bottle sorting decision together |
-| 6 · The hard problems | Wesley → Brad | Make the result useful in real conditions |
-| 7 · Come fight for what is next | Brad | Invite talent across Remington and TKG |
-| 8 · Try it yourself | Brad | Let the audience explore the 4Founders activity |
-| 9 · Bring us your idea | Brad | Invite interests beyond the roles described |
-| 10 · Let us connect | Brad → Wesley → Brad | Give Brad’s email and close |
+| Set the stakes | 1–4 | 3 minutes |
+| Show the work | 5–9 | 4 minutes |
+| Why we love it | 10 | 1 minute |
+| Live demo | 11 | 5 minutes |
+| Problems and invitation | 12–13 | 2 minutes |
+| Audience activity and close | 14–16 | 5 minutes |
 
-## Slide 1 — Engineering at The Kinetic Group
+## 1. Engineering at The Kinetic Group — Brad → Wesley → Brad
 
-**Brad:** Good afternoon. I’m Brad Daugherty. I lead small engineering teams across The Kinetic Group, with most of my work at Remington in Lonoke. I’m here with Wesley Siharath. Wesley, I’ll let you introduce yourself.
+**Brad:** “Good afternoon. I'm Brad Daugherty. I lead small engineering teams across The Kinetic Group, mainly at Remington in Lonoke. I'm here with Wesley Siharath. Wesley, introduce yourself in your own words.”
 
-**Wesley — introduce yourself in your own words (about 30 seconds):** *Tell the room where you started, what you work on now, and what pulled you into the project. Your path from one of the first software interns to engineer is a strong story; choose the parts that feel right to you.*
+**Wesley:** Introduce yourself. Mention starting as one of the first software interns, helping start Remington Vision, and carrying that work into your engineering role. Keep it to about 30 seconds.
 
-**Brad:** Today we want to show you what engineering can look like when an idea reaches the factory floor. We’ll explain the system in simple terms and then demonstrate it together. We are also here to meet people who might want to help us build what comes next.
+**Brad:** “Today we'll show what engineering looks like when it reaches the factory floor, then let you try a piece of it yourselves.”
 
-## Slide 2 — Writing the next rules
+**Move on:** “First, why this place matters.”
 
-**Brad:** Remington’s story goes back to 1816. The Lonoke operation has been part of that story since 1969. That is a remarkable history in American manufacturing, and we are proud to be part of it.
+## 2. Writing the next rules — Brad
 
-The world around manufacturing has changed. Machines can now give us a clearer picture of what is happening. Software can make that information useful in the moment. And engineers from different disciplines can work together in ways that were much harder before.
+**Brad:** “Remington's story reaches back to 1816, and the Lonoke plant has been part of it since 1969. Generations of people in Arkansas built a remarkable manufacturing foundation. We are proud of that history.”
 
-We want Remington and The Kinetic Group to **write the rules for the future of manufacturing** and keep doing that for decades to come. That is an ambitious goal. It means developing capabilities that help people solve real problems on the floor, then proving those capabilities in the conditions where they have to work. We have a strong foundation. Our job is to build the next chapter.
+“The world has changed. We can connect machines, software, and people in new ways. We want Remington and The Kinetic Group to keep writing the rules for manufacturing for decades to come.”
 
-## Slide 3 — Engineering that reaches the floor
+**Move on:** “That ambition has to meet the reality of this plant.”
 
-**Brad:** The system we are going to show you is easy to describe: **sense, decide, act**. A camera or a machine captures what is happening. Software turns that information into a decision. Then a person or a piece of equipment can take action.
+## 3. The stakes are real — Brad
 
-The interesting engineering is in connecting those steps. Can we get a clear view? Can we make a useful decision in time? Can the person running the process understand and trust the result? Our teams work across machines, software, controls, and the operation itself to answer those questions. We build, test, learn from the floor, and improve.
+**Brad:** “This is an ammunition plant. People work around propellants, primers, energetic materials, and moving machinery. We take that seriously. We build with operators, quality, and safety teams because the system has to serve the people who rely on it.”
 
-*Brad turns toward Wesley.*
+“Our applications support the operation. The plant's established safeguards and qualified people remain essential.”
 
-**Brad:** Wesley has lived that process from the beginning of Remington Vision. Wesley, what makes this work exciting for you?
+**Move on:** “The basic pattern behind our work is simple.”
 
-## Slide 4 — Why we love this work
+## 4. Engineering that reaches the floor — Brad
 
-**Wesley — in your own words (about 1 minute):** *Draw from what you already planned: working with AI and different machines; the variety; freedom to explore; taking ownership; and opportunities you did not expect. Pick one real moment that illustrates it. What was the problem, what did you try, and what did you learn? Finish with why this work matters to you. These are prompts, not a required script.*
+**Brad:** “Sense, decide, act. A machine signal or camera image tells us what is happening. Software makes it useful. A person or equipment responds through the right workflow.”
 
-*Wesley hands the floor back to Brad. Both presenters move to the demo setup.*
+“The hard part is making that chain dependable in production. Here are examples of how we are doing it.”
 
-## Slide 5 — Live demonstration
+## 5. SCADA — Brad
 
-**Brad:** Let’s put that idea in front of you. We’ll place Gatorade bottles in front of a camera. The application will identify what it sees and show a sorting decision on screen. Watch the path from an image to a decision to a visible result.
+**Brad:** “Our SCADA work answers two questions: what is happening now, and what changed? Machine signals become a shared production history, so operators and engineers can investigate conditions from the same record.”
 
-*Brad places the first bottle and pauses for the result.*
+“It is live and being refined. The challenge is earning confidence in the data behind the screen.”
 
-**Wesley — in your own words:** *Point out what the camera sees and the decision on screen. Choose the next bottle or feature and show what changes. Add any detail you think is worth showing.*
+**If you have a safe example:** Give one sentence about a question the history helped answer. Then advance.
 
-*Wesley chooses the next bottle or feature and narrates it in his own words. Brad can invite the audience to predict the result before it appears.*
+## 6. Centerfire inspection — Brad → Wesley → Brad
 
-**Brad:** This is a demonstration setup, so the sorting decision is shown on screen. What matters is the engineering path you just saw: sense what is happening, make a decision, and make that decision useful.
+**Brad:** “Centerfire inspection is live in the production flow. A camera captures a view, software evaluates it, and the result reaches the workflow. A timely decision matters, but the harder part is earning the trust of the people who depend on it.”
 
-*If a result is unexpected: “That is useful to see. Let’s look at what the camera saw and talk through what we would test next.”*
+**Wesley:** “A lab result is a starting point. On the floor we listen to operators, show what the system sees, and refine it from their feedback.” Add one brief moment from working with the people who use it, if one comes naturally.
 
-## Slide 6 — The hard problems
+**Brad:** “Trust does not arrive with installation. We earn it through use and improvement.”
 
-**Wesley — in your own words (about 1 minute):** *Use the demo to explain the hard parts you find most important. Possible anchors: changes in lighting or angle, how quickly a decision is needed, what happens when the system is uncertain, and whether people can trust the result. Choose one practical challenge you solved or would test next. You can go deeper if the room asks.*
+## 7. Shotshell inspection — Wesley → Brad
 
-**Brad:** That is what we mean by engineering that reaches the floor. A promising idea is the beginning. Making it dependable in the real operation is the work. If we want to write the rules for the future of manufacturing, our systems have to keep working as conditions change, the pace picks up, and people depend on the result. Those are some of the most interesting engineering challenges of our time.
+**Wesley:** “Shotshells bring a different visual challenge. We use the same engineering approach, but the view, evaluation, and production workflow have to fit this product.” Keep this to the product-level difference for now; add your real floor story when you choose it.
 
-## Slide 7 — Come fight for what is next
+**Brad:** “This system is live too, and we are still polishing it. We are building an inspection capability that can adapt across the operation.”
 
-**Brad:** We are looking for people who want to take on that work with us. There are opportunities across Remington and The Kinetic Group. It takes mechanical engineers, controls engineers, software builders, people who love testing, and people who see connections between all of those fields.
+## 8. Public sentiment — Brad
 
-We want teammates who are curious enough to ask why something works the way it does, willing to get close to the real problem, and determined to make the answer better. If that sounds like you, come talk to us. Tell us what you have built, what you are learning, and what you want to tackle next. We want people who are ready to help write the next rules with us.
+**Brad:** “Outside the plant, we also want to hear what people are saying about our products and brands. The sentiment project groups public discussion into themes and keeps the original sources close at hand.”
 
-## Slide 8 — Try it yourself
+“A product team can follow a theme back to what people actually said. That makes a signal useful instead of asking people to trust a score alone.”
 
-**Brad:** Now it is your turn to try something. Scan the code, or use the link and PIN on the screen. You can draw something, test it, and change it. Take a couple of minutes to explore, and then tell us what you noticed.
+## 9. Remi — Wesley → Brad
 
-*Pause for the audience activity. Call out one visible change and invite a few reactions. The 4Founders activity is separate from the bottle demonstration.*
+**Wesley:** “Remi is our local language-model work for engineering. An engineer asks a question, finds relevant project material, and checks the answer before using it. The useful part is the combination of model, sources, scoped tools, and human verification.”
 
-**Brad:** If this gets you thinking about something you want to build, we would like to hear about it after the talk. My email will be on the final slide so you can follow up.
+**Brad:** “That is the range of the work, from live systems on the floor to tools that help teams reason through information. Wesley, why do you love doing this?”
 
-## Slide 9 — Bring us your idea
+## 10. Why we love this work — Wesley
 
-**Brad:** We have talked about a few engineering fields today, but your interests may go well beyond that list. We want to know what you are interested in pursuing. Maybe you have an idea for a tool, a process, or a product. Maybe you see a problem we have not named.
+**Wesley:** “I started as one of the first software interns and got to work with AI and different machines. I love the variety, the freedom to explore, and the chance to own a problem. There is always something new to figure out. I have had opportunities I did not expect when I came in.” Add one brief example or say this in your own words.
 
-Tell us what you want to build and why it matters to you. If there is a fit, we would be interested in exploring it with you. That could mean shaping a first use case together. In the right situation, we might even become your first customer. The first step is a conversation.
+**Handoff:** Both presenters move to the demo. Brad sets the scene; Wesley watches the application.
 
-## Slide 10 — Let us connect
+## 11. Live demonstration — Brad + Wesley
 
-**Brad:** My email is on the screen. Wesley and I will be here afterward, and we would love to hear from you. Whether you are interested in joining a team, exploring an idea, or asking a question about the work, reach out and tell me what you want to pursue.
+**Brad:** “Let's show the same engineering pattern with ordinary objects. We'll put Gatorade bottles in front of a camera. The application will identify what it sees and show a sorting decision on screen.” Place the first bottle and pause.
 
-**Wesley — in your own words:** *Invite people to ask about the engineering or show you what they are building.*
+**Wesley:** Point to the camera view and the result. Choose the second bottle or feature. Say what changed.
 
-**Brad:** The rules for the future will be written by people willing to build. **Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.**
+**Brad:** Ask the room, “What do you think it will do?” Show the result. “That is sense, decide, act.”
 
-*Hold the final slide through questions so Brad’s email stays visible.*
+**Keep moving:** Two bottles or two clear outcomes are enough. This is an on-screen demo, separate from the live production inspection systems. If something unexpected happens: “That gives us something useful to test.” Then continue.
+
+## 12. The hard problems — Wesley → Brad
+
+**Wesley:** “The challenge is not just getting one result. Conditions change, the decision has to arrive in time, and the people using it need to trust it.” Name one issue you saw in the demo or one practical test you would run next.
+
+**Brad:** “To write the next rules, we have to make the technology useful in real conditions and earn the confidence of the people working with it.”
+
+## 13. Come fight for what is next — Brad
+
+**Brad:** “We are looking for people who want to take on these problems with us. There are opportunities across Remington and The Kinetic Group: mechanical, controls, software, testing, and people who connect them.”
+
+“Tell us what you have built and what you want to build next. We want people ready to help write the next rules.”
+
+## 14. Try it yourself — Brad
+
+**Brad:** “Now it is your turn. Scan the code, or use the link and PIN on screen. Draw something, test it, and change it.” Pause for the 4Founders activity. Ask for **one or two** reactions, then move to the invitation.
+
+**Backup:** [4founders.dev/demo/ai-in-action/](https://4founders.dev/demo/ai-in-action/) · PIN **877262**.
+
+## 15. Bring us your idea — Brad
+
+**Brad:** “Your interests may go beyond the roles we named. We still want to know what you want to pursue. If there is a fit, we would like to explore it with you. In the right situation, we could even become your first customer.”
+
+**Move on:** “The first step is a conversation.”
+
+## 16. Let us connect — Brad → Wesley → Brad
+
+**Brad:** “My email is on screen. Wesley and I will be here afterward. If you want to join a team, ask about the engineering, or explore an idea, reach out and tell me what you want to pursue.”
+
+**Wesley:** Invite questions and projects in your own words.
+
+**Brad:** “Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.”
+
+Hold the email slide during questions.
+
+## If you lose the thread
+
+- **Brad's reset:** “The point is that we are building systems people can use in real production, and we want you to help shape what comes next.”
+- **Wesley's reset:** “What I enjoy is owning a real problem, learning from the floor, and improving the system until it helps the people using it.”
+- **If time is short:** Skip optional anecdotes on slides 5–9, show two demo outcomes, take one activity reaction, and preserve slides 13–16.
+- **If a technical question starts a deep dive:** “That's a good one. Let's finish the demo and talk through the details afterward.”
+
+## Source and status notes
+
+Remington's [company history](https://www.remington.com/about-us.html) supports the 1816 origin and Lonoke ammunition focus. Its [employee history](https://www.remington.com/big-green-blog/labor-day-special.html) supports the 1969 Lonoke start. The Remington Systems Lab showcase narration informed the project descriptions. Brad confirmed that SCADA, centerfire inspection, and shotshell inspection are live and being polished. Sentiment and Remi are described as separate capabilities, without a production-line deployment claim.
