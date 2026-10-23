@@ -1,36 +1,29 @@
-# Engineering at The Kinetic Group — practice script
+# Engineering at The Kinetic Group — speaker script
 
-**Brad Daugherty + Wesley Siharath · Go 4th Fridays · October 23, 2026**  
-Matches the 17-slide corporate deck and phone cue cards. Each slide starts with the same cue route used on the phone. Practice the thought and handoff; speak naturally. Wesley owns his introduction, examples, and phrasing.
+**Brad Daugherty + Wesley Siharath · Go 4th Fridays · October 23, 2026**
 
-## The one-hour plan
+16 slides. Brad advances slides and watches the clock. Wesley's introduction, personal story, reliability remarks, and closing use his supplied wording. Speak the quoted paragraphs; the other lines are cues and demo instructions.
 
-| Clock | Slides | Purpose |
+## One-hour route
+
+| Clock | Slides | Focus |
 | --- | --- | --- |
-| 0:00–0:06 | 1–5 | Introduce us, the company, the plant, and our work |
-| 0:06–0:14 | 6–10 | Five project stories |
-| 0:14–0:16 | 11 | Why we love the work |
-| 0:16–0:36 | 12 | Live bottle demo, predictions, and questions |
-| 0:36–0:39 | 13–14 | Hard problems and invitation to join |
-| 0:39–0:47 | 15 | 4Founders audience activity |
-| 0:47–0:48 | 16–17 | Ideas, contact, and close |
-| 0:48–1:00 | 17 held | Open questions |
+| 0:00–0:05 | 1–5 | People, manufacturing context, and engineering method |
+| 0:05–0:10 | 6–9 | Two inspection systems, sentiment, and Remi |
+| 0:10–0:12 | 10 | Wesley's experience and ownership |
+| 0:12–0:32 | 11 | Bottle demo and guided engineering questions |
+| 0:32–0:35 | 12–13 | Reliability and invitation |
+| 0:35–0:43 | 14 | Audience activity |
+| 0:43–0:44 | 15–16 | Ideas, contact, and close |
+| 0:44–1:00 | 16 held | Open questions |
 
-This gives roughly **20 minutes of prepared speaking**, a **20-minute demo block** (about 10–12 minutes of demonstration and 8–10 minutes of guided questions), **8 minutes for the activity**, and **12 minutes of open questions**. Brad advances slides and watches the clock. Wesley can add his own story where it helps the audience.
+These are clock targets, not a requirement to fill every minute. The prepared talk has about 16 minutes available, with 20 minutes for the demo, 8 for the activity, and 16 for questions. If a section finishes early, move forward.
 
-## The message to return to
-
-**Four anchors:** Their legacy → our method → proof on the floor → the next generation.
-
-> Remington helped pave the way for generations of American manufacturing. Our responsibility is to continue that legacy: rethink how engineering projects begin, reach the floor, and become useful to the people running production. We want Remington and The Kinetic Group to write the next rules of manufacturing engineering—and build the capabilities the next generation will inherit.
-
-**The project thread:** Start with a real question from the operation. Build with the people who will rely on the answer. Test under real conditions. Put the result into a usable workflow. Keep improving it after deployment. Use this thread to explain *how* each project was approached, not just what technology it uses. “Writing the rules” is the ambition; this repeatable way of working is how we pursue it.
-
-**Company map:** The Kinetic Group is the broader ammunition organization; Remington is one of its five brands. Brad's teams work across TKG and mainly at Remington in Lonoke. The three floor examples are live and still being polished. Public sentiment and Remi show the wider range of engineering work; do not describe them as production-line deployments.
+**Story:** Remington's people built the foundation. Wesley entered through software and machine prototypes. Our work connects models and software to machinery and to the people using the result. Seeing a real reject handled is the payoff. Reliability is what lets that work leave our hands.
 
 ## 1. Engineering at The Kinetic Group — Brad → Wesley → Brad
 
-**Cue route:** Who we are → what you will see.
+**Cue:** Introductions, internship, and work reaching the floor.
 
 **Brad:** “I am Brad Daugherty. I am an electrical engineer at Remington. I work mostly at the Lonoke site but do support projects across our organization. I’m here with Wesley Siharath, who helped start our Remington Vision work. Wesley, tell everyone a little about yourself and how you got started here.”
 
@@ -38,95 +31,67 @@ This gives roughly **20 minutes of prepared speaking**, a **20-minute demo block
 
 “I came on full time this February, and now I work on AI tools and machines. One of the things that drew me here was being able to build a solution and see it put to use on the floor.”
 
-**Brad:** “We are here because we believe the next era of manufacturing engineering is being written right now. We will show you how we take an idea from a real need to a system people can use on the floor, demonstrate that process live, and talk about who might help us build what comes next. First, why this place matters.”
+**Brad:** “That is the story we want to show: how software becomes something useful on the floor, and what it takes to keep it working.”
 
 ## 2. Writing the next rules — Brad
 
-**Cue route:** 1816 → Lonoke 1969 → next decades.
+**Cue:** 1816, Lonoke 1969, and our turn to contribute.
 
-“Remington's story reaches back to 1816. Lonoke has been part of that manufacturing story since 1969. Generations of people solved hard problems in materials, machinery, quality, and production. They paved the way in their time, and we stand on the foundation they built.”
-
-“Now it is our turn. The world has changed. Cameras, controls, software, and local computing give us new ways to understand production while it is happening. We can connect a real problem on the floor to an engineering team, build a response, and improve it in use. We want Remington and The Kinetic Group to continue that legacy—to help write the rules for manufacturing engineering for the next generation.”
-
-“The Kinetic Group includes Remington alongside Federal, CCI, Speer, and HEVI-Shot. That gives us a field of engineering problems bigger than one plant or product. Today's examples come mainly from Remington in Arkansas, while the ambition spans the organization.”
-
-**Bridge:** “That ambition has to stand up in a serious operating environment.”
+**Brad:** “Remington's history goes back to 1816. Lonoke has been part of it since 1969. We inherited generations of work in machinery and manufacturing. Our contribution is to connect that experience with cameras, controls, and software. Remington is one of five TKG ammunition brands, so the problems we support extend beyond one site.”
 
 ## 3. The stakes are real — Brad
 
-**Cue route:** Energetic materials + machinery + real people.
+**Cue:** Real machinery, real operators, real consequences.
 
-“This is an ammunition plant. People work around propellants, primers, energetic materials, and moving machinery. Decisions here affect real operators and real production. We build with the people who will use a system: operators, quality, maintenance, engineering, and safety.”
-
-“These stakes change how we approach a project. We start by understanding the work and the people doing it. A promising prototype is a start; it earns its place only when information is timely, understandable, and useful in production. Our software supports the operation; qualified people and established safeguards remain essential.”
+**Brad:** “We work around energetic materials and moving machinery. That makes timing, clear information, and recovery part of the engineering problem. We build with operators, maintenance, quality, and safety. The software has to fit their workflow and the established safeguards.”
 
 ## 4. Engineering that reaches the floor — Brad
 
-**Cue route:** Sense → decide → act. Real need → useful workflow.
+**Cue:** Capture, inference, decision, response.
 
-“Sense, decide, act. We capture a machine signal or camera image. Software turns it into something useful. A person or equipment responds through the right workflow.”
-
-“The three words are simple. Here is the way we try to carry a project through: begin with a real question, build with the people who need the answer, test in the conditions where it will run, and keep refining it after it reaches the floor. Was the signal trustworthy? Did the result arrive in time? Could someone understand and use it? We do not measure completion by whether a demo worked once. We measure whether the capability holds up in the workflow.”
+**Brad:** “Sense, decide, act. For a vision system, that means acquiring an image, running inference, interpreting the output, and delivering a result in time for the workflow. A model result is one step in that chain. Camera conditions, signals, software latency, and the response all have to fit together. We test the whole chain and show people the evidence behind the result.”
 
 ## 5. The work spans the organization — Brad
 
-**Cue route:** Three live floor systems → two broader capabilities.
+**Cue:** Two live inspection systems, two broader capabilities. Finish by 0:05.
 
-**Clock:** Finish the portfolio map by 0:06, then begin the project stories.
+**Brad:** “Centerfire and shotshell inspection are live and still being refined. Public sentiment and Remi apply software to different questions: what customers are saying, and how engineers find project knowledge. The common problem is making the evidence useful to someone making a decision.”
 
-“On the left are three systems live in production at Remington and being refined: SCADA, centerfire inspection, and shotshell inspection. Each helps people understand or respond to what is happening on the floor. On the right are broader capabilities. Public sentiment helps teams hear customers in their own words. Remi helps engineers work with project knowledge.”
+## 6. Centerfire inspection — Brad → Wesley → Brad
 
-“They are different applications, but our approach is consistent: find the decision that matters, build around the person making it, and stay with the project until the result is useful. Sometimes that person is an operator watching a line. Sometimes it is an engineer checking a source. As we walk through these projects, listen for the engineering decision behind each one—not just the technology we used.”
+**Cue:** Vision pipeline, visible evidence, operator trust.
 
-## 6. SCADA — Brad
+**Brad:** “Remington Vision brings image capture, labeling, model training, and inference into one toolset. It uses YOLOX detection models and supports workstation and edge deployment. The model is only part of the system. The result has to reach a usable workflow, and people need to understand what the camera saw.”
 
-**Cue route:** What is happening now? What changed?
+**Wesley:** “On the floor we show operators what the system sees, listen when something is confusing, and make changes they can judge for themselves.”
 
-“SCADA gives us shared visibility into machine and process signals. Think of two questions: what is happening now, and what changed? A signal alone can be hard to interpret. With time and context in a production history, operators and engineers can investigate from the same record.”
+**Brad:** “That feedback is part of commissioning and continued improvement. It is how the technical result earns trust.”
 
-“This project begins with the floor question, not the screen. Which signals matter? What context helps someone act? A display can look impressive but still fail to answer the question that sent an engineer looking. SCADA is live, and we are polishing it with the people who use it. That is one rule we are writing into our work: build visibility around decisions, not around data for its own sake.”
+## 7. Shotshell inspection — Wesley → Brad
 
-**Optional 20-second story:** Name one public-safe question a shared history helped answer; describe the question and decision, not internal settings or process limits.
+**Cue:** A different product changes the image and the data.
 
-## 7. Centerfire inspection — Brad → Wesley → Brad
+**Wesley:** “A different product creates a different visual problem. We have to check the camera view, the examples used to train and test the model, and how the result fits the line. We carry the tooling forward, then validate the application in its own conditions.”
 
-**Cue route:** Camera → result → human trust.
+**Brad:** “This is also live and being refined. Reusing software still leaves real integration work.”
 
-**Brad:** “Centerfire inspection is in the production flow. A camera captures a view, software evaluates it, and the result enters a workflow. That sounds like a computer vision problem. In practice, one of the hardest challenges is human: how do we earn the trust of the people who will rely on the result?”
+## 8. Public sentiment — Brad
 
-**Wesley:** In your own words: “A promising result at a desk is just a start. On the floor we show operators what the system sees, listen when something is confusing, and make changes they can judge for themselves.” Add a brief example of working with a user if you have one you are comfortable sharing.
+**Cue:** Collect, score, retain the source.
 
-**Brad:** “Trust does not arrive the day a system is installed. It is built by showing evidence, listening, and improving the system in use. This inspection is live and still being polished. For us, deployment is a stage in the project—not the end of our responsibility.”
+**Brad:** “The sentiment project collects public discussion, scores sentiment and product themes, and stores the results for review. The scoring uses VADER with a domain vocabulary. A trend gives the team somewhere to investigate. Keeping the original comments available lets people check what the score actually represents.”
 
-## 8. Shotshell inspection — Wesley → Brad
+## 9. Remi — Wesley → Brad
 
-**Cue route:** Different product → different visual problem.
+**Cue:** Retrieve project material, generate an answer, check the source.
 
-**Wesley:** “Shotshell inspection is a different visual problem. We cannot assume that a view or workflow designed for another product will fit. We have to understand the product, where a camera can see it, and how the result will be used on the line.” Add your own floor story when ready; this public-safe version is enough for now.
+**Wesley:** “Remi uses a local language model with retrieval over approved project documents. It indexes the material, finds relevant passages, and answers with citations. Scoped tools let it work within a defined workspace. The engineer still checks the source and the result.”
 
-**Brad:** “It is also live and being refined. Together, the inspection projects show another part of our approach: build a capability we can carry forward, then do the work to fit each application to its real product, line, and people. That is how one project teaches us to approach the next.”
+**Brad:** “Here the integration problem is keeping the answer connected to evidence and controlling what the tools can do.”
 
-## 9. Public sentiment — Brad
+## 10. Why we love this work — Brad → Wesley → Brad
 
-**Cue route:** Hear the market → inspect the source.
-
-“Our work is not limited to the plant. The sentiment project helps product and business teams hear what people say publicly about products and brands. It groups discussion into themes and keeps the original sources available.”
-
-“A graph can suggest that something changed; the actual comments tell you what people meant. We begin with a business question, preserve the evidence behind an answer, and give the team a way to decide what to explore next. Even away from the plant floor, the rule is the same: make the result useful and inspectable to its user.”
-
-## 10. Remi — Wesley → Brad
-
-**Cue route:** Ask → find project material → verify.
-
-**Wesley:** “Remi is our local language-model work for engineering. An engineer asks a question about a project, finds relevant material, and checks the proposed answer before using it. The engineering is the whole system around the model: the material it can use, the tools it can call, how it shows its source, and how a person verifies the result.”
-
-**Brad:** “From production signals to engineering knowledge, the pattern holds: start with a real question, make the evidence visible, and let a person make an informed decision.”
-
-## 11. Why we love this work — Brad → Wesley → Brad
-
-**Cue route:** Intern → AI and machines → freedom → ownership → growth.
-
-**Clock:** 0:14–0:16. Hand off to the live demo at 0:16.
+**Cue:** Variety, freedom, ownership, and a real result. Demo at 0:12.
 
 **Brad:** “Wesley, what do you enjoy most about working here?”
 
@@ -138,31 +103,29 @@ This gives roughly **20 minutes of prepared speaking**, a **20-minute demo block
 
 “Following ideas through and seeing people get invested feels like helping pave the way for Remington. I enjoy figuring it out.”
 
-**Brad:** “That ownership is how we build the next standard. Let's show you the approach live.”
+**Brad:** “Let's show that connection between an image, a decision, and a visible result.”
 
-## 12. Live demonstration — Brad + Wesley, 20-minute block
+## 11. Live demonstration — Brad + Wesley
 
-**Cue route:** Define the decision → two clear outcomes → one planned variation → ask what makes it ready.
+**Cue:** Detection, color prediction, track, decision, one variation. 0:12–0:32.
 
-**Clock:** 0:16–0:36. Leave the demo at 0:36 and return to slide 13.
+**Before the event:** Rehearse the exact application build, camera, two bottles, and one variation. The repository's standard mode uses YOLOX bottle detection and a trained color model. The generic bundled bottle locator does not predict colors. Describe the mode actually shown. Keep the core demonstration on screen; include physical movement only if the complete event setup has been validated.
 
-**Before the event:** Choose one pass color and one contrasting bottle, plus one variation you have tested in the event lighting and camera position. Decide whether you will show an on-screen decision or a prevalidated physical divert. Keep cap status, OCR, and barcodes out of the core sequence; add one only if it makes a specific point. The demo uses a general bottle detector and exposed-color measurement for the Gatorade sort decision. Describe those parts accurately.
+**Opening, 2 minutes. Brad:** “This is a separate event demo using Gatorade bottles. We detect the bottle, associate evidence with its track, and apply a color rule to produce an on-screen sort decision. First, predict the result. Then we will change one condition and look at what happened.”
 
-**Opening (2 minutes). Brad:** “These bottles stand in for a production decision. The task is easy to see: identify a bottle and decide where it should go. The real engineering question is how we carry that decision from an idea to something a person can use and trust. Watch how we define the job, see the evidence, test a change, and decide what more the system would need in real production. This event setup is separate from the inspection systems live at Remington.”
+**Baseline, 4 minutes. Brad** states the pass color and asks for predictions for two contrasting bottles. **Wesley** points out the bottle box, model color prediction, track, and displayed decision. In the standard repository mode, unknown color diverts. Show what this build actually did.
 
-**Baseline (4 minutes):** Brad states the selected pass color, places the first bottle, and asks for a prediction. Wesley points to the camera view, bottle detection, exposed-color result, and sort decision. Repeat with the contrasting bottle. Say exactly what happened. If a physical diverter is connected and has been validated for the event setup, show the movement; otherwise call the displayed result an **on-screen sort decision**. **Point:** A project begins with a decision someone needs to make, and the audience can see the evidence behind this one.
+**Variation, 4 minutes.** Change one pretested orientation or position. Ask for a prediction. Compare the evidence with the baseline. If the result is surprising: “That gives us something useful to test.”
 
-**One planned variation (4 minutes):** Change one condition you have already tested: bottle orientation, position, or another visible factor. Ask the room to predict what will happen. Wesley shows the result and explains what changed in the evidence. If the outcome is uncertain, name it honestly: “That gives us something useful to test.” Do not improvise a failure case or change several variables at once. **Point:** A successful first run cannot tell us how a system will handle variation.
+**Engineering discussion, 8 minutes. Brad:** “What would you test before relying on this all day?” **Wesley** connects answers to lighting, missed detections, timing, and the information an operator needs. If confidence comes up, explain that the model score is not automatically a calibrated probability. If physical timing comes up, explain that the demo estimates arrival from distance and measured speed; it does not independently measure physical actuator position.
 
-**Guided engineering discussion (7–8 minutes):** Brad asks, “If this had to run all day on a real line, what would you test next? Who would rely on the result?” Take a few answers. Wesley connects one to timing or changing conditions and one to what an operator would need to see. Ask what should happen when evidence is unclear. Explain the system's actual unknown behavior only if you have demonstrated it reliably in the event setup. **Point:** Completion means a result is usable, checkable, and improvable in the real workflow.
+**Transition, 2 minutes. Brad:** “The image, model, tracking, and response each have to hold up. Wesley's experience on the floor is where those requirements become concrete.” Return to slide 12 by 0:32.
 
-**Transition (2 minutes). Brad:** “You have seen the beginning of our approach: define the decision, build a response, change the conditions, and learn from the result. The bottle demo illustrates that method. Our SCADA and inspection work shows what it takes to carry a system into a real plant. We work with the people who use it until it is reliable and useful in their workflow. That is what we mean by writing new rules for how engineering work gets done.”
+**Recovery:** Show the camera view and last successful result. Ask what the audience would inspect first. Move on within two minutes. Optional barcodes and physical motion are outside the core sequence.
 
-**If the demo stalls:** Show the camera view and last successful result. Ask the room what they would inspect first. Move on after two minutes instead of troubleshooting for the whole session.
+## 12. The hard problems — Brad → Wesley → Brad
 
-## 13. The hard problems — Brad → Wesley → Brad
-
-**Cue route:** Variation → timing → trust.
+**Cue:** Timing, signals, sunlight, and confidence.
 
 **Brad:** “Wesley, what are the hardest problems in getting these systems to work reliably on the floor?”
 
@@ -174,68 +137,44 @@ This gives roughly **20 minutes of prepared speaking**, a **20-minute demo block
 
 “Building that reliability and confidence takes work.”
 
-**Brad:** “These are among the most interesting engineering challenges we know. We want projects to be carried from a floor need to a trusted capability, with ownership through deployment and improvement. The technology matters. So does how the work is approached and completed. That is how we earn the right to write the next rules.”
+**Brad:** “That is the step from a prototype we operate ourselves to a system other people can rely on.”
 
-## 14. Come fight for what is next — Brad
+## 13. Come fight for what is next — Brad
 
-**Cue route:** Across TKG → multiple disciplines → come build.
+**Cue:** Mechanical, controls, software, and testing. Activity at 0:35.
 
-**Clock:** Finish the invitation and start the audience activity at 0:39.
+**Brad:** “These problems cross mechanical engineering, controls, software, and testing. We want people who will follow a problem from the first question through deployment and improvement. Tell us what you have built and what you want to take on next.”
 
-“We are looking for people who want to work on this with us. Opportunities across Remington and The Kinetic Group span mechanical engineering, controls, software, testing, and the connections between them. There are problems on the floor, in our tools, and in how those tools reach people.”
+## 14. 4Founders challenge — Brad + Wesley
 
-“We are looking for people who want to own a problem all the way through: listen to the people affected, build, test, put the result to work, and keep improving it. Tell us what you have built, what you want to learn, and what kind of problem you want to take on. The next generation will inherit what we build together. Come help us set that standard.”
+**Cue:** Scan, PIN, try, share. 0:35–0:43.
 
-## 15. 4Founders challenge — Brad, 8 minutes
+**Brad:** “Scan the QR code or open the URL on screen. Enter PIN **877262**. Try the Audience Lab and notice what matches or surprises your expectations.”
 
-**Cue route:** Scan → enter PIN → try → tell us what surprised you.
+Give **4–5 minutes**. Wesley helps with access. Brad keeps the QR and PIN visible, then takes **two or three observations**. Ask: “What would you change before people used this every day?”
 
-**Clock:** 0:39–0:47. Keep the QR code and PIN visible during the activity.
+**Backup URL:** [4founders.dev/demo/ai-in-action/](https://4founders.dev/demo/ai-in-action/). Recheck access and scan before the event. If access fails, show one prepared example and ask the room to predict it.
 
-“Now we want you to try something yourselves. Scan the QR code or open the URL on screen. Enter the event PIN, **877262**. The activity opens as **AI in Action — Audience Lab**. Notice where your expectation matches or differs from what happens.”
+## 15. Bring us your idea — Brad
 
-Give the room **4–5 minutes**. Wesley helps with access; Brad keeps this slide visible. Take **two or three observations**: “What surprised you?” or “What would you change if people had to use this every day?” Tie one answer back to the project thread: the first result starts a conversation with the people who will use it; their feedback shapes what gets built next.
+**Cue:** Problem, affected person, first experiment.
 
-**Backup:** [4founders.dev/demo/ai-in-action/](https://4founders.dev/demo/ai-in-action/) · PIN **877262**. The QR decoded to this URL and the PIN opened Audience Lab when checked on October 22, 2026. Recheck the service and projector scan on event day because event access can change.
+**Brad:** “Your idea may go beyond the projects we showed. Tell us the problem, who it affects, and what you want to try. If there is a fit, let us explore it together.”
 
-## 16. Bring us your idea — Brad
+## 16. Let us connect — Brad → Wesley → Brad
 
-**Cue route:** Beyond our list → tell us your interest → explore fit.
+**Cue:** awhite@tkghunt.com, questions, internship, and ideas. Hold for questions at 0:44.
 
-**Clock:** 0:47–0:48, shared with the contact and close.
-
-“Your interests may go beyond the roles or projects we named. We still want to know what you want to pursue. If there is a fit, we would be interested in exploring it together. Tell us the problem you care about, who it affects, and what you would like to try. Some of the next rules will come from ideas we have not seen yet.”
-
-**Bridge:** “The first step is a conversation.”
-
-## 17. Let us connect — Brad → Wesley → Brad
-
-**Cue route:** Email: awhite@tkghunt.com. Hold for questions.
-
-**Clock:** Reach this slide by 0:48, then hold it for questions through 1:00.
-
-**Brad:** “Reach us at **awhite@tkghunt.com**. Put a few words in your note about what you want to build, work on, or ask. We’ll be here afterward if anyone wants to connect. Wesley, anything you’d like to add?”
+**Brad:** “Reach us at **awhite@tkghunt.com**. We’ll be here afterward if anyone wants to connect. Wesley, anything you’d like to add?”
 
 **Wesley:** “Yeah, if you guys have any engineering questions or want to hear more about my internship experience, come talk with us afterward. I’d love to hear what you’re building and spitball some ideas with you.”
 
-**Brad:** “Grace Hopper warned, ‘Probably the most dangerous phrase that can be used in any computer installation is, “But we’ve always done it that way.”’ I think about that here with respect for the generations who built Remington. Their work paved the way. We carry forward what works and use today's tools to solve what comes next. Our responsibility is to bring the same courage and care to the problems in front of us, and build capabilities the next generation will stand on. Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.” Hold this slide for open questions.
-
-## Staying on track
-
-**Brad reset:** “We start with a real need, build with the people using it, and carry the work until it helps them in production. That is how we write the next rules.”
-
-**Wesley reset:** “I love owning a real problem, learning from the floor, and improving a system until people can use it.”
-
-- **0:06:** Reach the portfolio map. Shorten the history if behind.
-- **0:16:** Start the live demo. Protect two clear outcomes and one audience prediction.
-- **0:36:** Leave the demo. Save deep technical discussion for open questions.
-- **0:39:** Open the activity. Keep QR and PIN visible until most people are in.
-- **0:48:** Reach the contact slide and use the rest of the hour for questions.
-- **Quiet room:** Ask “What would you need to trust a result like this on a factory floor?” or “At what point would you call this project ready for the people using it?”
-- **Short on time:** Give one sentence each on sentiment and Remi; preserve the plant context, demo, invitation, activity, and contact.
+**Brad:** “The generations before us built the foundation. We want to build what the next generation can stand on. Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.”
 
 ## Source and status notes
 
-Remington's [company history](https://www.remington.com/about-us.html) supports the 1816 origin, TKG's five-brand structure, and Lonoke ammunition focus. Its [employee history](https://www.remington.com/big-green-blog/labor-day-special.html) supports the 1969 Lonoke start. Brad confirmed SCADA, centerfire inspection, and shotshell inspection are live and being polished. The Remington Systems Lab showcase narration informed the project descriptions. Wesley's shotshell story remains his to choose.
+The supplied deck and Brad's project descriptions establish the company context and that the two inspection systems are live and still being refined. Remington's [company history](https://www.remington.com/about-us.html) and [employee history](https://www.remington.com/big-green-blog/labor-day-special.html) are the existing sources for the 1816 origin and 1969 Lonoke start.
 
-The closing uses Grace Hopper's wording as recorded in Richard Seltzer's [1983 account of her remarks](https://www.seltzerbooks.com/snap3.html). The familiar “most dangerous phrase in the language” wording is a later variant; this script uses the attested “computer installation” version. This line is Hopper's, not Marie Curie's.
+Technical descriptions were checked against the supplied local project documentation: RemingtonVision README (capture, labeling, YOLOX training/inference, and deployment options); Public Sentiment README (collection, VADER/domain scoring, storage, and dashboard); Little Chef README and docs/KNOWLEDGE.md (local model, retrieval, citations, and scoped tools). These describe software capabilities, not a claim that every feature is deployed on every production line. No inspection criteria, process settings, performance metrics, or production architecture have been added.
+
+The bottle demo description follows the [repository README](https://github.com/YeChamo/part-tracking-demo-ualr/blob/main/README.md). This revision does not establish live hardware, camera, or venue readiness. Wesley supplied his four personal sections; his wording is retained.
