@@ -1,7 +1,7 @@
 # Optional demo phone cues
 
 OPTIONAL DEMO PHONE CUES — PREPARED, NOT ENABLED
-Current deck: 16 slides. Demo slide 11, 0:12–0:32.
+Current deck: 16 slides. Demo slide 11, 0:16–0:36.
 
 SENTIMENT — 3 MIN — BRAD + WESLEY
 Brad: images to text; where should we start looking?
@@ -23,5 +23,5 @@ Backup: genuine saved run only; otherwise omit.
 
 EXIT
 Brad: changing conditions, timely result, evidence users can trust.
-Return to slide 12 by 0:32. Activity 0:35. Contact/questions 0:44.
+Return to slide 12 by 0:36. Close 0:40. Homepage QR slide 15. Final-slide activity 0:41–0:49; questions to 1:00.
 Neither insert is included in the main script unless chosen.

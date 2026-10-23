@@ -1,8 +1,8 @@
 # Optional demo preparation
 
 Presentation documents only. Neither insert is enabled in the main talk.
-The current deck has 16 slides. The demonstration is slide 11 at 0:12–0:32,
-the audience activity begins at 0:35, and contact/questions begin at 0:44.
+The current deck has 16 slides. The demonstration is slide 11 at 0:16–0:36,
+the audience activity begins at 0:41, and the closing invitation is at 0:40 and final-slide activity starts at 0:41.
 Use the [main speaker script](Speaker_Script.md) and [main cues](Phone_Cue_Cards.md)
 unless an optional insert is deliberately selected.
 
