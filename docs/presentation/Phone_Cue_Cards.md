@@ -13,8 +13,8 @@ Read the bold route for each slide. The next line gives you words to say if you 
 ## 1 · INTRO — BRAD → WESLEY → BRAD
 
 **Who we are → what you will see.**  
-**Brad:** “I lead small engineering teams across TKG, mainly at Remington in Lonoke. Wesley helped start Remington Vision. Wesley, tell them your story in your own words.”  
-**Wesley:** Early software intern → Remington Vision → engineer.  
+**Brad:** Electrical engineer at Remington, mainly Lonoke, supporting projects across the organization. Wesley helped start Remington Vision. “Wesley, tell everyone a little about yourself and how you got started here.”  
+**Wesley:** Software intern + machine prototypes → full time this February → AI tools and machines. “I wanted to build a solution and see it used on the floor.”  
 **Brad:** “We will show how a real need becomes a system people can use, then demonstrate that approach live.”
 
 ## 2 · HISTORY — BRAD
@@ -66,12 +66,14 @@ Read the bold route for each slide. The next line gives you words to say if you 
 
 **Ask → find project material → verify.**  
 **Wesley:** “A local model helps find relevant engineering knowledge. The engineer checks sources before using an answer.”  
-**Brad:** “Real question, visible source, informed decision. Wesley, why do you love this way of working?”
+**Brad:** “Real question, visible source, informed decision.”
 
-## 11 · WHY WE LOVE IT — WESLEY
+## 11 · WHY WE LOVE IT — BRAD → WESLEY → BRAD
 
-**Intern → AI and machines → freedom → ownership → growth.**  
-Use your own words. Add one moment when you owned an idea beyond its first prototype.  
+**Variety → freedom → ownership → seeing it work.**  
+**Brad:** “Wesley, what do you enjoy most about working here?”  
+**Wesley:** Debugging code one day, grease and a stopped motor the next. Freedom to spitball ideas and own the solution.  
+**Story:** A real reject came through. Our system tossed it out. “Something I helped build did its job.” Follow ideas through; help pave the way.  
 **Brad:** “That ownership is how we build the next standard. Let's show you the approach live.”
 
 ## 12 · LIVE DEMO — BRAD + WESLEY · TO 0:36
@@ -84,10 +86,11 @@ Use your own words. Add one moment when you owned an idea beyond its first proto
 **If surprised:** “That gives us something useful to test.”  
 **Exit at 0:36:** “The bottle demo shows our method. The live Remington systems show the work of carrying it into production with the people who use it.”
 
-## 13 · HARD PROBLEMS — WESLEY → BRAD
+## 13 · HARD PROBLEMS — BRAD → WESLEY → BRAD
 
-**Variation → timing → trust.**  
-**Wesley:** Connect one demo moment to a real engineering test.  
+**Timing → signals → changing conditions → confidence.**  
+**Brad:** “Wesley, what are the hardest problems in getting these systems to work reliably on the floor?”  
+**Wesley:** Right signal at the right moment? Downstream issue? Sunlight can blind cameras for thirty minutes. Work through the details until the system can leave our hands and users trust it.  
 **Brad:** “A project is more than a prototype. Carry it from a need to a trusted capability. That is how we earn the right to write the next rules.”
 
 ## 14 · JOIN US — BRAD
@@ -109,8 +112,8 @@ Give 4–5 minutes to try it, then ask for two or three reactions. Ask how their
 ## 17 · CONNECT — BRAD → WESLEY → BRAD
 
 **Email: awhite@tkghunt.com. Hold for questions.**  
-**Brad:** “Tell us what you want to build or ask. We will be here afterward.”  
-**Wesley:** Invite questions your way.  
+**Brad:** “We’ll be here afterward if anyone wants to connect. Wesley, anything you’d like to add?”  
+**Wesley:** Engineering questions or internship experience? Come talk afterward. “I’d love to hear what you’re building and spitball some ideas with you.”  
 **Brad:** Grace Hopper: “Probably the most dangerous phrase that can be used in any computer installation is, ‘But we’ve always done it that way.’” Respect the generations who built Remington; bring their courage and care to today's problems. “Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.”
 
 ## If you lose the thread
