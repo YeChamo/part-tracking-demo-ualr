@@ -32,7 +32,7 @@ This gives roughly **20 minutes of prepared speaking**, a **20-minute demo block
 
 **Cue route:** Who we are → what you will see.
 
-**Brad:** “Good afternoon. I'm Brad Daugherty. I lead small engineering teams across The Kinetic Group, and most of my work is at Remington in Lonoke. I'm here with Wesley Siharath. Wesley helped start our Remington Vision work, beginning as one of our first software interns and carrying it into his engineering role. Wesley, introduce yourself however you'd like.”
+**Brad:** “I am Brad Daugherty. I am an electrical engineer at Remington. I work mostly at the Lonoke site but do support projects across our organization. Next to me is Wesley Siharath. Me and Wesley are both computer engineers that have been navigating the world of manufacturing engineering. Wesley started as an intern working on machine vision. Wesley, tell everyone about yourself and how you got started here.”
 
 **Wesley:** Introduce yourself in your own words. Give the room your path from intern to engineer and what you work on now.
 
