@@ -7,9 +7,9 @@ The purpose is to bring AI into something real and help build the next generatio
 - [PowerPoint with matching speaker notes](Engineering_at_The_Kinetic_Group.pptx)
 - [Complete speaker script](Speaker_Script.md)
 - [Phone cue cards](Phone_Cue_Cards.md)
-- [Wesley's story worksheet](Wesley_Story_Notes.md)
+- [Wesley's completed story notes](Wesley_Story_Notes.md)
 
-The opening follows Brad's account: mechanical engineering internship, full-time school in Fayetteville and full-time work Friday–Monday in Lonoke, OCR from HMI web servers, inspection struggles, approval under new CSG management, and the call to Wesley. Wesley's supplied personal wording remains in the script. His optional memories are prompts for him to add. The historical OCR/SCADA anecdote does not add a standalone SCADA project slide.
+The opening follows Brad's account: mechanical engineering internship, full-time school in Fayetteville and full-time work Friday–Monday in Lonoke, OCR from HMI web servers, inspection struggles, approval under new CSG management, and the call to Wesley. Wesley's supplied interview-notification and GPIO memory is on slide 2, his next-application lesson and exact handback on slide 8, and his real-reject/dented-shell moment on slide 11. The earlier worksheet used different slide numbers; the completed notes, main script, cue cards, and PowerPoint speaker notes now use the current deck. The historical OCR/SCADA anecdote does not add a standalone SCADA project slide.
 
 ## Route
 

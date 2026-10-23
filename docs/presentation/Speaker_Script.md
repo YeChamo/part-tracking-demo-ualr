@@ -20,7 +20,7 @@
 | 0:41–0:49 | 17 | Interactive Audience Lab and reactions |
 | 0:49–1:00 | 17 held | Open questions |
 
-These are targets, not time to fill. The introduction can naturally take **6–8 minutes**. Hold the cover for roughly 3–5 minutes and CSG for roughly 2–3 minutes, depending on Wesley's contribution. Change slides at the story turns below, even if the clock differs. A still cover is intentional: look at the audience, pause, and let the story carry the opening.
+These are targets, not time to fill. The introduction can naturally take **6–8 minutes**. Allow roughly 3–4 minutes on the cover and 3–4 minutes on CSG, including Wesley's interview and GPIO story. Do not stretch either section to fill a target. Change slides at the story turns below, even if the clock differs. A still cover is intentional: look at the audience, pause, and let the story carry the opening.
 
 If the introduction reaches 0:08, use the short route for slides 3–6 below and keep sentiment and Remi to about 30 seconds each. Aim to reach slide 11 around 0:14 and start the demo around 0:16. If more time is needed, use the demo's short route rather than rushing the story. Protect the close, the final QR activity, and questions. Optional sentiment and REMI live demonstrations remain separate.
 
@@ -56,7 +56,7 @@ If the introduction reaches 0:08, use the short route for slides 3–6 below and
 
 **On screen:** CSG brand, Prague headquarters, 1995 origins, main industries, and TKG membership in Ammo+.
 
-**HOLD SLIDE 2:** Briefly explain who CSG is, then continue the approval story and hand off to Wesley. Keep this slide visible through his introduction and optional memory. Target the end of the opening around 0:06; up to 0:08 is workable.
+**HOLD SLIDE 2:** Briefly explain who CSG is, then continue the approval story and hand off to Wesley. Keep this slide visible through his introduction, interview memory, and GPIO story. Target the end of the opening around 0:06; up to 0:08 is workable.
 
 **Brad:** “Before I tell you what happened to that proposal, this is where CSG fits. CSG stands for Czechoslovak Group. It is a global industrial and technology group headquartered in Prague, in the Czech Republic. Its roots go back to Excalibur Army in 1995, and its businesses span defense, aerospace, and automotive industries. The Kinetic Group is part of CSG Ammo+, and Remington is one of the TKG brands. Today's examples come mainly from Lonoke.”
 
@@ -64,13 +64,19 @@ If the introduction reaches 0:08, use the short route for slides 3–6 below and
 
 **Delivery:** Pause at the turn in the story.
 
-**Brad:** “So I called Wesley. He decided to come down to central Arkansas and take on the project with me. Wesley, I've told them how I got to that phone call. Tell them your part of the story.”
+**Brad:** “So I called Wesley. He decided to come down to central Arkansas and take on the project with me. Wesley, I've told them how I got to that phone call. Take it from here.”
 
 **Wesley:** “Hi, I’m Wesley Siharath. I’m an engineer here at Remington. I got started as an intern focused on software, with some prototyping on machines.”
 
-“I came on full time this February, and now I work on AI tools and machines. One of the things that drew me here was being able to build a solution and see it put to use on the floor.”
+“I remember it was about eight at night, and I was stacking boxes when that interview notification came through.”
 
-**Wesley's optional story slot, 30–60 seconds:** [Add your own memory of the call, coming to central Arkansas, or the first problem you tackled together. The supplied introduction works without an added anecdote.]
+“I looked at my phone and thought, ‘Thank God, I might actually get to use this degree.’ Hearing about the projects they were working on, I saw an opportunity. It sounded interesting and exciting, so I decided to charge headfirst into something I knew very little about.”
+
+“The first problem we tackled was GPIO. We didn’t realize the Jetson needed a patch, and then we had to figure out how to control a 24-volt relay from its low-voltage output. That was my introduction to making software actually work with a machine.”
+
+**Delivery:** Pause after “use this degree.” Let the room hear the turn from stacking boxes to building machines. Keep the GPIO memory at the level of the story; no wiring explanation is needed. If the acronym needs one short gloss, GPIO means the computer's input/output pins. Hold slide 2 throughout.
+
+**Wesley:** “I came on full time this February, and now I work on AI tools and machines. One of the things that drew me here was being able to build a solution and see it put to use on the floor.”
 
 **Brad:** “That is how the two of us got into this work. We were given a chance to turn an idea into something people could use on the floor. Our part in that story is recent. The manufacturing history we are building on goes back much further.”
 
@@ -157,7 +163,13 @@ If the introduction reaches 0:08, use the short route for slides 3–6 below and
 
 **Cue:** A different product changes the image and the data.
 
-**Wesley:** “A different product creates a different visual problem. We have to check the camera view, the examples used to train and test the model, and how the result fits the line. We carry the tooling forward, then validate the application in its own conditions.”
+**Wesley:** “One thing Remington Vision taught me is how much work happens before you even train the model. You have to figure out what the camera can actually see, collect useful examples, and label them consistently.”
+
+“When we move to a different product, those questions come up again. We can carry over the software and what we’ve learned, but we still have to get the images and testing right for that application.”
+
+“That’s something I enjoy about this work. Every problem we figure out gives us a better starting point for the next one—and there’s always something new to learn.”
+
+**Wesley handback:** Finish on “there’s always something new to learn.” Pause and look to Brad. Keep slide 8 visible until Brad's transition.
 
 **Brad:** “This is also live and being refined. Reusing software still leaves real integration work.”
 
@@ -208,6 +220,10 @@ If the introduction reaches 0:08, use the short route for slides 3–6 below and
 “I also enjoy the freedom to spitball an idea, explore different solutions, and take ownership of how we tackle the problem.”
 
 “One moment that really stuck with me was seeing a real reject come through and watching our system toss it out. Seeing something I helped build actually do its job was an amazing feeling.”
+
+“Brad started calling that dented shell his child. I remember him being happy about it for a week straight.”
+
+**Delivery:** Pause for the laugh, then finish the ownership thought.
 
 “Following ideas through and seeing people get invested feels like helping pave the way for Remington. I enjoy figuring it out.”
 
@@ -329,7 +345,7 @@ The supplied deck and Brad's project descriptions establish the company context 
 
 Technical descriptions were checked against the supplied local project documentation: RemingtonVision README (capture, labeling, YOLOX training/inference, and deployment options); Public Sentiment README (collection, VADER/domain scoring, storage, and dashboard); Little Chef README and docs/KNOWLEDGE.md (local model, retrieval, citations, and scoped tools). These describe software capabilities, not a claim that every feature is deployed on every production line. No inspection criteria, process settings, performance metrics, or production architecture have been added.
 
-The bottle demo description follows the [repository README](https://github.com/YeChamo/part-tracking-demo-ualr/blob/main/README.md). This revision does not establish live hardware, camera, or venue readiness. Wesley supplied his four personal sections; his wording is retained.
+The bottle demo description follows the [repository README](https://github.com/YeChamo/part-tracking-demo-ualr/blob/main/README.md). This revision does not establish live hardware, camera, or venue readiness. Wesley supplied his introduction, interview-notification and GPIO story, dented-shell moment, next-application lesson, reliability examples, and closing invitation. His new story wording is retained. The original worksheet used an earlier slide order; these memories now belong to slides 2, 11, and 8 respectively. The GPIO and relay account is a personal recollection, not equipment instructions or a claim about the event demo's hardware.
 
 
 Brad's personal introduction comes from his account supplied in this chat: mechanical engineering internship, full-time school in Fayetteville and work in Lonoke Friday–Monday, OCR from HMI web servers, inspection struggles with Keyence/Cognex, CSG approval, and the call to Wesley. The historical OCR/SCADA anecdote does not reintroduce a standalone SCADA project slide. CSG context is sourced in slide 2 notes. The AI/next-generation ambition is the presenters' framing.

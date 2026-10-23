@@ -8,11 +8,15 @@
 
 ## 1 · PERSONAL INTRODUCTION — BRAD
 
-**HOLD COVER, roughly 3–5 minutes. Tell the complete beginning.** Mechanical intern. Full-time school Fayetteville; full-time Lonoke Friday–Monday. OCR from HMI web servers. First AI / worst SCADA joke, pause. Keyence + Cognex inspection; nearly a year; did not understand, felt defeated. Experienced engineers had struggled too. Proposed building it ourselves. **ADVANCE TO 2 only after:** “I proposed that we build it ourselves.”
+**HOLD COVER, roughly 3–4 minutes. Tell the complete beginning.** Mechanical intern. Full-time school Fayetteville; full-time Lonoke Friday–Monday. OCR from HMI web servers. First AI / worst SCADA joke, pause. Keyence + Cognex inspection; nearly a year; did not understand, felt defeated. Experienced engineers had struggled too. Proposed building it ourselves. **ADVANCE TO 2 only after:** “I proposed that we build it ourselves.”
 
 ## 2 · CSG AND THE CALL — BRAD → WESLEY → BRAD
 
-**HOLD SLIDE 2 through approval, call, and Wesley's introduction, roughly 2–3 minutes.** “Before I tell you what happened to that proposal, this is where CSG fits.” CSG = Czechoslovak Group. Global industrial and technology group, headquartered in Prague, Czech Republic. Origins in 1995 with Excalibur Army; defense, aerospace and automotive businesses. TKG belongs to CSG Ammo+; Remington is a TKG brand. New CSG management approved our proposal. “Go get an intern.” Called Wesley; he came to central Arkansas. **“Tell them your part of the story.”** Wesley's supplied introduction, then optional memory of the call/first problem. Brad: AI into useful capability; next generation of manufacturing. Target 0:06; room to 0:08. Brad: our beginning is recent, the manufacturing history goes back further. **ADVANCE TO 3 after:** “goes back much further.”
+**HOLD SLIDE 2 through approval, call, and Wesley's introduction and story, roughly 3–4 minutes.** “Before I tell you what happened to that proposal, this is where CSG fits.” CSG = Czechoslovak Group. Global industrial and technology group, headquartered in Prague, Czech Republic. Origins in 1995 with Excalibur Army; defense, aerospace and automotive businesses. TKG belongs to CSG Ammo+; Remington is a TKG brand. New CSG management approved our proposal. “Go get an intern.” Called Wesley; he came to central Arkansas. **“Take it from here.”**
+
+**Wesley:** Software intern + machine prototypes. **Eight at night, stacking boxes → interview notification.** “Thank God, I might actually get to use this degree.” Interesting projects; charged headfirst into something new. **First problem: GPIO → Jetson patch → low-voltage output / 24-volt relay.** “That was my introduction to making software actually work with a machine.” Came on full time in February; now AI/tools/machines. **Hold slide 2 throughout; pause at the degree line.**
+
+**Brad:** AI into useful capability; next generation of manufacturing. Target 0:06; room to 0:08. Brad: our beginning is recent, the manufacturing history goes back further. **ADVANCE TO 3 after:** “goes back much further.”
 
 ## 3 · HISTORY — BRAD
 
@@ -50,7 +54,9 @@
 
 ## 8 · SHOTSHELL — WESLEY → BRAD
 
-**Wesley:** Different product, camera view, training/test examples, workflow. Reuse tooling, validate the application.
+**Wesley:** Work before training: what camera sees → useful examples → consistent labels. Different product means those questions return. Carry over software and learning; get images and testing right. Every solved problem gives the next a better starting point.
+
+**End exactly:** “there’s always something new to learn.” **Pause and look to Brad.**
 
 **Brad:** Live and still improving. Integration remains real work.
 
@@ -74,7 +80,7 @@
 
 **Brad:** “What do you enjoy most?”
 
-**Wesley:** Code one day, grease and a stopped motor the next. Freedom to spitball and own solutions. **Real reject: our system tossed it out.** Seeing our work do its job. Follow ideas through; help pave the way.
+**Wesley:** Code one day, grease and a stopped motor the next. Freedom to spitball and own solutions. **Real reject: our system tossed it out.** Seeing our work do its job. **Dented shell: Brad called it his child; happy for a week. Pause for laugh.** Follow ideas through; help pave the way.
 
 **Brad:** Let's show the image, decision, and visible result.
 
