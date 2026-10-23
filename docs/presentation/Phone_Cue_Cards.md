@@ -12,7 +12,7 @@
 
 ## 2 · CSG AND THE CALL — BRAD → WESLEY → BRAD
 
-CSG = Czechoslovak Group. TKG belongs to CSG Ammo+; Remington is a TKG brand. New CSG management approved our proposal. “Go get an intern.” Called Wesley; he came to central Arkansas. **“Tell them your part of the story.”** Wesley's supplied introduction, then optional memory of the call/first problem. Brad: AI into useful capability; next generation of manufacturing. Finish introduction by about 0:06.
+CSG = Czechoslovak Group. Global industrial and technology group, headquartered in Prague, Czech Republic. Origins in 1995 with Excalibur Army; defense, aerospace and automotive businesses. TKG belongs to CSG Ammo+; Remington is a TKG brand. New CSG management approved our proposal. “Go get an intern.” Called Wesley; he came to central Arkansas. **“Tell them your part of the story.”** Wesley's supplied introduction, then optional memory of the call/first problem. Brad: AI into useful capability; next generation of manufacturing. Finish introduction by about 0:06.
 
 ## 3 · HISTORY — BRAD
 

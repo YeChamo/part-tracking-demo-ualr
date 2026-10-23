@@ -46,11 +46,11 @@ These are targets, not time to fill. Let the introduction breathe, then move thr
 
 **Bridge:** Advance to the CSG slide for the company context and the opportunity to try.
 
-## 2. CSG: Czechoslovak Group — Brad → Wesley → Brad
+## 2. Czechoslovak Group (CSG) — Brad → Wesley → Brad
 
 **Cue:** CSG context, approval, and the call to Wesley. Complete the personal introduction by about 0:06.
 
-**Brad:** “CSG is Czechoslovak Group, an industrial and technology group. The Kinetic Group is part of its Ammo+ division, and Remington is one of the TKG brands. Today's examples come mainly from Lonoke.”
+**Brad:** “CSG stands for Czechoslovak Group. It is a global industrial and technology group headquartered in Prague, in the Czech Republic. Its roots go back to Excalibur Army in 1995, and its businesses span defense, aerospace, and automotive industries. The Kinetic Group is part of CSG Ammo+, and Remington is one of the TKG brands. Today's examples come mainly from Lonoke.”
 
 “Under the new CSG management, the proposal to build our own system was actually approved. They told me to go get an intern.”
 
@@ -66,7 +66,7 @@ These are targets, not time to fill. Let the introduction breathe, then move thr
 
 **Brad:** “We want to turn that opportunity into useful capability on the floor. That is how we want to help build the next generation of manufacturing. Here is the company and the work that story sits inside.”
 
-**Sources for company context:** [The Kinetic Group About Us](https://www.thekineticgroup.com/aboutus.html); [CSG companies](https://csg.com/en/companies), checked October 22, 2026. The AI ambition is the presenters' framing. The approval and internship details are Brad's account.
+**Sources for company context:** [CSG About Us](https://csg.com/en/about-us) (Prague headquarters, 1995 origins, industries); [The Kinetic Group About Us](https://www.thekineticgroup.com/aboutus.html) (Ammo+ membership), checked October 22, 2026. Brand image supplied by Brad in this chat. The AI ambition is the presenters' framing. The approval and internship details are Brad's account.
 
 ## 3. Writing the next rules — Brad
 
