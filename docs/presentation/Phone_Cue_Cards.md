@@ -118,7 +118,7 @@
 
 ## 15 · CONNECT — BRAD → WESLEY → BRAD · TO 0:40
 
-**awhite@tkghunt.com. Close before the two QR slides.**
+**bdaugherty@tkghunt.com and wsiharath@tkghunt.com. Close before the two QR slides.**
 
 **Brad:** “We’ll be here afterward. Wesley, anything you’d like to add?”
 

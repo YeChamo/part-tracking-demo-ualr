@@ -25,7 +25,7 @@ The opening follows Brad's account: mechanical engineering internship, full-time
 | 0:41–0:49 | 17 | Interactive lab: https://4founders.dev/demo/ai-in-action/ — PIN **877262** |
 | 0:49–1:00 | 17 held | Open questions |
 
-Contact: **awhite@tkghunt.com**. The final interactive slide stays visible for questions. Both QR destinations were decoded from the rendered slides. The deck has 17 matching notes sections. Camera, hardware, page access, and venue projection remain part of the event rehearsal.
+Follow-up contacts: Brad, **bdaugherty@tkghunt.com**; Wesley, **wsiharath@tkghunt.com**. The final interactive slide stays visible for questions. Both QR destinations were decoded from the rendered slides. The deck has 17 matching notes sections. Camera, hardware, page access, and venue projection remain part of the event rehearsal.
 
 ## Optional live inserts remain separate
 

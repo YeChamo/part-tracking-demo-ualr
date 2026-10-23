@@ -277,11 +277,11 @@ Aim to reach slide 11 around 0:14 and start the demo around 0:16. Optional senti
 
 ## 15. Let us connect — Brad → Wesley → Brad
 
-**On screen:** Factory-floor closing message and awhite@tkghunt.com. Close the story before the QR slides.
+**On screen:** Factory-floor closing message and bdaugherty@tkghunt.com and wsiharath@tkghunt.com. Close the story before the QR slides.
 
-**Cue:** awhite@tkghunt.com, questions, internship, and ideas. Close the story by about 0:40, before the homepage and lab QR slides.
+**Cue:** bdaugherty@tkghunt.com and wsiharath@tkghunt.com, questions, internship, and ideas. Close the story by about 0:40, before the homepage and lab QR slides.
 
-**Brad:** “Reach us at **awhite@tkghunt.com**. We’ll be here afterward if anyone wants to connect. Wesley, anything you’d like to add?”
+**Brad:** “Reach me at **bdaugherty@tkghunt.com**, and Wesley at **wsiharath@tkghunt.com**. We’ll be here afterward if anyone wants to connect. Wesley, anything you’d like to add?”
 
 **Wesley:** “Yeah, if you guys have any engineering questions or want to hear more about my internship experience, come talk with us afterward. I’d love to hear what you’re building and spitball some ideas with you.”
 
