@@ -152,4 +152,4 @@ Give 4–5 minutes, then take two or three reactions. Wesley helps access. Brad 
 
 ## Reset
 
-Brad: learning, struggle, chance, called Wesley. Then follow the original company/project route. Wesley: own the problem until others can rely on it. If the introduction reaches 0:08: short history/stakes/system/portfolio route; sentiment and Remi about 30 seconds each. Aim for slide 11 at 0:14, demo at 0:16. A late demo uses the short route and still exits around 0:36. Protect the close and final QR activity.
+Brad: learning, struggle, chance, called Wesley. Then follow the original company/project route. Wesley: own the problem until others can rely on it. Aim for slide 11 at 0:14 and the demo at 0:16–0:36. Keep the full story, the close, and the final QR activity.

@@ -22,7 +22,7 @@
 
 These are targets, not time to fill. The introduction can naturally take **6–8 minutes**. Allow roughly 3–4 minutes on the cover and 3–4 minutes on CSG, including Wesley's interview and GPIO story. Do not stretch either section to fill a target. Change slides at the story turns below, even if the clock differs. A still cover is intentional: look at the audience, pause, and let the story carry the opening.
 
-If the introduction reaches 0:08, use the short route for slides 3–6 below and keep sentiment and Remi to about 30 seconds each. Aim to reach slide 11 around 0:14 and start the demo around 0:16. If more time is needed, use the demo's short route rather than rushing the story. Protect the close, the final QR activity, and questions. Optional sentiment and REMI live demonstrations remain separate.
+Aim to reach slide 11 around 0:14 and start the demo around 0:16. Optional sentiment and REMI live demonstrations remain separate.
 
 **Slide control:** Brad advances slides and watches the clock. Wesley operates the bottle demo. On slide 12, hold the slide while introducing the demonstration, switch to the demo application at the marked cue, then return to slide 13 after the final observation. Keep slide 17 visible throughout the final questions.
 
@@ -93,8 +93,6 @@ If the introduction reaches 0:08, use the short route for slides 3–6 below and
 **Brad:** “Remington's history goes back to 1816. Lonoke has been part of it since 1969. We inherited generations of work in machinery and manufacturing. Our contribution is to connect that experience with cameras, controls, and software. Remington is one of five TKG ammunition brands, so the problems we support extend beyond one site.”
 
 
-**Short route if the introduction ran long:** “Our part of the story is recent. Remington goes back to 1816, and Lonoke to 1969. Our contribution is to build on that experience with cameras, controls, and software.”
-
 **Brad, transition:** “That history carries responsibility, because this is real manufacturing.”
 
 **ADVANCE TO SLIDE 4 after:** “real manufacturing.”
@@ -106,8 +104,6 @@ If the introduction reaches 0:08, use the short route for slides 3–6 below and
 **Cue:** Real machinery, real operators, real consequences.
 
 **Brad:** “That was part of what made those inspection projects so challenging. We work around energetic materials and moving machinery. That makes timing, clear information, and recovery part of the engineering problem. We build with operators, maintenance, quality, and safety. The software has to fit their workflow and the established safeguards.”
-
-**Short route:** “We work around energetic materials, moving machinery, and real production. The system has to fit the people, workflow, and safeguards.”
 
 **Brad, transition:** “So what does it take for software to reach that floor?”
 
@@ -121,8 +117,6 @@ If the introduction reaches 0:08, use the short route for slides 3–6 below and
 
 **Brad:** “When we proposed building it ourselves, this was the whole problem we were taking on. Sense, decide, act. For a vision system, that means acquiring an image, running inference, interpreting the output, and delivering a result in time for the workflow. A model result is one step in that chain. Camera conditions, signals, software latency, and the response all have to fit together. We test the whole chain and show people the evidence behind the result.”
 
-**Short route:** “Sense, decide, act. Capturing an image, making a decision, and getting a usable response all have to work together.”
-
 **Brad, transition:** “You can see that same pattern across our work.”
 
 **ADVANCE TO SLIDE 6 after:** “across our work.”
@@ -135,9 +129,7 @@ If the introduction reaches 0:08, use the short route for slides 3–6 below and
 
 **Brad:** “That approach now connects the different kinds of work we do. Centerfire and shotshell inspection are live and still being refined. Public sentiment and Remi apply software to different questions: what customers are saying, and how engineers find project knowledge. The common problem is making the evidence useful to someone making a decision.”
 
-**Short route:** “Centerfire and shotshell inspection are live and being refined. Sentiment and Remi address other kinds of information. I will start with inspection.”
-
-**Brad, transition for the full route:** “Start with centerfire inspection and what building that capability involves.”
+**Brad, transition:** “Start with centerfire inspection and what building that capability involves.”
 
 **ADVANCE TO SLIDE 7 after:** the centerfire introduction. Finish this overview around 0:10.
 
@@ -185,8 +177,6 @@ If the introduction reaches 0:08, use the short route for slides 3–6 below and
 
 **Brad:** “The same need to turn information into a useful decision also shows up away from the production line. The sentiment project collects public discussion, scores sentiment and product themes, and stores the results for review. The scoring uses VADER with a domain vocabulary. A trend gives the team somewhere to investigate. Keeping the original comments available lets people check what the score actually represents.”
 
-**If behind:** Keep the spoken overview to about 30 seconds. Retain the original-comment point.
-
 **Brad, transition:** “Public comments are one source. Our own project documents are another. Wesley?”
 
 **ADVANCE TO SLIDE 10 after:** “Wesley?”
@@ -200,8 +190,6 @@ If the introduction reaches 0:08, use the short route for slides 3–6 below and
 **Wesley:** “Another kind of information we work with is project documentation. Remi uses a local language model with retrieval over approved project documents. It indexes the material, finds relevant passages, and answers with citations. Scoped tools let it work within a defined workspace. The engineer still checks the source and the result.”
 
 **Brad:** “Here the integration problem is keeping the answer connected to evidence and controlling what the tools can do.”
-
-**If behind:** About 30 seconds. Keep retrieval, citations, and the engineer checking the source.
 
 **Brad, transition:** “Those are the projects. The part that keeps us interested is getting to carry an idea into use.”
 
@@ -252,8 +240,6 @@ If the introduction reaches 0:08, use the short route for slides 3–6 below and
 **Transition, 2 minutes. Brad:** “The image, model, tracking, and response each have to hold up. Wesley's experience on the floor is where those requirements become concrete.” Return to slide 13 by 0:36.
 
 **Recovery:** Show the camera view and last successful result. Ask what the audience would inspect first. Move on within two minutes. Optional barcodes and physical motion are outside the core sequence.
-
-**Short route if starting late:** Two minutes framing, four minutes for the two baseline outcomes, four minutes for one variation, then guided questions and exit by 0:36. Trim discussion to the time remaining.
 
 **RETURN TO THE DECK AT SLIDE 13** after the demo transition. Do not move through the sentiment or Remi slides again.
 

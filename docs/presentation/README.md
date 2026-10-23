@@ -1,6 +1,6 @@
 # Go 4th Fridays — Engineering at The Kinetic Group
 
-Brad Daugherty and Wesley Siharath present on October 23, 2026, at 11:30 a.m. The 17-slide deck keeps the original company and project visuals and flow. Brad's personal introduction runs over the cover and the new CSG slide, with the handoff to Wesley on slide 2. The speech keeps the full story while the slides remain visual anchors. Explicit HOLD, ADVANCE, and application-switch cues match the PowerPoint speaker notes and phone cards. Allow 6–8 minutes for the introduction; use the short overview route if needed to protect the demo and closing.
+Brad Daugherty and Wesley Siharath present on October 23, 2026, at 11:30 a.m. The 17-slide deck keeps the original company and project visuals and flow. Brad's personal introduction runs over the cover and the new CSG slide, with the handoff to Wesley on slide 2. The speech keeps the full story while the slides remain visual anchors. Explicit HOLD, ADVANCE, and application-switch cues match the PowerPoint speaker notes and phone cards. Allow 6–8 minutes for the introduction. The script follows one delivery path with the complete story.
 
 The purpose is to bring AI into something real and help build the next generation of manufacturing.
 

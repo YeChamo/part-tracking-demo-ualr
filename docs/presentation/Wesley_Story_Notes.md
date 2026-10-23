@@ -14,7 +14,7 @@ Start with your short introduction, then tell this memory:
 
 “The first problem we tackled was GPIO. We didn’t realize the Jetson needed a patch, and then we had to figure out how to control a 24-volt relay from its low-voltage output. That was my introduction to making software actually work with a machine.”
 
-Pause after “use this degree.” Keep CSG visible. Finish with your supplied update about coming on full time this February, then look to Brad for the bridge to company history. Aim to complete the shared introduction around 0:06–0:08. If it runs to eight minutes, Brad uses the shorter company overview.
+Pause after “use this degree.” Keep CSG visible. Finish with your supplied update about coming on full time this February, then look to Brad for the bridge to company history. Aim to complete the shared introduction around 0:06–0:08.
 
 ## Slide 8 — the next application
 
