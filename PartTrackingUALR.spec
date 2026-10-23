@@ -13,7 +13,7 @@ for package in ('torch', 'onnx', 'onnxscript', 'onnx_ir', 'sympy'):
     extra_datas += copy_metadata(package)
 extra_binaries = []
 extra_imports = collect_submodules('app.vendor.yolox_models')
-extra_imports += ['torch.onnx', 'torch.export', 'onnxscript', 'onnx_ir', 'sympy']
+extra_imports += ['torch.onnx', 'torch.export', 'onnxscript', 'onnx_ir', 'sympy', 'app.color_classifier']
 tensor_packages = ('tensorrt', 'tensorrt_libs', 'tensorrt_bindings',
                    'tensorrt_cu12', 'tensorrt_cu12_libs', 'tensorrt_cu12_bindings')
 if gpu_build:
@@ -48,7 +48,7 @@ if not gpu_build:
 # PATH can otherwise supply ICU 78 with incompatible suffixed exports.
 a.binaries = [entry for entry in a.binaries
               if entry[0].lower() not in ('icuuc.dll', 'icudt78.dll')]
-pyz = PYZ(a.pure)
+pyz = PYZ(list(a.pure))
 exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name='PartTrackingUALR',
           debug=False, bootloader_ignore_signals=False, strip=False, upx=False,
           console=False, disable_windowed_traceback=False, contents_directory='_runtime',

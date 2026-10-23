@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import os
 from pathlib import Path
 import tempfile
@@ -73,7 +74,7 @@ class VisualUiTests(unittest.TestCase):
         self.assertFalse(self.window.tabs.isTabVisible(diverter))
         self.assertTrue(self.window.stat_cards['output'].isHidden())
         self.assertTrue(self.window.stat_cards['divert'].isHidden())
-        self.assertTrue(self.window.table.isColumnHidden(2))
+        self.assertFalse(self.window.table.isColumnHidden(2))
         self.assertTrue(self.window.table.isColumnHidden(4))
         self.assertFalse(self.window.arm.isEnabled())
         self.assertFalse(self.window.connect_button.isEnabled())
@@ -152,6 +153,40 @@ class VisualUiTests(unittest.TestCase):
             self.window.toggle_fullscreen()
         self.assertIs(self.window.worker,camera)
         worker.assert_not_called(); capture.assert_not_called()
+
+    def test_color_prediction_is_shown_and_exported_with_bottle_id(self):
+        camera=_Camera(); self.window.worker=camera
+        self.window.running=True; self.window.started_at=time.monotonic()
+        packet=self.packet(); packet.update(colors=['blue'],color_confidences=[.81])
+        camera.packet=packet; self.window.tick()
+        self.assertIn('BLUE 81%',self.window.live_evidence.text())
+        self.assertIn('BLUE 81%',self.window.visual_track_title(self.window.tracker.tracks[0]))
+        self.assertEqual(self.window.table.item(0,2).text(),'BLUE')
+        target=self.root/'colors.csv'; self.window.write_csv(target)
+        with target.open(encoding='utf-8-sig',newline='') as stream: row=next(csv.DictReader(stream))
+        self.assertEqual(row['color'],'blue')
+        self.assertAlmostEqual(float(row['color_confidence']),.81)
+
+    def test_ethermotion_mode_restart_saves_routing_and_does_not_arm(self):
+        self.window.operation_mode.setCurrentIndex(1)
+        with patch('app.ui.subprocess.Popen') as launch,patch.object(self.window,'close'):
+            self.window.apply_operation_mode()
+        launch.assert_called_once()
+        saved=json.loads((self.root/'data'/'settings.json').read_text())
+        self.assertFalse(saved['visual_only'])
+        self.assertEqual(saved['yolox_mode'],'two_models')
+        self.assertEqual(saved['rule'],'color')
+        self.assertFalse(self.window.armed)
+        self.assertFalse(self.window.send_gate.is_set())
+
+    def test_mode_cannot_restart_while_tracking_or_motion_is_active(self):
+        self.window.operation_mode.setCurrentIndex(1)
+        for state in ('running','armed','arming','owns_motion'):
+            setattr(self.window,state,True)
+            with patch('app.ui.subprocess.Popen') as launch:
+                self.window.apply_operation_mode()
+            launch.assert_not_called()
+            setattr(self.window,state,False)
 
 
 if __name__=='__main__': unittest.main()

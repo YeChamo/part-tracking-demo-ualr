@@ -1,0 +1,35 @@
+General color neural network: MobileNetV3-Small, 13 output categories.
+Author: Gio Sanchez (giosanchez0208).
+Model card: https://huggingface.co/giosanchez0208/clothing-color-recognition
+Pinned revision: a2650675ea2af6fbb01a94e66432774a6e0381bf
+Original filename: distilV4_student.onnx
+Download: https://huggingface.co/giosanchez0208/clothing-color-recognition/resolve/a2650675ea2af6fbb01a94e66432774a6e0381bf/distilV4_student.onnx
+SHA256: 7c93e068a1f1e3fbb9b3734dc537e8b4d04fc6afea578b2ea1f9a45e629d0887
+Size: 6,134,359 bytes. Unmodified author ONNX export, opset 17.
+Source: https://github.com/giosanchez0208/Clothing-Color-Recognition-ML-With-Synthetic-Dataset
+License: MIT, supplied as LICENSE.txt; author model card supplied as MODEL_CARD.md.
+
+Label order: red, orange, yellow, green, blue, violet, purple, white, gray,
+black, pink, brown, olive.
+Input: float32 [batch,3,224,224], RGB ImageNet normalization, composite of
+112x112 inner crop pasted at [56:168,56:168] into 224x224 wider crop.
+The app adapts the source scripts/predict.py compose_input implementation.
+Output: raw logits [batch,13], softmax distribution over those color labels.
+
+This is a trained general color model, NOT a bottle-trained detector.
+Its author trained on 28,860 procedural garment images and zero real photos.
+Bottle color use is an experimental transfer; no bottle accuracy is claimed.
+Confidence may be low or labels wrong under lighting/reflections/mixed colors.
+The source model card documents ImageNet backbone and indoor-background
+provenance. No training images or product evaluation photos are redistributed.
+YOLOX remains responsible for detecting and tracking bottles. This network
+only classifies the inner body crop of an already detected bottle.
+
+Demo crop calibration: x .20-.80, y .18-.35 relative to the detected bottle
+box. This samples the upper liquid shoulder and avoids the large printed
+label. Selected after comparing fixed crops on three official Gatorade
+product images (Cool Blue, Lemon Lime, Glacier Cherry). Those same examples
+then predicted blue, yellow and white. This is calibration on three product
+images, NOT independent accuracy validation or conveyor validation.
+Images and exploratory evidence stay in ignored .build/color-model-research.
+The actual trained weights are unchanged. No class remapping is applied.

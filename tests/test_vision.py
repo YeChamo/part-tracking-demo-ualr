@@ -140,6 +140,33 @@ class MailboxTests(unittest.TestCase):
 
 
 class YoloXWorkerTests(unittest.TestCase):
+    def test_visual_worker_forwards_optional_nn_color_without_sorting_reasons(self):
+        expected = {"boxes": [(20, 10, 80, 90)], "colors": ["blue"],
+                    "color_confidences": [.91], "confidences": [.77],
+                    "model_labels": ["bottle"], "visual_only": True,
+                    "reasons": [[]], "inference_ms": 6.0}
+        pipeline = FakePipeline(expected)
+        frame = np.full((100, 100, 3), (0, 128, 255), np.uint8)
+        with tempfile.TemporaryDirectory() as folder:
+            worker = VideoWorker({"source": "usb", "visual_only": True, "rule": "tracking",
+                                  "color_model_path": "trained_color.onnx"}, Path(folder))
+            packets = []
+            def read(_source):
+                packet = worker.take_latest()
+                if packet is not None:
+                    packets.append(packet)
+                    raise EOFError("Test source ended")
+                return frame, 10.0
+            with patch("app.vision.YoloXPipeline", return_value=pipeline), patch.object(
+                    worker, "_open_source", return_value=(("usb", object(), None), "Fake camera")), patch.object(
+                    worker, "_read_source", side_effect=read), patch.object(worker, "_close_source"), patch(
+                    "app.vision.barcode_status", return_value=(False, "Unavailable")):
+                worker.run()
+            self.assertEqual(len(packets), 1)
+            for key, value in expected.items():
+                self.assertEqual(packets[0][key], value, key)
+            self.assertEqual(packets[0]["defects"], [])
+
     def test_visual_tracking_forwards_detector_confidence_without_color_requirements(self):
         frame = np.full((100, 100, 3), 127, np.uint8)
         pipeline = FakePipeline({"boxes": [(20, 10, 80, 90)], "colors": ["unknown"],

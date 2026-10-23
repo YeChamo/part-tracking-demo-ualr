@@ -122,7 +122,7 @@ class PthPipelineTests(unittest.TestCase):
         self.assertTrue(all(reason == [] for reason in result["reasons"]))
 
     def test_two_models_auto_select_the_only_locator_class_and_read_color_model(self):
-        pipeline = self.open_pipeline(self.settings(yolox_mode="two_models",
+        pipeline = self.open_pipeline(self.settings(yolox_mode="two_models", color_backend="yolox",
                         model_path=str(self.locator), color_model_path=str(self.two_colors),
                         model_class_id=39, pass_color="blue"))
         self.assertEqual(pipeline.settings["model_class_id"], 0)

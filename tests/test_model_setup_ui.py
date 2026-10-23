@@ -58,13 +58,14 @@ class ModelSetupTests(unittest.TestCase):
         self.assertIn('color_experiment_path',self.window.fields)
         self.assertTrue(self.window.fields['auto_model_config'].isChecked())
     def test_prepare_reads_classes_without_silently_changing_pass_target(self):
+        target=self.window.fields['pass_color'].currentText().casefold()
         with patch('app.ui.ModelPreparationWorker',Preparation): self.window.prepare_models()
         worker=self.window.model_preparer
         self.assertFalse(self.window.start_button.isEnabled())
         self.assertFalse(self.window.path_buttons['model_path'].isEnabled())
         worker.prepared.emit({'colors':['pink','fruit punch'],'models':[]})
         combo=self.window.fields['pass_color']
-        self.assertEqual(combo.currentText(),'orange')
+        self.assertEqual(combo.currentText(),target)
         self.assertEqual([combo.itemText(i) for i in range(combo.count())],['pink','fruit punch'])
         combo.setCurrentText('Fruit Punch')
         worker.active=False; worker.finished.emit()

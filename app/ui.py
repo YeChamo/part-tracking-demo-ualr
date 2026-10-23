@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import csv
+import base64
 import heapq
 import json
 import logging
 import os
 import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -191,7 +193,9 @@ class MainWindow(QMainWindow):
         # only exposed by the explicit --smoke-test diagnostic.
         self.settings['source'] = ('simulation' if smoke_test else
                                    self.settings['source'] if self.settings['source'] in ('usb', 'basler') else 'usb')
-        if not self.visual_only: self.settings['rule'] = 'color'
+        if not self.visual_only:
+            self.settings['rule'] = 'color'
+            if self.settings['yolox_mode'] == 'tracking': self.settings['yolox_mode'] = 'two_models'
         self.sim = Simulation()
         self.tracker = self.make_tracker()
         self.worker = None
@@ -377,6 +381,7 @@ class MainWindow(QMainWindow):
         self.build_conveyor_tab()
         self.build_reject_tab()
         if self.visual_only:
+            self.tabs.setTabVisible(self.tabs.count()-2,False)
             self.tabs.setTabVisible(self.tabs.count()-1,False)
         splitter.addWidget(self.tabs)
         splitter.setSizes([970,430])
@@ -384,8 +389,7 @@ class MainWindow(QMainWindow):
         self.table = QTableWidget(0,6)
         self.table.setHorizontalHeaderLabels(['TIME / BOTTLE','COLOR','ROUTING','BARCODE','OUTPUT','DETAIL'])
         if self.visual_only:
-            self.table.setHorizontalHeaderLabels(['TIME / PART','MODEL LABEL','','BARCODE','','CONFIDENCE'])
-            self.table.setColumnHidden(2,True)
+            self.table.setHorizontalHeaderLabels(['TIME / PART','MODEL LABEL','COLOR NN','BARCODE','','CONFIDENCE'])
             self.table.setColumnHidden(4,True)
         self.table.setAlternatingRowColors(True)
         self.table.verticalHeader().hide()
@@ -488,40 +492,48 @@ class MainWindow(QMainWindow):
 
     def build_models_tab(self):
         box = self.new_tab('Models')
-        self.note(box,'Choose the YOLOX model used to detect and track bottles.' if self.visual_only else 'Choose the YOLOX models used for bottle tracking and color sorting.')
+        self.operation_mode=QComboBox()
+        self.operation_mode.addItem('Visual preview',True)
+        self.operation_mode.addItem('EtherMotion sorting',False)
+        self.operation_mode.setCurrentIndex(0 if self.visual_only else 1)
+        box.addWidget(self.operation_mode)
+        self.apply_mode_button=QPushButton('Apply mode / restart app')
+        self.apply_mode_button.clicked.connect(self.apply_operation_mode)
+        box.addWidget(self.apply_mode_button)
+        self.note(box,'YOLOX bottle tracking + trained color NN. Stop to change models or mode.')
         form = QFormLayout(); form.setSpacing(10)
-        modes = [('Part tracking (one model)','tracking')]
-        if not self.visual_only: modes += [('Bottle model + color model','two_models'),('One model: colored bottles','combined')]
+        modes = ([('Part tracking','tracking')] if self.visual_only else
+                 [('Bottle model + color model','two_models'),('One YOLOX: colored bottles','combined')])
         self.combo(form,'yolox_mode','YOLOX models',modes)
+        if self.visual_only: form.setRowVisible(self.fields['yolox_mode'],False)
         self.path_field(form,'model_path','Bottle YOLOX','YOLOX models (*.pth *.pt *.onnx)')
-        self.path_field(form,'color_model_path','Color YOLOX','YOLOX models (*.pth *.pt *.onnx)')
-        if self.visual_only: form.setRowVisible(self.fields['color_model_path'].parentWidget(),False)
-        self.combo(form,'inference_backend','Acceleration',[('Automatic (GPU if available)','auto'),('ONNX CPU','cpu'),('TensorRT FP32','tensorrt_fp32'),('TensorRT FP16','tensorrt_fp16')])
-        self.field(form,'auto_model_config','Read saved model settings','bool')
+        self.path_field(form,'color_model_path','Color model','Models (*.onnx *.pth *.pt)')
+        self.combo(form,'color_backend','Color model type',[('Bundled color neural network','classifier'),('YOLOX color detector','yolox')])
         self.path_buttons['model_path'].setText('Choose'); self.path_buttons['model_path'].setMaximumWidth(70)
         self.path_buttons['color_model_path'].setText('Choose'); self.path_buttons['color_model_path'].setMaximumWidth(70)
         box.addLayout(form)
         self.prepare_models_button=QPushButton('Load / convert models')
         self.prepare_models_button.clicked.connect(self.prepare_models)
         box.addWidget(self.prepare_models_button)
-        self.model_note=self.note(box,'Pick .pth/.pt or ONNX. Checkpoints convert automatically; saved exports and GPU engines are reused.')
+        self.model_note=self.note(box,'Bundled models are ready. YOLOX checkpoints convert automatically.')
         thresholds=QFormLayout(); thresholds.setSpacing(12)
         thresholds.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapAllRows)
         for key,title in (('confidence','Bottle confidence'),('color_confidence','Color confidence')):
             control=ConfidenceControl(float(self.settings[key]))
-            control.setToolTip('Minimum YOLOX detection confidence.' if self.visual_only else 'Adjust during live preview while reject output is disarmed.')
+            control.setToolTip('Minimum model confidence. Adjust during live preview while reject output is disarmed.')
             self.fields[key]=control
             thresholds.addRow(title,control)
             control.valueChanged.connect(self.confidence_changed)
-            if self.visual_only and key=='color_confidence': thresholds.setRowVisible(control,False)
         box.addLayout(thresholds)
-        self.note(box,'Higher confidence requires a stronger YOLOX prediction. Adjust the slider during live tracking.' if self.visual_only else 'Higher confidence requires a stronger YOLOX prediction. Sliders update live preview while output is disarmed.')
+        self.note(box,'Low color confidence = unknown / divert. Verify your bottles before enabling output.')
         advanced_button=QPushButton('Advanced model settings')
         advanced_button.setCheckable(True)
         box.addWidget(advanced_button)
         advanced=QWidget(); advanced.setVisible(False)
         advanced_button.toggled.connect(advanced.setVisible)
         form=QFormLayout(advanced); form.setContentsMargins(0,0,0,0); form.setSpacing(10)
+        self.combo(form,'inference_backend','Acceleration',[('Automatic (GPU if available)','auto'),('ONNX CPU','cpu'),('TensorRT FP32','tensorrt_fp32'),('TensorRT FP16','tensorrt_fp16')])
+        self.field(form,'auto_model_config','Read saved model settings','bool')
         self.field(form,'model_class_id','Bottle class ID (-1 = all)','int',-1,999)
         self.field(form,'image_size','Bottle input size','int',160,1920)
         names=self.field(form,'model_class_names','Bottle class order','text')
@@ -536,13 +548,32 @@ class MainWindow(QMainWindow):
         self.combo(form,'color_architecture','Color architecture',variants)
         self.path_field(form,'model_experiment_path','Bottle experiment','YOLOX Python experiment (*.py)')
         self.path_field(form,'color_experiment_path','Color experiment','YOLOX Python experiment (*.py)')
-        if self.visual_only:
-            for key in ('color_image_size','color_class_names','color_class_map','color_architecture'):
-                form.setRowVisible(self.fields[key],False)
-            form.setRowVisible(self.fields['color_experiment_path'].parentWidget(),False)
         box.addWidget(advanced)
         self.note(box,'Model names and input size are read automatically. Use Advanced for missing labels or a modified YOLOX graph. A custom experiment runs Python model-building code; select your own training configuration. Generic COCO weights locate bottles only.')
         box.addStretch()
+
+    def apply_operation_mode(self):
+        if self.running or self.armed or self.arming or self.owns_motion or (self.model_preparer and self.model_preparer.isRunning()):
+            return
+        selected=bool(self.operation_mode.currentData())
+        if selected == self.visual_only: return
+        for key,widget in self.fields.items(): self.settings[key]=self.widget_value(widget)
+        self.settings.update(visual_only=selected, yolox_mode='tracking' if selected else 'two_models',
+                             rule='tracking' if selected else 'color')
+        store.save(self.root,self.settings)
+        # The child must wait until this process releases the single-instance
+        # server and camera. A hidden launcher owns that wait after we close.
+        quote=lambda value: "'"+str(value).replace("'","''")+"'"
+        script=f"Wait-Process -Id {os.getpid()} -ErrorAction SilentlyContinue; Start-Process -FilePath {quote(sys.executable)} -WorkingDirectory {quote(self.root)}"
+        if not getattr(sys,'frozen',False): script+=' -ArgumentList '+quote('"'+str(self.root/'run.py')+'"')
+        encoded=base64.b64encode(script.encode('utf-16le')).decode('ascii')
+        command=['powershell.exe','-NoProfile','-NonInteractive','-EncodedCommand',encoded]
+        try:
+            subprocess.Popen(command,cwd=str(self.root),creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+        except OSError as exc:
+            self.set_status('Restart failed: '+str(exc),'#fb8b94')
+            return
+        self.close()
 
     @staticmethod
     def widget_value(widget):
@@ -856,11 +887,13 @@ class MainWindow(QMainWindow):
     def update_enabled(self):
         preparing=bool(self.model_preparer and self.model_preparer.isRunning())
         editable=not self.running and not preparing
+        self.operation_mode.setEnabled(editable and not self.armed and not self.arming and not self.owns_motion)
+        self.apply_mode_button.setEnabled(self.operation_mode.isEnabled())
         self.start_button.setEnabled(editable and not self.owns_motion and not self.camera_scanning)
         self.prepare_models_button.setEnabled(editable and not self.owns_motion)
         for widget in self.fields.values(): widget.setEnabled(editable)
         for button in self.path_buttons.values(): button.setEnabled(editable)
-        two_models=self.fields['yolox_mode'].currentData()=='two_models'
+        two_models=self.visual_only or self.fields['yolox_mode'].currentData()=='two_models'
         for key in ('color_model_path','color_class_names','color_image_size','model_class_id'):
             self.fields[key].setEnabled(editable and two_models)
         if self.visual_only: self.fields['model_class_id'].setEnabled(editable)
@@ -968,7 +1001,9 @@ class MainWindow(QMainWindow):
 
     def visual_track_title(self,track):
         meta=self.track_meta.get(track.id,{})
-        return f"#{track.id:03d}  {meta.get('model_label','bottle').upper()}  {float(meta.get('confidence',0)):.0%}"
+        title=f"#{track.id:03d}  {meta.get('model_label','bottle').upper()}  {float(meta.get('confidence',0)):.0%}"
+        color=meta.get('color','unknown')
+        return title+(f"  | {color.upper()} {float(meta.get('color_confidence',0)):.0%}" if color!='unknown' else '')
 
     def record_visual_tracks(self,tracks):
         changed=False
@@ -983,19 +1018,23 @@ class MainWindow(QMainWindow):
                        'bottle_id':track.id,'model_label':meta.get('model_label','bottle'),
                        'confidence':float(meta.get('confidence',0)),
                        'barcode':meta.get('barcode','UNREAD'),'barcode_format':meta.get('format',''),
-                       'source':self.settings['source'],'color':'','decision':'','output':'VISUAL','detail':''}
+                       'source':self.settings['source'],'color':meta.get('color','unknown'),
+                       'color_confidence':float(meta.get('color_confidence',0)),
+                       'decision':'','output':'VISUAL','detail':''}
                 self.visual_events[key]=event
                 self.events.append(event)
                 self.add_row(event)
                 changed=True
             else:
                 new_code=meta.get('barcode','UNREAD')
-                changed=changed or new_code!=event['barcode']
+                changed=changed or new_code!=event['barcode'] or meta.get('color','unknown')!=event['color']
                 event.update(model_label=meta.get('model_label','bottle'),confidence=float(meta.get('confidence',0)),
+                             color=meta.get('color','unknown'),color_confidence=float(meta.get('color_confidence',0)),
                              barcode=new_code,barcode_format=meta.get('format',''))
                 for row in range(self.table.rowCount()):
                     if self.table.item(row,0).data(Qt.ItemDataRole.UserRole)==event['event_id']:
                         self.table.item(row,3).setText(event['barcode'])
+                        self.table.item(row,2).setText(event['color'].upper())
                         self.table.item(row,5).setText(f"{event['confidence']:.0%}")
                         break
         if changed: self.save_events()
@@ -1013,7 +1052,7 @@ class MainWindow(QMainWindow):
                 self.live_swatch.setStyleSheet('background:#243b61;color:#c8dcff;border-radius:10px;font-size:23px;font-weight:700;')
                 self.live_title.setText(f'LIVE PART  #{track.id:03d}')
                 self.live_detail.setText(f"{meta.get('model_label','bottle').upper()}  •  {float(meta.get('confidence',0)):.0%} confidence")
-                self.live_evidence.setText(f'YOLOX prediction  •  {track.hits} camera frame(s) tracked')
+                self.live_evidence.setText(f"Color NN: {meta.get('color','unknown').upper()} {float(meta.get('color_confidence',0)):.0%}  •  {track.hits} frame(s) tracked")
                 self.live_route.setText('TRACKING')
             elif packet and packet.get('boxes'):
                 self.live_swatch.setText('•')
@@ -1138,7 +1177,7 @@ class MainWindow(QMainWindow):
         self.table.insertRow(0)
         values=[event['time'][11:19]+f"  #{event['bottle_id']:03d}",event['color'].upper(),f"{event['decision']} · {'DIVERT' if event['decision'] else 'PASS'}",event['barcode'],event['output'],event['detail']]
         if self.visual_only:
-            values=[event['time'][11:19]+f"  #{event['bottle_id']:03d}",event.get('model_label','bottle').upper(),'',event['barcode'],'',f"{event.get('confidence',0):.0%}"]
+            values=[event['time'][11:19]+f"  #{event['bottle_id']:03d}",event.get('model_label','bottle').upper(),event.get('color','unknown').upper(),event['barcode'],'',f"{event.get('confidence',0):.0%}"]
         for i,text in enumerate(values):
             item=QTableWidgetItem(str(text)); item.setData(Qt.ItemDataRole.UserRole,event['event_id'])
             if i==2 and not self.visual_only: item.setForeground(QColor('#fb8b94' if event['decision'] else '#54dfbb'))
@@ -1430,7 +1469,7 @@ class MainWindow(QMainWindow):
     def write_csv(self,path):
         fields=['time','session','event_id','bottle_id','color','decision','barcode','barcode_format','source','output','detail','request_id','run_id','program_id','return_program_id','cycles','cycles_completed']
         if self.visual_only:
-            fields=['time','session','event_id','bottle_id','model_label','confidence','barcode','barcode_format','source']
+            fields=['time','session','event_id','bottle_id','model_label','confidence','color','color_confidence','barcode','barcode_format','source']
         with Path(path).open('w',newline='',encoding='utf-8-sig') as file:
             writer=csv.DictWriter(file,fieldnames=fields); writer.writeheader()
             writer.writerows({key:event.get(key,'') for key in fields} for event in self.events)

@@ -3,6 +3,7 @@ import tempfile
 import unittest
 import importlib.util
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import numpy as np
@@ -195,11 +196,167 @@ class PipelineTests(unittest.TestCase):
     def test_visual_only_flag_bypasses_a_saved_two_model_color_requirement(self):
         self.model("bottles.onnx", names=["bottle"], detections=[detection(label="bottle")])
         pipe = self.pipeline(visual_only=True, yolox_mode="two_models", auto_model_config=True,
-                             model_path="bottles.onnx", color_model_path="missing.onnx", color_confidence=None)
+                             model_path="bottles.onnx", color_model_path="", color_confidence=None)
         self.assertEqual(pipe.settings["model_class_id"], 0)
         self.assertEqual(len(self.opened), 1)
         self.assertEqual(pipe.information()["colors"], [])
         self.assertEqual(pipe.infer(np.zeros((240, 320, 3), np.uint8))["model_labels"], ["bottle"])
+
+    def test_visual_tracking_optional_color_model_preserves_bottle_identity_and_model_colors(self):
+        self.model("bottles.onnx", count=80, detections=[detection(color_id=39, score=.83, label="bottle")])
+        self.model("colors.onnx", names=["orange", "blue"], detections=[
+            detection((20, 60, 80, 100), 1, .92, "blue")])
+        pipe = self.pipeline(visual_only=True, yolox_mode="tracking", rule="tracking",
+                             model_path="bottles.onnx", color_model_path="colors.onnx", pass_color="unused")
+        orange_pixels = np.full((240, 320, 3), (0, 128, 255), np.uint8)
+        result = pipe.infer(orange_pixels)
+        self.assertEqual(result["colors"], ["blue"])
+        self.assertEqual(result["color_confidences"], [.92])
+        self.assertEqual(result["model_labels"], ["bottle"])
+        self.assertEqual(result["confidences"], [.83])
+        self.assertEqual(result["reasons"], [[]])
+        self.assertTrue(result["visual_only"])
+        self.assertEqual(result["inference_ms"], 7)
+        self.assertEqual(result, pipe.infer(np.zeros_like(orange_pixels)))
+        self.assertEqual(len(pipe.information()["models"]), 2)
+        self.assertEqual(pipe.information()["colors"], ["orange", "blue"])
+        self.assertIn("YOLOX colors", pipe.describe())
+
+    def test_visual_color_confidence_changes_keep_unknown_color_informational(self):
+        pipe = self.two_models(visual_only=True, colors=[detection(score=.6)], pass_color="unused")
+        frame = np.zeros((240, 320, 3), np.uint8)
+        self.assertEqual(pipe.infer(frame)["colors"], ["orange"])
+        pipe.set_confidence(.3, .7)
+        result = pipe.infer(frame)
+        self.assertEqual(result["colors"], ["unknown"])
+        self.assertEqual(result["reasons"], [[]])
+        self.assertEqual(result["model_labels"], ["bottle"])
+        self.assertEqual(pipe._color.detector._cfg.conf, .7)
+        pipe.set_confidence(.3, .5)
+        self.assertEqual(pipe.infer(frame)["colors"], ["orange"])
+        self.assertEqual(len(self.opened), 2)
+
+    def test_visual_conflicting_color_predictions_never_emit_rejection(self):
+        pipe = self.two_models(visual_only=True, colors=[detection(), detection(color_id=1, score=.8, label="blue")])
+        result = pipe.infer(np.zeros((240, 320, 3), np.uint8))
+        self.assertEqual(result["colors"], ["unknown"])
+        self.assertEqual(result["reasons"], [[]])
+
+    def test_visual_combined_model_reports_color_without_requiring_pass_class(self):
+        self.models["colors.onnx"]["detections"] = [detection(color_id=1, label="blue_bottle")]
+        pipe = self.pipeline(visual_only=True, yolox_mode="combined", pass_color="unused")
+        result = pipe.infer(np.zeros((240, 320, 3), np.uint8))
+        self.assertEqual(result["colors"], ["blue"])
+        self.assertEqual(result["reasons"], [[]])
+        self.assertEqual(result["confidences"], [.9])
+
+    def test_visual_selected_missing_color_model_is_reported(self):
+        self.model("bottles.onnx", count=80)
+        with self.assertRaisesRegex(ValueError, "YOLOX model was not found"):
+            self.pipeline(visual_only=True, yolox_mode="tracking", model_path="bottles.onnx",
+                          color_model_path="missing.onnx")
+        self.assertEqual(self.opened, [])
+
+    def classifier_pipeline(self, *, confidence=.91, box=(10, 10, 110, 210), **settings):
+        owner = self
+        self.classifier_crops = []
+        class Classifier:
+            names = ("red", "blue")
+            bottle_crop = (.2, .15, .8, .45)
+            input_shape = (224, 224)
+            def __init__(self, path):
+                owner.classifier_instance = self
+                self.path, self.closed = path, False
+            def open(self):
+                return self
+            def infer(self, crop):
+                owner.classifier_crops.append(crop.copy())
+                return "blue", confidence
+            def close(self):
+                self.closed = True
+        self.model("bottles.onnx", count=80, detections=[detection(box, 39, .83, "bottle")])
+        (self.root / "classifier.onnx").touch()
+        options = dict(visual_only=True, yolox_mode="tracking", rule="tracking",
+                       model_path="bottles.onnx", color_model_path="classifier.onnx",
+                       color_backend="classifier", pass_color="unused")
+        options.update(settings)
+        with patch.dict("sys.modules", {"app.color_classifier": SimpleNamespace(ColorClassifier=Classifier)}):
+            return self.pipeline(**options)
+
+    def test_visual_secondary_classifier_uses_model_roi_once_and_preserves_bottle_scores(self):
+        pipe = self.classifier_pipeline()
+        orange = np.full((240, 320, 3), (0, 128, 255), np.uint8)
+        result = pipe.infer(orange)
+        self.assertEqual(result["colors"], ["blue"])
+        self.assertEqual(result["color_confidences"], [.91])
+        self.assertEqual(result["confidences"], [.83])
+        self.assertEqual(result["model_labels"], ["bottle"])
+        self.assertEqual(result["reasons"], [[]])
+        self.assertTrue(result["visual_only"])
+        np.testing.assert_array_equal(self.classifier_crops[0], orange[40:100, 30:90])
+        self.assertEqual(pipe.information()["colors"], ["red", "blue"])
+        self.assertEqual(len(pipe.information()["models"]), 2)
+        self.assertIn("color NN", pipe.describe())
+        pipe.close()
+        self.assertTrue(self.classifier_instance.closed)
+
+    def test_visual_classifier_threshold_is_live_and_below_threshold_never_rejects(self):
+        pipe = self.classifier_pipeline(confidence=.6)
+        frame = np.zeros((240, 320, 3), np.uint8)
+        self.assertEqual(pipe.infer(frame)["colors"], ["blue"])
+        pipe.set_confidence(.25, .7)
+        result = pipe.infer(frame)
+        self.assertEqual(result["colors"], ["unknown"])
+        self.assertEqual(result["reasons"], [[]])
+        pipe.set_confidence(.25, .5)
+        self.assertEqual(pipe.infer(frame)["colors"], ["blue"])
+        self.assertEqual(len(self.opened), 1)
+
+    def test_visual_classifier_skips_crops_outside_frame(self):
+        pipe = self.classifier_pipeline(box=(-100, -100, -10, -10))
+        result = pipe.infer(np.zeros((240, 320, 3), np.uint8))
+        self.assertEqual(result["colors"], ["unknown"])
+        self.assertEqual(result["reasons"], [[]])
+        self.assertEqual(self.classifier_crops, [])
+
+    def test_visual_classifier_skips_tiny_crops_instead_of_faulting_camera(self):
+        pipe = self.classifier_pipeline(box=(10, 10, 11, 11))
+        result = pipe.infer(np.zeros((240, 160, 3), dtype=np.uint8))
+        self.assertEqual(result['colors'], ['unknown'])
+        self.assertEqual(result['reasons'], [[]])
+        self.assertEqual(self.classifier_crops, [])
+
+    def test_visual_classifier_invalid_confidence_faults_instead_of_fabricating_color(self):
+        pipe = self.classifier_pipeline(confidence=float("nan"))
+        with self.assertRaisesRegex(ValueError, "invalid confidence"):
+            pipe.infer(np.zeros((240, 320, 3), np.uint8))
+
+    def test_secondary_classifier_passes_only_selected_color_in_sorting_mode(self):
+        pipe = self.classifier_pipeline(visual_only=False, yolox_mode="two_models", rule="color", pass_color="blue")
+        result = pipe.infer(np.zeros((240, 320, 3), np.uint8))
+        self.assertEqual(result["colors"], ["blue"])
+        self.assertEqual(result["color_confidences"], [.91])
+        self.assertEqual(result["reasons"], [[]])
+        self.assertEqual(result["model_labels"], ["blue"])
+        self.assertFalse(pipe.information()["visual_only"])
+        self.assertIn("color NN", pipe.describe())
+
+    def test_secondary_classifier_nonpass_and_unknown_emit_existing_sorting_decisions(self):
+        pipe = self.classifier_pipeline(visual_only=False, yolox_mode="two_models", rule="color", pass_color="red")
+        frame = np.zeros((240, 320, 3), np.uint8)
+        result = pipe.infer(frame)
+        self.assertEqual(result["colors"], ["blue"])
+        self.assertEqual(result["reasons"], [["Color NN blue (divert)"]])
+        pipe.set_confidence(.25, .95)
+        result = pipe.infer(frame)
+        self.assertEqual(result["colors"], ["unknown"])
+        self.assertEqual(result["reasons"], [["Unknown color"]])
+
+    def test_sorting_classifier_requires_a_pass_class_present_in_trained_labels(self):
+        with self.assertRaisesRegex(ValueError, "Choose a pass color"):
+            self.classifier_pipeline(visual_only=False, yolox_mode="two_models", rule="color", pass_color="orange")
+        self.assertTrue(self.classifier_instance.closed)
+        self.assertEqual(self.opened, [])
 
     def test_pass_color_must_be_in_trained_classes(self):
         with self.assertRaisesRegex(ValueError, "pass color"):

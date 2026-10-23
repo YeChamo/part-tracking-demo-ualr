@@ -44,6 +44,16 @@ def check_runtime(root: Path) -> int:
         from .model_classes import build_color_map
         checks['yolox_color_class_map'] = build_color_map(['blue_bottle','yellow_bottle','white_bottle'],class_count=3)
         checks['trained_color_model_required'] = True
+        from .color_classifier import ColorClassifier
+        classifier=ColorClassifier(root/'models'/'color'/'distilV4_student.onnx').open()
+        try:
+            color,confidence=classifier.infer(np.full((96,96,3),(220,95,30),np.uint8))
+            if color not in classifier.names or not 0 <= confidence <= 1:
+                raise RuntimeError('Bundled color neural network returned invalid output.')
+            checks['color_neural_network']={'ready':True,'prediction':color,'confidence':confidence,
+                                             'bottle_accuracy_test':False}
+        finally:
+            classifier.close()
         # Synthetic checkpoint exercises the packaged converter, not accuracy.
         import torch
         from .vendor.yolox_models import build_model
@@ -58,6 +68,28 @@ def check_runtime(root: Path) -> int:
         del graph
         converted=prepare_model(checkpoint,root,image_size=None)
         from .yolox_pipeline import YoloXPipeline
+        color_fixture=os.environ.get('UALR_COLOR_TEST_IMAGE','')
+        if color_fixture:
+            color_frame=cv2.imread(color_fixture)
+            if color_frame is None: raise RuntimeError('Color test image could not be read.')
+            checks['color_bottle_photo']={}
+            for pass_color in ('blue','red'):
+                color_pipeline=YoloXPipeline({'visual_only':False,'yolox_mode':'two_models','rule':'color',
+                    'model_path':'models/yolox_nano.onnx','model_class_id':39,'confidence':.20,
+                    'color_model_path':'models/color/distilV4_student.onnx','color_backend':'classifier',
+                    'color_confidence':.50,'pass_color':pass_color,'inference_backend':'cpu',
+                    'auto_model_config':True},root)
+                try:
+                    color_pipeline.open(); result=color_pipeline.infer(color_frame)
+                    if len(result['boxes']) < 2 or any(value!='blue' for value in result['colors']):
+                        raise RuntimeError('Color fixture did not detect and classify both blue bottles.')
+                    rejects=[bool(reason) for reason in result['reasons']]
+                    if any(rejects) != (pass_color!='blue') or len(set(rejects))!=1:
+                        raise RuntimeError('Color fixture did not produce the expected pass/reject results.')
+                    checks['color_bottle_photo'][pass_color]={'colors':result['colors'],
+                        'confidences':result['color_confidences'],'rejects':rejects}
+                finally:
+                    color_pipeline.close()
         setup={'yolox_mode':'combined','model_path':str(converted),'pass_color':'orange',
                'auto_model_config':True,'inference_backend':'cpu','rule':'color'}
         pipeline=YoloXPipeline(setup,root)

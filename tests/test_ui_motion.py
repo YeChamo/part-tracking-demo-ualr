@@ -9,6 +9,8 @@ import time
 import unittest
 from unittest.mock import patch
 
+import numpy as np
+
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtWidgets import QApplication
@@ -158,6 +160,69 @@ class UiMotionTests(unittest.TestCase):
     def poll(self):
         self.window.poll_motion()
         self.jobs.run_next()
+
+    def feed_classifier_packets(self, reasons_for_frame):
+        """Exercise production packet -> tracker -> UI -> scheduler, no camera."""
+        camera = StubCamera()
+        self.window.worker = camera
+        self.window.started_at = 100.0
+        self.window.settings.update(distance_mm=100, belt_speed=200, lead_ms=200, move_ms=150)
+        for index, x in enumerate(range(180, 841, 30)):
+            captured = 100.0 + index * .1
+            flags = reasons_for_frame(index, x)
+            camera.packet = {"frame": np.zeros((400, 1000, 3), np.uint8),
+                             "boxes": [(x - 30, 100, x + 30, 300)], "reasons": [flags],
+                             "colors": ["blue"], "color_confidences": [.88],
+                             "model_labels": ["blue"], "captured": captured,
+                             "inspection_ready": True, "visual_only": False,
+                             "confidence_revision": 0, "barcodes": [],
+                             "vision_pipeline": "YOLOX bottles; color NN"}
+            with patch("app.ui.time.monotonic", return_value=captured):
+                self.window.tick()
+            if x + 30 < 800:
+                self.assertEqual(self.window.events, [], "Upstream color evidence must wait for line crossing")
+
+    def test_classifier_color_packet_rejects_once_at_line_and_sends_selected_program(self):
+        self.live()
+        self.feed_classifier_packets(lambda _index, _x: ["Color NN blue (divert)"])
+        self.assertEqual(len(self.window.events), 1)
+        event = self.window.events[0]
+        self.assertEqual(event["bottle_id"], 1)
+        self.assertEqual(event["color"], "blue")
+        self.assertEqual(event["decision"], 1)
+        self.assertIn("Color NN blue (divert)", event["detail"])
+        self.assertEqual(len(self.window.pending), 1)
+        self.assertEqual(self.controller.calls, [])
+        due = event["_plan"]["due_at"]
+        with patch("app.ui.time.monotonic", return_value=due):
+            self.window.dispatch_due(due)
+            self.jobs.run_next()
+        triggers = [call for call in self.controller.calls if call[0] == "trigger"]
+        self.assertEqual(len(triggers), 1)
+        self.assertEqual(triggers[0][1], "reject-once")
+        self.assertEqual(event["output"], "ACCEPTED")
+        self.assertEqual(self.window.complete_count, 0, "Acceptance is not physical completion")
+
+    def test_classifier_pass_packet_stays_disarmed_without_scheduling_motion(self):
+        self.live(armed=False)
+        self.feed_classifier_packets(lambda _index, _x: [])
+        self.assertEqual(len(self.window.events), 1)
+        event = self.window.events[0]
+        self.assertEqual((event["color"], event["decision"], event["output"]), ("blue", 0, "DISARMED"))
+        self.assertFalse(self.window.pending)
+        self.assertFalse(self.jobs.pending)
+        self.assertFalse(self.controller.calls)
+        self.assertFalse(self.window.send_gate.is_set())
+
+    def test_late_classifier_mismatch_at_crossing_is_not_allowed_to_pass_unconfirmed(self):
+        self.live()
+        self.feed_classifier_packets(lambda _index, x: ["Color NN blue (divert)"] if x >= 780 else [])
+        self.assertEqual(len(self.window.events), 1)
+        event = self.window.events[0]
+        self.assertEqual(event["decision"], 1)
+        self.assertIn("Unconfirmed color: Color NN blue (divert)", event["detail"])
+        self.assertEqual(event["output"], "SCHEDULED")
+        self.assertFalse(self.controller.calls)
 
     def test_stop_cancels_scheduled_output_and_persists_csv_state(self):
         self.live()

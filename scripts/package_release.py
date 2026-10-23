@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import zipfile
 
-VERSION = '1.4.0'
+VERSION = '1.5.0'
 
 def main():
     root = Path(__file__).resolve().parents[1]
@@ -27,13 +27,16 @@ def main():
         if not name:
             continue
         relative = Path(name)
+        if name == 'PartTrackingUALR.exe':
+            # The Git-distributed launcher is replaced by the verified fresh build below.
+            continue
         if relative.is_absolute() or '..' in relative.parts:
             raise RuntimeError('Source path must remain inside the project.')
         if name.startswith('data/') and name != 'data/.gitkeep':
             raise RuntimeError('Saved workstation data must not be tracked or packaged.')
         if relative.suffix.lower() in ('.pth', '.pt', '.ckpt', '.engine'):
             raise RuntimeError('User checkpoints and hardware-specific engine caches must not be tracked or packaged.')
-        if name.endswith(('.exe','.pyd','.zip')) or name.startswith(('_runtime/','.build','.package/','.releases/')):
+        if name.lower().endswith(('.exe','.pyd','.zip')) or name.startswith(('_runtime/','.build','.package/','.releases/','.runtime-setup/')):
             raise RuntimeError('Generated binaries must not be tracked as source.')
         entries.append((root / relative,prefix+relative.as_posix()))
     entries.append((executable,prefix+'PartTrackingUALR.exe'))
@@ -52,6 +55,11 @@ def main():
         for label in ('logo', 'blue', 'yellow', 'white'):
             assert prefix+f'models/gatorade_{label}_reference.png' in names
         assert prefix+'Start Demo.cmd' in names
+        for name in ('SetupRuntime.ps1', 'runtime-manifest.json', 'Build Demo.cmd',
+                     'app/color_classifier.py', 'models/color/distilV4_student.onnx',
+                     'models/color/LICENSE.txt', 'models/color/MODEL_CARD.md',
+                     'models/color/PROVENANCE.txt'):
+            assert prefix+name in names, f'Missing release component: {name}'
         assert prefix+'app/vendor/yolox_models/LICENSE' in names
         assert prefix+'app/vendor/yolox_models/NOTICE' in names
         assert any(name.startswith(prefix+'_runtime/torch/') for name in names)

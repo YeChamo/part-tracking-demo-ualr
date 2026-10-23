@@ -9,12 +9,13 @@ DEFAULTS = {
     'camera_manual': False, 'basler_serial': '', 'video_path': '',
     'visual_only': True,
     'model_path': 'models/yolox_nano.onnx', 'model_class_id': 39, 'image_size': 640,
-    'yolox_mode': 'tracking', 'model_class_names': '', 'color_model_path': '',
+    'yolox_mode': 'tracking', 'model_class_names': '',
+    'color_model_path': 'models/color/distilV4_student.onnx', 'color_backend': 'classifier',
     'color_class_names': '', 'color_class_map': '', 'color_image_size': 640,
     'auto_model_config': True, 'inference_backend': 'cpu',
     'model_architecture': 'auto', 'color_architecture': 'auto',
     'model_experiment_path': '', 'color_experiment_path': '',
-    'confidence': .25, 'color_confidence': .50, 'rule': 'tracking', 'pass_color': 'orange',
+    'confidence': .20, 'color_confidence': .50, 'rule': 'tracking', 'pass_color': 'blue',
     'direction': 'ltr', 'line': .80, 'entry': .30,
     'confirm_frames': 3, 'max_miss': .4, 'belt_speed': 200.0, 'field_width': 1000.0,
     'distance_mm': 100.0, 'delay_ms': 0, 'lead_ms': 200, 'every_n': 4,
@@ -34,6 +35,13 @@ def load(root: Path) -> dict:
             saved = json.loads(path.read_text(encoding='utf-8'))
             if isinstance(saved, dict):
                 result.update({k: v for k, v in saved.items() if k in DEFAULTS})
+                # Upgrade the old bottle-only demo once; an explicitly cleared
+                # color selection in the current version remains cleared.
+                if 'color_backend' not in saved and not saved.get('color_model_path'):
+                    result['color_model_path'] = DEFAULTS['color_model_path']
+                    result['color_confidence'] = DEFAULTS['color_confidence']
+                elif 'color_backend' not in saved and saved.get('color_model_path'):
+                    result['color_backend'] = 'yolox'
         except (ValueError, OSError):
             pass
     return result

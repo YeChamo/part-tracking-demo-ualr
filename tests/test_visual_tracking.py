@@ -17,7 +17,8 @@ class VisualTrackingTests(unittest.TestCase):
         self.assertEqual(DEFAULTS["model_path"], "models/yolox_nano.onnx")
         self.assertEqual(DEFAULTS["model_class_id"], 39)
         self.assertEqual(DEFAULTS["inference_backend"], "cpu")
-        self.assertEqual(DEFAULTS["color_model_path"], "")
+        self.assertEqual(DEFAULTS["color_model_path"], "models/color/distilV4_student.onnx")
+        self.assertEqual(DEFAULTS["color_backend"], "classifier")
 
     def test_centered_stationary_bottle_gets_a_stable_id_without_entry_zone(self):
         tracker = BottleTracker(TrackingConfig(visual_only=True))

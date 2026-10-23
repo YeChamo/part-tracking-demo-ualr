@@ -1,10 +1,10 @@
 # Part Tracking Demo UALR
 
-A standalone Windows **visual bottle-tracking demo** using YOLOX detections, persistent bottle IDs, confidence scores, camera selection, and barcode display. Visual mode sends no motion commands.
+A standalone Windows bottle-tracking and color-sorting demo with YOLOX bottle detection, persistent IDs, a bundled trained color neural network, camera selection, confidence controls, barcode display, and optional EtherMotion output. It starts in **Visual preview**, with motion disarmed. Select **EtherMotion sorting** when configuring the conveyor installation.
 
-Version **1.4.0 preview** packages as `PartTrackingDemoUALR-v1.4.0-Windows-x64.zip`.
+Version **1.5.0** packages as `PartTrackingDemoUALR-v1.5.0-Windows-x64.zip`.
 
-- Visual tracking starts with the included real COCO YOLOX-Nano bottle detector; a separate color model is not required.
+- Included COCO YOLOX-Nano locates bottles; a trained MobileNetV3 color network classifies an inner bottle-body crop.
 - Bottles receive IDs anywhere in the camera image, including stationary bottles in the center.
 - Named USB/Basler camera selection, live bottle/color confidence sliders, and full-screen inspection.
 - Optional return program, timed clearance, sequential cycle repeats, and CSV logs.
@@ -12,20 +12,18 @@ Version **1.4.0 preview** packages as `PartTrackingDemoUALR-v1.4.0-Windows-x64.z
 
 ## Download and run
 
-Download the **Windows portable ZIP** from [Releases](https://github.com/YeChamo/part-tracking-demo-ualr/releases/latest), extract the complete folder, and double-click **Start Demo.cmd**. No Python installation is needed. Keep `_runtime`, `models`, and the other supplied folders beside `PartTrackingUALR.exe`.
+Pull this repository and double-click **Start Demo.cmd**. The executable and supplied models are tracked in Git. When `_runtime` is missing, the launcher downloads the pinned [1.4.0 runtime release](https://github.com/YeChamo/part-tracking-demo-ualr/releases/tag/v1.4.0-rc1), verifies its exact size and SHA-256, extracts only `_runtime`, and checks it before installation. This first launch needs internet and a 407 MB download; your executable, models, and saved settings are preserved. A compatible runtime already present is checked and reused.
 
-Visual tracking and checkpoint conversion are available in the [1.4.0 preview](https://github.com/YeChamo/part-tracking-demo-ualr/releases/tag/v1.4.0-rc1).
-
-The repository contains editable source; ready-to-run applications and bundled runtimes are release assets.
+For an offline station, download the complete **Windows portable ZIP** from [Releases](https://github.com/YeChamo/part-tracking-demo-ualr/releases), extract the complete folder, and run **Start Demo.cmd**. No Python installation is needed for either route. Keep `_runtime`, `models`, and the other supplied folders beside `PartTrackingUALR.exe`.
 
 ## Camera, models, and display
 
 1. Choose **USB camera** or **Basler / GigE**, then select your camera by name. A saved, connected camera starts automatically. Use **Refresh cameras** after connecting another device.
-2. Leave **Visual bottle tracking** selected. The bundled **YOLOX-Nano** bottle model is ready to use. The optional YOLOX-S model is larger and slower on CPU. A trained color model is not required for boxes and IDs.
+2. In **Models**, leave **Visual preview** selected initially. The bundled **YOLOX-Nano** bottle locator and **Bundled color neural network** are configured. YOLOX-S is also supplied but is larger and slower on CPU.
 3. Place a bottle in view. The live image shows its box, ID, and model confidence; the live readout shows current detections. Bottles do not need to cross an entry or reject line.
 4. Adjust **Bottle confidence** if needed. Press **F11** for full-screen view. Barcode results remain real decoded values; unread symbols stay `UNREAD`.
 
-The default visual-only setup hides motion controls and blocks connection, arming, and dispatch. Optional trained-color and legacy sorting settings remain available in the source; they are not needed for this demo.
+To configure real sorting, choose **EtherMotion sorting** in **Models** and click **Apply mode / restart app**. The app restarts and exposes the **Diverter** controls. Select the pass color, connect your separate EtherMotion installation, choose its saved Once programs, and calibrate timing before arming. The selected color passes; other colors and unknown results divert. **Visual preview** hides motion controls and blocks connection, arming, and dispatch. Changing mode always requires a restart and begins disarmed. EtherMotion integration has simulator coverage; actual conveyor and diverter operation has not been validated on this laptop.
 
 A saved USB camera is followed by device identity when Windows changes its index. A missing camera blocks startup; the app does not switch to the laptop camera. Manual camera index remains an explicit advanced choice.
 
@@ -33,13 +31,17 @@ Press **F11** or double-click the inspection view for full screen. Press **Esc**
 
 ## YOLOX models and confidence
 
-The default **Visual bottle tracking** mode uses one included YOLOX detector for bottle boxes. In the optional **Bottle model + color model** mode, select your trained `.pth`, `.pt`, or `.onnx` file in the color/category picker. Exact trained category names can be used independently of automatic input sizing. A blank bottle-model selection uses the bundled generic COCO **YOLOX-Nano** locator. For the optional larger generic locator, select `models/yolox_s.onnx` in the bottle model picker. Both use COCO bottle class ID **39**; neither is a color-trained or Gatorade brand-trained model.
+The supplied setup uses **YOLOX-Nano** for bottle boxes and `models/color/distilV4_student.onnx` for color. The color model is an unmodified, MIT-licensed MobileNetV3-Small network trained on procedural garment images; it is **not bottle-trained**. See its [model card](models/color/MODEL_CARD.md), [provenance](models/color/PROVENANCE.txt), and [upstream model page](https://huggingface.co/giosanchez0208/clothing-color-recognition). The app applies its trained input composition to a fixed inner-body crop; it uses no HSV color rules.
+
+The bottle crop was calibrated using three product photos that then returned blue, yellow, and white. Those same examples are calibration, not independent accuracy evidence. On the blue product photo, YOLOX detected two bottles and the color network classified both blue. This small check does not establish bottle accuracy or live conveyor performance. Lighting, reflections, labels, and pose affect predictions. Unknown or below-threshold results remain unknown and divert in sorting mode.
+
+For your own YOLOX color/category detector, select **YOLOX color detector** as the color model type, use **Bottle model + color model**, and select a trained `.pth`, `.pt`, or `.onnx` file in the color/category picker. Exact trained category names can be used independently of automatic input sizing. A blank bottle-model selection uses the bundled generic COCO **YOLOX-Nano** locator. For the optional larger generic locator, select `models/yolox_s.onnx` in the bottle model picker. Both use COCO bottle class ID **39**; neither is a color-trained or Gatorade brand-trained model. **Visual bottle tracking** can also run bottle detection alone.
 
 The color model's class order is read from checkpoint or ONNX metadata. If names are absent, enter the exact trained order, for example `orange,blue,green`. The advanced class map accepts explicit IDs such as `0:orange,1:blue,2:green`. The bottle locator class ID selects its bottle class; `-1` accepts all locator classes. For one model already trained on `orange_bottle`, `blue_bottle`, etc., choose **One model: colored bottles** and select it in the bottle model picker.
 
-Live color decisions use YOLOX predictions exclusively, with no HSV or pixel-color fallback. Missing, conflicting, or unmapped predictions remain unknown and divert. Model/output shape and class-count mismatches block inspection startup.
+Live color decisions use the selected trained neural network: the bundled classifier or your YOLOX color detector. There is no HSV or pixel-color fallback. Missing, conflicting, or unmapped predictions remain unknown and divert. Model/output shape and class-count mismatches block inspection startup.
 
-Supported trained color labels include orange, yellow, green, blue, red, purple, clear, and **white**. White must be predicted by your color model and included in its class names or explicit mapping; the reference photo is not a white-color classifier. Other trained literal categories are supported too: select the exact pass category and keep the remaining category names in their trained output order. Generic, unknown, and ambiguous labels do not become custom categories.
+YOLOX color labels support orange, yellow, green, blue, red, purple, clear, and **white**, as well as other literal trained categories. White must be predicted by the selected neural network; the reference photo does not supply that prediction. The bundled classifier's 13 trained labels are recorded in its model card and include blue, yellow, and white, but not clear. For custom detectors, select the exact pass category and keep category names in their trained output order. Generic, unknown, and ambiguous labels do not become custom categories.
 
 The four `models/gatorade_*_reference.png` photo crops and `GatoradeLabelMatcher` in `app/gatorade.py` are optional **offline reference tools**. They are not trained weights and are not called by live bottle/color inference or routing. Live inspection does not gate bottles by a photo/logo match.
 
@@ -126,12 +128,14 @@ py -3.11 -m venv .venv
 .\Build.ps1 -Python .\.venv\Scripts\python.exe
 ```
 
-`Build.ps1` creates this demo's own `.build-venv`, installs the official CPU PyTorch wheel, and includes checkpoint export dependencies in the executable. Close the demo before building; the script refuses to replace a running application. For an optional GPU-capable bundle, use `Build.ps1 -Python .\.venv\Scripts\python.exe -TensorRT`. That installs `requirements-tensorrt.txt` in the build environment and retains GPU provider libraries; the default build excludes them. Do not install the CPU and GPU ONNX Runtime distributions together.
+Double-click **Build Demo.cmd**, or use `Build.ps1` as above. The script discovers Python 3.11 x64 and reuses an environment only after checking the pinned dependencies. A complete environment takes the fast path without pip installs. Otherwise it prepares this demo's private `.build-venv`, including the official CPU PyTorch wheel and checkpoint-export dependencies. A repository-local `.builddeps` directory can supply an already installed pinned barcode wheel. Close the demo before building; replacement is refused while it is running. The staged executable/runtime pair must pass `--self-test` before installation; a failed swap restores the previous pair. Validation diagnostics and backups remain in ignored build folders.
+
+For an optional GPU-capable bundle, use `Build.ps1 -Python .\.venv\Scripts\python.exe -TensorRT`. Missing GPU dependencies are installed only in the private `.build-venv`; a shared environment is preserved. The optional build uses `requirements-tensorrt.txt` and retains GPU provider libraries; the default build excludes them. Do not install the CPU and GPU ONNX Runtime distributions together.
 
 Keep `models/yolox_nano.onnx` and its external `models/yolox_nano.onnx.data` together. Basler transport drivers may need installation on the target computer. The optional EtherMotion simulator test needs your separately supplied `EtherMotion.exe` in `EtherMotion/`; routine verification does not open cameras or move hardware.
 
 ## Files and privacy
 
-Saved settings, camera identities, controller tokens, logs, model-conversion/engine caches, environments, and generated binaries are excluded from source control. User-selected checkpoints are read from their selected paths and are not added to Git. Portable releases start with an empty `data` folder. Source builds run independently of the original RemingtonVision checkout. The release packager creates the new version's archive and refuses to overwrite an existing archive.
+Saved settings, camera identities, controller tokens, logs, model-conversion/engine caches, environments, and the generated `_runtime` directory are excluded from source control. The single supplied `PartTrackingUALR.exe` and supplied ONNX models are tracked so Git users receive the application. User-selected checkpoints are read from their selected paths and are not added to Git. Portable releases start with an empty `data` folder. Source builds run independently of the original RemingtonVision checkout. The release packager creates the new version's archive and refuses to overwrite an existing archive.
 
 See [third-party notices](THIRD_PARTY_NOTICES.txt) for dependency/model provenance. EtherMotion is a separate installation; this project supplies its integration, setup notes, and simulator fixture.
