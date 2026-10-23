@@ -32,9 +32,11 @@ This gives roughly **20 minutes of prepared speaking**, a **20-minute demo block
 
 **Cue route:** Who we are → what you will see.
 
-**Brad:** “I am Brad Daugherty. I am an electrical engineer at Remington. I work mostly at the Lonoke site but do support projects across our organization. Next to me is Wesley Siharath. Me and Wesley are both computer engineers that have been navigating the world of manufacturing engineering. Wesley started as an intern working on machine vision. Wesley, tell everyone about yourself and how you got started here.”
+**Brad:** “I am Brad Daugherty. I am an electrical engineer at Remington. I work mostly at the Lonoke site but do support projects across our organization. I’m here with Wesley Siharath, who helped start our Remington Vision work. Wesley, tell everyone a little about yourself and how you got started here.”
 
-**Wesley:** Introduce yourself in your own words. Give the room your path from intern to engineer and what you work on now.
+**Wesley:** “Hi, I’m Wesley Siharath. I’m an engineer here at Remington. I got started as an intern focused on software, with some prototyping on machines.”
+
+“I came on full time this February, and now I work on AI tools and machines. One of the things that drew me here was being able to build a solution and see it put to use on the floor.”
 
 **Brad:** “We are here because we believe the next era of manufacturing engineering is being written right now. We will show you how we take an idea from a real need to a system people can use on the floor, demonstrate that process live, and talk about who might help us build what comes next. First, why this place matters.”
 
@@ -118,19 +120,25 @@ This gives roughly **20 minutes of prepared speaking**, a **20-minute demo block
 
 **Wesley:** “Remi is our local language-model work for engineering. An engineer asks a question about a project, finds relevant material, and checks the proposed answer before using it. The engineering is the whole system around the model: the material it can use, the tools it can call, how it shows its source, and how a person verifies the result.”
 
-**Brad:** “From production signals to engineering knowledge, the pattern holds: start with a real question, make the evidence visible, and let a person make an informed decision. Wesley, why do you love working this way?”
+**Brad:** “From production signals to engineering knowledge, the pattern holds: start with a real question, make the evidence visible, and let a person make an informed decision.”
 
-## 11. Why we love this work — Wesley
+## 11. Why we love this work — Brad → Wesley → Brad
 
 **Cue route:** Intern → AI and machines → freedom → ownership → growth.
 
 **Clock:** 0:14–0:16. Hand off to the live demo at 0:16.
 
-Tell this in your own voice. Connect your intern-to-engineer path to the four points on the slide: **variety, freedom, ownership, and growth.** A practice version:
+**Brad:** “Wesley, what do you enjoy most about working here?”
 
-“I started here as one of the first software interns and got involved in work with AI and different machines. What I enjoy most is the variety, the freedom to explore ideas, and the chance to take ownership. There is always something new to figure out, and I've had opportunities here that I wouldn't have expected coming in.”
+**Wesley:** “What I love most is the variety of problems we face day to day. One day I might be debugging code in the office. Another day I might be knee-deep in grease, figuring out why a machine’s motor isn’t spinning.”
 
-Add one specific moment that feels like yours: a problem you owned, an experiment that changed direction, or something you learned from the floor. If it fits, say how it felt to carry an idea beyond a prototype. **Brad:** “That ownership is how we build the next standard. Let's show you the approach live.”
+“I also enjoy the freedom to spitball an idea, explore different solutions, and take ownership of how we tackle the problem.”
+
+“One moment that really stuck with me was seeing a real reject come through and watching our system toss it out. Seeing something I helped build actually do its job was an amazing feeling.”
+
+“Following ideas through and seeing people get invested feels like helping pave the way for Remington. I enjoy figuring it out.”
+
+**Brad:** “That ownership is how we build the next standard. Let's show you the approach live.”
 
 ## 12. Live demonstration — Brad + Wesley, 20-minute block
 
@@ -152,11 +160,19 @@ Add one specific moment that feels like yours: a problem you owned, an experimen
 
 **If the demo stalls:** Show the camera view and last successful result. Ask the room what they would inspect first. Move on after two minutes instead of troubleshooting for the whole session.
 
-## 13. The hard problems — Wesley → Brad
+## 13. The hard problems — Brad → Wesley → Brad
 
 **Cue route:** Variation → timing → trust.
 
-**Wesley:** “The challenge is not getting one good result. Conditions change. The result has to arrive at the right time. The person using it needs to know whether to trust it.” Connect one demo moment to a test you would run on a real system, then say what user feedback would tell you to improve next.
+**Brad:** “Wesley, what are the hardest problems in getting these systems to work reliably on the floor?”
+
+**Wesley:** “Some of the hardest problems in any system are the little things. Is the machine timed correctly? Is it getting the right signal at the moment it needs it? Or is something downstream causing an issue?”
+
+“Then you have changing conditions. Something as simple as sunlight coming through a window could blind your cameras for thirty minutes.”
+
+“You have to work through those issues so the whole system keeps working as conditions change. It needs to be reliable enough to leave your hands, and the people using it need confidence that it will keep doing its job.”
+
+“Building that reliability and confidence takes work.”
 
 **Brad:** “These are among the most interesting engineering challenges we know. We want projects to be carried from a floor need to a trusted capability, with ownership through deployment and improvement. The technology matters. So does how the work is approached and completed. That is how we earn the right to write the next rules.”
 
@@ -198,9 +214,9 @@ Give the room **4–5 minutes**. Wesley helps with access; Brad keeps this slide
 
 **Clock:** Reach this slide by 0:48, then hold it for questions through 1:00.
 
-**Brad:** “Reach us at **awhite@tkghunt.com**. Put a few words in your note about what you want to build, work on, or ask. Wesley and I will be here afterward.”
+**Brad:** “Reach us at **awhite@tkghunt.com**. Put a few words in your note about what you want to build, work on, or ask. We’ll be here afterward if anyone wants to connect. Wesley, anything you’d like to add?”
 
-**Wesley:** Invite questions and projects in your own words.
+**Wesley:** “Yeah, if you guys have any engineering questions or want to hear more about my internship experience, come talk with us afterward. I’d love to hear what you’re building and spitball some ideas with you.”
 
 **Brad:** “Grace Hopper warned, ‘Probably the most dangerous phrase that can be used in any computer installation is, “But we’ve always done it that way.”’ I think about that here with respect for the generations who built Remington. Their work paved the way. We carry forward what works and use today's tools to solve what comes next. Our responsibility is to bring the same courage and care to the problems in front of us, and build capabilities the next generation will stand on. Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.” Hold this slide for open questions.
 
