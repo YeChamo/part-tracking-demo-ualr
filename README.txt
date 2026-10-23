@@ -27,10 +27,15 @@ the bottle. Turn the option OFF to restore strict timing. Close before git pull.
 
 In Models choose EtherMotion sorting and click Apply mode / restart app.
 After restart, in Diverter connect the separate EtherMotion installation and select
-saved Once programs. Choose the pass color and calibrate belt/actuator timing.
-The selected color passes; other colors and unknown results divert. Output starts
+saved Once programs. Calibrate belt/actuator timing. Blue is the correct/pass color;
+other colors and unknown results divert. Output starts
 disarmed and must be armed explicitly. The conveyor uses its own controller.
 Actual conveyor/diverter operation has not been validated on this laptop.
+
+Yellow or red displays RED; gray, grey or white displays WHITE. BLUE displays
+CORRECT / PASS. The fresh color at the decision line controls the one final
+decision for each bottle. Earlier red/white readings do not retain a reject when
+the bottle is currently blue. Barcode decoding is unchanged.
 
 Visual preview hides motion controls and blocks connection, arming and commands.
 Bottle boxes and stable IDs can appear anywhere in view, including stationary

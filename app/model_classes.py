@@ -13,7 +13,7 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 
-COLORS = ("orange", "yellow", "green", "blue", "red", "purple", "white", "clear")
+COLORS = ("orange", "yellow", "green", "blue", "red", "purple", "white", "clear", "gray", "grey")
 
 
 def _structured(value: str) -> Any:

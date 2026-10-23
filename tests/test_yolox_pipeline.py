@@ -257,11 +257,12 @@ class PipelineTests(unittest.TestCase):
                           color_model_path="missing.onnx")
         self.assertEqual(self.opened, [])
 
-    def classifier_pipeline(self, *, confidence=.91, box=(10, 10, 110, 210), **settings):
+    def classifier_pipeline(self, *, confidence=.91, box=(10, 10, 110, 210), color='blue', names=('red', 'blue'), **settings):
         owner = self
+        trained_names = names
         self.classifier_crops = []
         class Classifier:
-            names = ("red", "blue")
+            names = trained_names
             bottle_crop = (.2, .15, .8, .45)
             input_shape = (224, 224)
             def __init__(self, path):
@@ -271,7 +272,7 @@ class PipelineTests(unittest.TestCase):
                 return self
             def infer(self, crop):
                 owner.classifier_crops.append(crop.copy())
-                return "blue", confidence
+                return color, confidence
             def close(self):
                 self.closed = True
         self.model("bottles.onnx", count=80, detections=[detection(box, 39, .83, "bottle")])
@@ -361,6 +362,60 @@ class PipelineTests(unittest.TestCase):
     def test_pass_color_must_be_in_trained_classes(self):
         with self.assertRaisesRegex(ValueError, "pass color"):
             self.pipeline(pass_color="green")
+
+    def test_combined_red_and_yellow_predictions_share_red_sorting_group(self):
+        self.model('colors.onnx', names=['red', 'yellow', 'blue'], detections=[
+            detection(color_id=0, score=.91, label='red'),
+            detection(color_id=1, score=.88, label='yellow'),
+        ])
+        pipe = self.pipeline(pass_color='RED')
+        result = pipe.infer(np.zeros((240, 320, 3), np.uint8))
+        self.assertEqual(result['colors'], ['red'])
+        self.assertEqual(result['reasons'], [[]])
+        self.assertEqual(result['model_labels'], ['red / yellow'])
+        self.assertEqual(pipe.information()['colors'], ['red', 'blue'])
+        self.assertEqual(pipe.information()['models'][0]['class_names'], ['red', 'yellow', 'blue'])
+
+    def test_combined_gray_and_grey_predictions_share_white_sorting_group(self):
+        self.model('colors.onnx', names=['gray_bottle', 'grey_bottle', 'white', 'blue'], detections=[
+            detection(color_id=0, score=.91, label='gray_bottle'),
+            detection(color_id=1, score=.88, label='grey_bottle'),
+        ])
+        pipe = self.pipeline(pass_color='WHITE')
+        result = pipe.infer(np.zeros((240, 320, 3), np.uint8))
+        self.assertEqual(result['colors'], ['white'])
+        self.assertEqual(result['reasons'], [[]])
+        self.assertEqual(pipe.information()['colors'], ['white', 'blue'])
+
+    def test_two_yolox_models_merge_only_requested_color_aliases(self):
+        self.model('bottles.onnx', count=80, detections=[detection(color_id=39, label='bottle')])
+        self.model('colors.onnx', names=['yellow', 'red', 'blue'], detections=[
+            detection(color_id=0, score=.91, label='yellow'),
+            detection(color_id=1, score=.88, label='red'),
+        ])
+        pipe = self.pipeline(yolox_mode='two_models', model_path='bottles.onnx',
+                             color_model_path='colors.onnx', pass_color='yellow')
+        frame = np.zeros((240, 320, 3), np.uint8)
+        self.assertEqual(pipe.infer(frame)['colors'], ['red'])
+        self.assertEqual(pipe.infer(frame)['reasons'], [[]])
+        self.models['colors.onnx']['detections'].append(detection(color_id=2, score=.87, label='blue'))
+        self.assertEqual(pipe.infer(frame)['colors'], ['unknown'])
+        self.assertEqual(pipe.infer(frame)['reasons'], [['Unknown color']])
+
+    def test_classifier_groups_routing_without_relabeling_raw_network_outputs(self):
+        names = ('yellow', 'gray', 'grey', 'blue')
+        for raw, selected, expected in (('yellow', 'red', 'red'), ('gray', 'white', 'white'),
+                                        ('grey', 'GRAY', 'white'), ('blue', 'white', 'blue')):
+            with self.subTest(raw=raw):
+                pipe = self.classifier_pipeline(color=raw, names=names, visual_only=False,
+                                                yolox_mode='two_models', rule='color', pass_color=selected)
+                result = pipe.infer(np.zeros((240, 320, 3), np.uint8))
+                self.assertEqual(result['colors'], [expected])
+                self.assertEqual(result['model_labels'], [raw])
+                self.assertEqual(result['reasons'], [['Color NN blue (divert)']] if raw == 'blue' else [[]])
+                self.assertEqual(pipe.information()['colors'], ['red', 'white', 'blue'])
+                self.assertEqual(pipe.information()['models'][-1]['class_names'], list(names))
+                pipe.close()
 
     def test_bundled_stock_models_cannot_be_relabelled_as_color_without_metadata(self):
         for name in ("yolox_nano.onnx", "yolox_s.onnx"):

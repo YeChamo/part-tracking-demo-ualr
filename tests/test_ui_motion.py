@@ -161,7 +161,7 @@ class UiMotionTests(unittest.TestCase):
         self.window.poll_motion()
         self.jobs.run_next()
 
-    def feed_classifier_packets(self, reasons_for_frame):
+    def feed_classifier_packets(self, reasons_for_frame, color_for_frame=None):
         """Exercise production packet -> tracker -> UI -> scheduler, no camera."""
         camera = StubCamera()
         self.window.worker = camera
@@ -172,7 +172,7 @@ class UiMotionTests(unittest.TestCase):
             flags = reasons_for_frame(index, x)
             camera.packet = {"frame": np.zeros((400, 1000, 3), np.uint8),
                              "boxes": [(x - 30, 100, x + 30, 300)], "reasons": [flags],
-                             "colors": ["blue"], "color_confidences": [.88],
+                             "colors": [color_for_frame(index,x) if color_for_frame else "blue"], "color_confidences": [.88],
                              "model_labels": ["blue"], "captured": captured,
                              "inspection_ready": True, "visual_only": False,
                              "confidence_revision": 0, "barcodes": [],
@@ -220,9 +220,27 @@ class UiMotionTests(unittest.TestCase):
         self.assertEqual(len(self.window.events), 1)
         event = self.window.events[0]
         self.assertEqual(event["decision"], 1)
-        self.assertIn("Unconfirmed color: Color NN blue (divert)", event["detail"])
+        self.assertEqual("Color NN blue (divert)", event["detail"])
         self.assertEqual(event["output"], "SCHEDULED")
         self.assertFalse(self.controller.calls)
+
+    def test_early_red_recovers_to_current_blue_and_displays_correct_pass(self):
+        self.live(armed=False)
+        self.feed_classifier_packets(
+            lambda _index,x: ['Color NN red (divert)'] if x<700 else [],
+            lambda _index,x: 'red' if x<700 else 'blue')
+        self.assertEqual(len(self.window.events),1)
+        event=self.window.events[0]
+        self.assertEqual((event['color'],event['decision']),('blue',0))
+        self.assertEqual(event['detail'],'')
+        self.assertEqual(self.window.live_route.text(),'CORRECT · PASS')
+        self.assertIn('CORRECT',self.window.table.item(0,2).text())
+        self.assertFalse(self.controller.calls)
+
+    def test_alias_colors_display_only_red_or_white(self):
+        for value,expected in [('yellow','RED'),('red','RED'),('gray','WHITE'),('grey','WHITE'),('white','WHITE')]:
+            self.window.show_live_color(value,.9)
+            self.assertTrue(self.window.live_detail.text().startswith(expected+'  '))
 
     def test_stop_cancels_scheduled_output_and_persists_csv_state(self):
         self.live()

@@ -6,6 +6,8 @@ Version **1.5.1** packages as `PartTrackingDemoUALR-v1.5.1-Windows-x64.zip`.
 
 The latest Git build adds **Tracking → Run late triggers (demo)**, enabled by default. It removes the missed-timing stop and transmission deadline: overdue actions wait for the diverter to be free, then run in sequence and are logged as late. Pass events with no movement do not fail for timing lateness. Stop/disarm, controller readiness, fresh-camera checks and one-motion-at-a-time behavior remain. Late execution can miss the physical bottle. Turn the option off to restore strict timing. Close the application before `git pull`; the checked-in EXE includes this update.
 
+The demo groups yellow/red as **RED** and gray/grey/white as **WHITE**. **BLUE** is the fixed correct/pass color. The fresh color at the decision line determines routing: an earlier red or white reading does not latch a reject when the bottle is currently blue. Each bottle gets one final decision at that line. Barcode decoding is unchanged.
+
 - Included COCO YOLOX-Nano locates bottles; a trained MobileNetV3 color network classifies an inner bottle-body crop.
 - Bottles receive IDs anywhere in the camera image, including stationary bottles in the center.
 - Named USB/Basler camera selection, live bottle/color confidence sliders, and full-screen inspection.
@@ -29,7 +31,7 @@ If the ordinary Git launcher fails, `data/runtime-setup-error.txt` records the e
 3. Place a bottle in view. The live image shows its box, ID, and model confidence; the live readout shows current detections. Bottles do not need to cross an entry or reject line.
 4. Adjust **Bottle confidence** if needed. Press **F11** for full-screen view. Barcode results remain real decoded values; unread symbols stay `UNREAD`.
 
-To configure real sorting, choose **EtherMotion sorting** in **Models** and click **Apply mode / restart app**. The app restarts and exposes the **Diverter** controls. Select the pass color, connect your separate EtherMotion installation, choose its saved Once programs, and calibrate timing before arming. The selected color passes; other colors and unknown results divert. **Visual preview** hides motion controls and blocks connection, arming, and dispatch. Changing mode always requires a restart and begins disarmed. EtherMotion integration has simulator coverage; actual conveyor and diverter operation has not been validated on this laptop.
+To configure real sorting, choose **EtherMotion sorting** in **Models** and click **Apply mode / restart app**. The app restarts and exposes the **Diverter** controls. Connect your separate EtherMotion installation, choose its saved Once programs, and calibrate timing before arming. Current blue at the decision line displays **CORRECT / PASS**; other colors and unknown results divert. **Visual preview** hides motion controls and blocks connection, arming, and dispatch. Changing mode always requires a restart and begins disarmed. EtherMotion integration has simulator coverage; actual conveyor and diverter operation has not been validated on this laptop.
 
 A saved USB camera is followed by device identity when Windows changes its index. A missing camera blocks startup; the app does not switch to the laptop camera. Manual camera index remains an explicit advanced choice.
 
@@ -37,7 +39,7 @@ Press **F11** or double-click the inspection view for full screen. Press **Esc**
 
 ## YOLOX models and confidence
 
-If model loading reports output shape `[1, N, 5+C]`, stop inspection and click **Models → Use included bottle + color models**. It restores the Nano bottle detector, the color classifier, their model types and class settings together, then checks both models. Camera selection, pass color and EtherMotion settings are preserved. The color classifier belongs in the Color model slot with **Bundled color neural network** selected; it is not a YOLOX bottle detector. Custom model errors name the selected file, slot and actual output shape.
+If model loading reports output shape `[1, N, 5+C]`, stop inspection and click **Models → Use included bottle + color models**. It restores the Nano bottle detector, the color classifier, their model types and class settings together, then checks both models. Camera selection and EtherMotion settings are preserved; blue remains the correct/pass color. The color classifier belongs in the Color model slot with **Bundled color neural network** selected; it is not a YOLOX bottle detector. Custom model errors name the selected file, slot and actual output shape.
 
 The supplied setup uses **YOLOX-Nano** for bottle boxes and `models/color/distilV4_student.onnx` for color. The color model is an unmodified, MIT-licensed MobileNetV3-Small network trained on procedural garment images; it is **not bottle-trained**. See its [model card](models/color/MODEL_CARD.md), [provenance](models/color/PROVENANCE.txt), and [upstream model page](https://huggingface.co/giosanchez0208/clothing-color-recognition). The app applies its trained input composition to a fixed inner-body crop; it uses no HSV color rules.
 
@@ -49,7 +51,7 @@ The color model's class order is read from checkpoint or ONNX metadata. If names
 
 Live color decisions use the selected trained neural network: the bundled classifier or your YOLOX color detector. There is no HSV or pixel-color fallback. Missing, conflicting, or unmapped predictions remain unknown and divert. Model/output shape and class-count mismatches block inspection startup.
 
-YOLOX color labels support orange, yellow, green, blue, red, purple, clear, and **white**, as well as other literal trained categories. White must be predicted by the selected neural network; the reference photo does not supply that prediction. The bundled classifier's 13 trained labels are recorded in its model card and include blue, yellow, and white, but not clear. For custom detectors, select the exact pass category and keep category names in their trained output order. Generic, unknown, and ambiguous labels do not become custom categories.
+YOLOX color labels support orange, yellow, green, blue, red, purple, clear, and **white**, as well as other literal trained categories. The operational groups map yellow/red to red and gray/grey/white to white; the reference photo does not supply predictions. The bundled classifier's 13 raw trained labels and probabilities remain unchanged. For custom detectors, keep category names in their trained output order; blue remains the correct/pass group. Generic, unknown, and ambiguous labels do not become custom categories.
 
 The four `models/gatorade_*_reference.png` photo crops and `GatoradeLabelMatcher` in `app/gatorade.py` are optional **offline reference tools**. They are not trained weights and are not called by live bottle/color inference or routing. Live inspection does not gate bottles by a photo/logo match.
 
@@ -107,7 +109,7 @@ trigger delay = arrival delay - actuator lead
 bottle-clear deadline = arrival + bottle length / belt speed + clearance margin
 ```
 
-Arming requires **lead >= measured move time** and **arrival delay >= lead**. Impossible deadlines are rejected instead of clamped to the present. Recalibrate after changing speed, geometry, or the mechanism.
+With **Run late triggers (demo)** unchecked, arming requires **lead >= measured move time** and **arrival delay >= lead**; impossible deadlines are rejected. With the default demo option checked, overdue or busy actions queue and run sequentially without the missed-timing cutoff. This changes scheduling, not the mechanism's speed. Recalibrate after changing speed, geometry, or the mechanism.
 
 Configure saved EtherMotion **Once** programs in **Diverter**:
 

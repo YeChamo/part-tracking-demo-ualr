@@ -32,6 +32,7 @@ from . import diverter
 from .ethermotion import EtherMotionClient
 from .fullscreen_view import FullscreenCameraWindow
 from .model_preparation import ModelPreparationWorker
+from .sorting_colors import canonical_sort_color
 from .simulation import HEIGHT, WIDTH, Simulation
 from .tracking import BottleTracker, TrackingConfig
 from .vision import VideoWorker
@@ -159,6 +160,7 @@ class VisionView(QWidget):
                 p.drawRoundedRect(QRectF(x1,y1,x2-x1,y2-y1), 5/scale, 5/scale)
                 labels = m.last_packet.get('model_labels' if m.visual_only else 'colors', [])
                 label = str(labels[index] if index<len(labels) else 'bottle').upper()
+                if not m.visual_only: label=canonical_sort_color(label).upper()
                 p.setFont(QFont('Segoe UI', max(10, round(10/scale)), QFont.Weight.DemiBold))
                 p.drawText(QRectF(max(0,x1),max(18,y1-7/scale),max(130,x2-x1),25/scale),
                            Qt.AlignmentFlag.AlignLeft, label if m.visual_only else f'BOTTLE · {label} / MOVE TO ENTRY')
@@ -172,7 +174,7 @@ class VisionView(QWidget):
             p.drawRoundedRect(QRectF(x1-5,y1-5,x2-x1+10,y2-y1+10), 5/scale, 5/scale)
             meta = m.track_meta.get(track.id, {})
             title = (m.visual_track_title(track) if m.visual_only else
-                     f"#{track.id:03d}  {meta.get('color', '').upper()}  {'1 DIVERT' if track.bad else '0 PASS'}")
+                     f"#{track.id:03d}  {meta.get('color', '').upper()}  {'1 REJECT' if track.bad else 'CORRECT / PASS'}")
             p.setFont(QFont('Segoe UI', max(10, round(10/scale)), QFont.Weight.Bold))
             text_w = p.fontMetrics().horizontalAdvance(title) + 14/scale
             tag_y = max(0, y1-30/scale)
@@ -186,6 +188,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.root, self.smoke_test = root, smoke_test
         self.settings = store.load(root)
+        self.settings['pass_color']='blue'
         self.visual_only = bool(self.settings.get('visual_only', True))
         if self.visual_only:
             self.settings.update(visual_only=True, yolox_mode='tracking', rule='tracking')
@@ -466,12 +469,11 @@ class MainWindow(QMainWindow):
     def build_sort_tab(self):
         box = self.new_tab('Barcode' if self.visual_only else 'Color + code')
         if not self.visual_only:
-            self.note(box,'Choose the color that stays on the belt. Other colors produce decision 1 and the selected divert motion.')
+            self.note(box,'Blue is correct and passes. Red/yellow display as RED; white/gray display as WHITE. Routing uses the current color at the decision line, without remembering earlier wrong readings.')
         routing = QWidget()
         form = QFormLayout(routing); form.setSpacing(10)
-        self.combo(form,'pass_color','Pass color',[(c.title(),c) for c in ['orange','blue','green','red','yellow','purple','white','clear']])
-        self.fields['pass_color'].setEditable(True)
-        self.fields['pass_color'].setToolTip('Choose a trained color/class, or type its exact name. Load models to read their class names.')
+        self.combo(form,'pass_color','Correct color',[('Blue (correct / pass)','blue')])
+        self.fields['pass_color'].setToolTip('Blue passes based on the current reading at the decision line.')
         self.combo(form,'rule','Sort rule',[('Visual tracking','tracking'),('YOLOX color → 0 / 1','color'),('Every Nth (simulation)','every_n'),('Divert all (simulation)','all'),('Pass all (simulation)','none')])
         self.field(form,'every_n','Every Nth','int',2,100)
         box.addWidget(routing)
@@ -613,13 +615,8 @@ class MainWindow(QMainWindow):
             if self.model_preparer is worker: self.model_note.setText(message)
         def prepared(info):
             if self.model_preparer is not worker: return
-            choices=info.get('colors',[]); combo=self.fields['pass_color']
-            current=combo.currentText().strip().casefold()
-            combo.clear()
-            for choice in choices: combo.addItem(choice,choice)
-            combo.setCurrentText(current)
             details='; '.join(f"{Path(m['path']).name}: {len(m['class_names'])} classes, {' × '.join(map(str,m['input_shape']))}" for m in info.get('models',[]))
-            suffix = '. Start visual tracking.' if self.visual_only else '. Choose the class that should pass, then start inspection.'
+            suffix = '. Start visual tracking.' if self.visual_only else '. Blue is correct / pass. Start inspection.'
             self.model_note.setText('Ready • '+details+suffix)
         worker.progress.connect(progress)
         worker.prepared.connect(prepared)
@@ -674,6 +671,7 @@ class MainWindow(QMainWindow):
         self.field(form,'entry','Entry zone fraction',minimum=.05,maximum=.60,decimals=2)
         self.field(form,'line','Decision line fraction',minimum=.40,maximum=.95,decimals=2)
         self.field(form,'confirm_frames','Confirm color frames','int',1,20)
+        form.setRowVisible(self.fields['confirm_frames'],False)
         self.field(form,'max_miss','Track timeout (s)',minimum=.05,maximum=3,decimals=2)
         self.field(form,'field_width','Visible belt width (mm)',minimum=50,maximum=10000)
         self.field(form,'belt_speed','Measured belt speed (mm/s)',minimum=5,maximum=2500)
@@ -999,7 +997,7 @@ class MainWindow(QMainWindow):
             cx=(track.bbox[0]+track.bbox[2])/2; cy=(track.bbox[1]+track.bbox[3])/2
             if boxes:
                 i=min(range(len(boxes)),key=lambda j: abs((boxes[j][0]+boxes[j][2])/2-cx)+abs((boxes[j][1]+boxes[j][3])/2-cy))
-                if i<len(colors): meta['color']=colors[i]
+                if i<len(colors): meta['color']=canonical_sort_color(colors[i])
                 if i<len(labels): meta['model_label']=labels[i]
                 if i<len(confidences): meta['confidence']=confidences[i]
                 if i<len(color_confidences): meta['color_confidence']=color_confidences[i]
@@ -1094,7 +1092,7 @@ class MainWindow(QMainWindow):
         if not fresh and packet and packet.get('boxes'):
             boxes = packet['boxes']
             index = max(range(len(boxes)), key=lambda i: (boxes[i][2]-boxes[i][0])*(boxes[i][3]-boxes[i][1]))
-            color = str(packet.get('colors',[])[index] if index<len(packet.get('colors',[])) else 'unknown').lower()
+            color = canonical_sort_color(packet.get('colors',[])[index] if index<len(packet.get('colors',[])) else 'unknown')
             values = packet.get('color_confidences',[])
             support = max(0.0,min(1.0,float(values[index]))) if index<len(values) else 0.0
             matches = packet.get('brand_matches',[])
@@ -1119,20 +1117,21 @@ class MainWindow(QMainWindow):
         target = (1-self.settings['line'] if self.settings['direction']=='rtl' else self.settings['line']) * width
         track = min(fresh, key=lambda item: abs((item.bbox[0]+item.bbox[2])/2-target))
         meta = self.track_meta.get(track.id,{})
-        color = str(meta.get('color','unknown')).lower()
+        color = canonical_sort_color(meta.get('color','unknown'))
         support = max(0.0,min(1.0,float(meta.get('color_confidence',0))))
         self.show_live_color(color,support)
         self.live_title.setText(f'LIVE BOTTLE  #{track.id:03d}')
         label = 'label visible' if meta.get('gatorade_label_match') else 'label not confirmed'
-        self.live_evidence.setText(f'{label}  •  {track.hits} camera frame(s) tracked')
+        self.live_evidence.setText(f'Current color at the decision line  •  {track.hits} frame(s) tracked')
         passing = color == self.settings['pass_color'] and not track.bad
-        self.live_route.setText('PREDICTED 0 · PASS' if passing else 'PREDICTED 1 · DIVERT')
+        self.live_route.setText('CORRECT · PASS' if passing else 'REJECT')
         tone = '#174b3f' if passing else '#633942'
         ink = '#75f0c7' if passing else '#ffc3cc'
         self.live_route.setStyleSheet(f'background:{tone};color:{ink};padding:9px 12px;border-radius:8px;font-weight:700;')
 
     def show_live_color(self,color,support):
-        palette = {'blue':('#1d5db7','#e6f0ff'),'yellow':('#f4c841','#242424'),
+        color=canonical_sort_color(color)
+        palette = {'blue':('#1d5db7','#e6f0ff'),'red':('#a73545','#fff0f2'),
                    'white':('#f0f2f5','#242424')}
         background, foreground = palette.get(color,('#43546a','#f2f4f7'))
         self.live_swatch.setText(color[:1].upper() if color in palette else '?')
@@ -1199,7 +1198,7 @@ class MainWindow(QMainWindow):
 
     def add_row(self,event):
         self.table.insertRow(0)
-        values=[event['time'][11:19]+f"  #{event['bottle_id']:03d}",event['color'].upper(),f"{event['decision']} · {'DIVERT' if event['decision'] else 'PASS'}",event['barcode'],event['output'],event['detail']]
+        values=[event['time'][11:19]+f"  #{event['bottle_id']:03d}",canonical_sort_color(event['color']).upper(),f"{event['decision']} · {'REJECT' if event['decision'] else 'CORRECT / PASS'}",event['barcode'],event['output'],event['detail']]
         if self.visual_only:
             values=[event['time'][11:19]+f"  #{event['bottle_id']:03d}",event.get('model_label','bottle').upper(),event.get('color','unknown').upper(),event['barcode'],'',f"{event.get('confidence',0):.0%}"]
         for i,text in enumerate(values):

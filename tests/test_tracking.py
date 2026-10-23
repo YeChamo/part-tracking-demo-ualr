@@ -34,24 +34,30 @@ class TrackingTests(unittest.TestCase):
         self.assertEqual(len(output), 1)
         self.assertEqual(output[0].bbox[0], 190)
 
-    def test_confirmed_reject_is_sticky_after_clean_frames(self):
+    def test_early_reject_clears_when_current_color_is_correct_at_line(self):
         tracker = BottleTracker()
         for n, x in enumerate(range(180, 751, 30)):
-            tracks, decisions = self.feed(tracker, x, n * 0.1, ["Missing cap"] if n < 3 else [])
-        self.assertTrue(tracks[0].bad)
-        self.assertEqual(tracks[0].reasons, ["Missing cap"])
-        self.assertTrue(decisions[0].bad)
-        self.assertEqual(decisions[0].reasons, ["Missing cap"])
+            tracks, decisions = self.feed(tracker, x, n * 0.1, ["Color: red (divert)"] if n < 19 else [])
+        self.assertEqual(tracks[0].id, 1)
+        self.assertFalse(tracks[0].bad)
+        self.assertEqual(tracks[0].reasons, [])
+        self.assertFalse(decisions[0].bad)
+        self.assertEqual(decisions[0].reasons, [])
 
-    def test_clean_or_missed_frame_breaks_confirmation_streak(self):
+    def test_each_fresh_inspection_replaces_old_reasons_after_dropout(self):
         tracker = BottleTracker()
         self.feed(tracker, 180, 0, ["Missing cap"])
         self.feed(tracker, 210, 0.1, ["Missing cap"])
-        self.feed(tracker, 240, 0.2)
-        self.feed(tracker, 270, 0.3, ["Missing cap"])
-        tracker.update([], [], 0.4, 1000, 400)
-        tracks, _ = self.feed(tracker, 330, 0.5, ["Missing cap"])
+        tracks, _ = self.feed(tracker, 240, 0.2)
         self.assertFalse(tracks[0].bad)
+        tracks, _ = self.feed(tracker, 270, 0.3, ["Color: red (divert)"])
+        self.assertTrue(tracks[0].bad)
+        self.assertEqual(tracks[0].reasons, ["Color: red (divert)"])
+        tracker.update([], [], 0.4, 1000, 400)
+        tracks, _ = self.feed(tracker, 330, 0.5)
+        self.assertFalse(tracks[0].bad)
+        self.assertEqual(tracks[0].reasons, [])
+        self.assertEqual(tracks[0].id, 1)
 
     def test_unknown_inspection_fails_closed_immediately(self):
         for reason in ("Inspection unavailable: camera failed", "Unknown color"):
@@ -61,8 +67,8 @@ class TrackingTests(unittest.TestCase):
                 self.assertTrue(tracks[0].bad)
                 self.assertEqual(tracks[0].reasons, [reason])
 
-    def test_unconfirmed_mismatch_at_crossing_diverts(self):
-        for reason, prefix in (("Color: blue (divert)", "Unconfirmed color:"), ("Cap differs from taught bottle", "Unconfirmed inspection:")):
+    def test_current_mismatch_at_crossing_diverts_without_historical_reasons(self):
+        for reason in ("Color: red (divert)", "Cap differs from taught bottle", "Unknown color"):
             with self.subTest(reason=reason):
                 tracker = BottleTracker()
                 for n, x in enumerate(range(180, 721, 30)):
@@ -71,8 +77,28 @@ class TrackingTests(unittest.TestCase):
                 self.assertEqual(len(decisions), 1)
                 self.assertTrue(decisions[0].bad)
                 self.assertTrue(tracks[0].bad)
-                self.assertTrue(decisions[0].reasons[0].startswith(prefix))
-                self.assertIn(reason, decisions[0].reasons[0])
+                self.assertEqual(decisions[0].reasons, [reason])
+
+    def test_initial_unknown_can_recover_on_the_crossing_frame(self):
+        for reason in ("Unknown color", "Inspection unavailable: color model warming up"):
+            with self.subTest(reason=reason):
+                tracker = BottleTracker()
+                for n, x in enumerate(range(180, 751, 30)):
+                    tracks, decisions = self.feed(tracker, x, n * 0.1, [reason] if x < 750 else [])
+                self.assertEqual(tracks[0].id, 1)
+                self.assertEqual(len(decisions), 1)
+                self.assertFalse(decisions[0].bad)
+                self.assertEqual(decisions[0].reasons, [])
+
+    def test_color_change_after_crossing_cannot_emit_another_decision(self):
+        tracker = BottleTracker()
+        outputs = []
+        for n, x in enumerate(range(180, 901, 30)):
+            _, decisions = self.feed(tracker, x, n * 0.1, ["Color: red (divert)"] if x >= 780 else [])
+            outputs.extend(decisions)
+        self.assertEqual(len(outputs), 1)
+        self.assertFalse(outputs[0].bad)
+        self.assertEqual(outputs[0].reasons, [])
 
     def test_transient_upstream_noise_clears_before_crossing(self):
         tracker = BottleTracker()

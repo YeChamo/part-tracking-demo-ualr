@@ -22,6 +22,8 @@ class TrackingConfig:
     direction: str = "ltr"
     line: float = 0.80
     entry: float = 0.30
+    # Retained for older saved recipes. Sorting uses the current inspection at
+    # the decision line rather than accumulating a color history.
     confirm_frames: int = 3
     max_miss: float = 0.40
     visual_only: bool = False
@@ -55,8 +57,6 @@ class Track:
     missed: bool = False
     _vx: float = field(default=0.0, repr=False)
     _vy: float = field(default=0.0, repr=False)
-    _streak: int = field(default=0, repr=False)
-    _pending: list[str] = field(default_factory=list, repr=False)
 
 
 @dataclass(frozen=True)
@@ -109,25 +109,12 @@ class BottleTracker:
         return progress <= self.config.entry and self._leading(box, width) < self.config.line
 
     def _inspect(self, track: Track, reasons: list[str]) -> None:
-        if self.config.visual_only:
-            track.bad = False
-            track.reasons.clear()
-            track._streak = 0
-            track._pending.clear()
-            return
-        # Unavailable inspection is a fail-closed state, never a good bottle.
-        unavailable = any(reason.casefold().startswith(("inspection unavailable", "unknown inspection", "unknown color", "not inspected", "vision unavailable")) for reason in reasons)
-        if reasons:
-            track._streak += 1
-            track._pending = list(dict.fromkeys(track._pending + reasons))
-            if unavailable or track._streak >= self.config.confirm_frames:
-                track.bad = True
-                track.reasons = list(dict.fromkeys(track.reasons + track._pending))
-            elif track.bad:
-                track.reasons = list(dict.fromkeys(track.reasons + reasons))
-        else:
-            track._streak = 0
-            track._pending.clear()
+        # An early color guess must not latch a later correct bottle into the
+        # reject route. Each fresh detection replaces the previous evidence;
+        # the line crossing below snapshots exactly this frame's inspection.
+        # Current unknown/unavailable inspection still supplies reject reasons.
+        track.reasons = [] if self.config.visual_only else list(reasons)
+        track.bad = bool(track.reasons)
 
     def _cost(self, track: Track, box: BBox, captured: float, width: int, height: int) -> float | None:
         old = track.bbox
@@ -252,22 +239,11 @@ class BottleTracker:
             self._inspect(track, reasons[index])
             if (not self.config.visual_only and not track.decided
                     and previous_edge < self.config.line <= self._leading(box, width)):
-                # Confirmation filters transient upstream noise, but evidence
-                # still unresolved at the deadline cannot become a PASS merely
-                # because too few camera frames remain for confirmation.
-                if not track.bad and track._streak > 0 and track._pending:
-                    track.bad = True
-                    track.reasons = [
-                        f"Unconfirmed {'color' if 'color' in reason.casefold() else 'inspection'}: {reason}"
-                        for reason in track._pending
-                    ]
                 track.decided = True
                 decisions.append(Decision(track.id, track.bad, list(track.reasons), captured, box))
         for track in self._tracks.values():
             if track.id not in seen:
                 track.missed = True
-                track._streak = 0
-                track._pending.clear()
         for index, box in enumerate(boxes):
             if index in used or (not self.config.visual_only and not self._at_entry(box, width)):
                 continue

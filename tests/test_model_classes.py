@@ -41,6 +41,11 @@ class ClassNamesTests(unittest.TestCase):
         self.assertIsNone(color_from_class_name("white_clear_bottle"))
         self.assertIsNone(color_from_class_name("whitish_bottle"))
 
+    def test_gray_and_grey_tokens_preserve_raw_model_labels_before_sort_grouping(self):
+        self.assertEqual(color_from_class_name('gray_bottle'), 'gray')
+        self.assertEqual(color_from_class_name('bottle_GREY'), 'grey')
+        self.assertEqual(build_color_map(['gray_bottle', 'blue_bottle']), {0: 'gray', 1: 'blue'})
+
 
 class ColorMapTests(unittest.TestCase):
     def test_explicit_mapping_formats(self):

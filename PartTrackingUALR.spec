@@ -13,7 +13,7 @@ for package in ('torch', 'onnx', 'onnxscript', 'onnx_ir', 'sympy'):
     extra_datas += copy_metadata(package)
 extra_binaries = []
 extra_imports = collect_submodules('app.vendor.yolox_models')
-extra_imports += ['torch.onnx', 'torch.export', 'onnxscript', 'onnx_ir', 'sympy', 'app.color_classifier']
+extra_imports += ['torch.onnx', 'torch.export', 'onnxscript', 'onnx_ir', 'sympy', 'app.color_classifier', 'app.sorting_colors']
 tensor_packages = ('tensorrt', 'tensorrt_libs', 'tensorrt_bindings',
                    'tensorrt_cu12', 'tensorrt_cu12_libs', 'tensorrt_cu12_bindings')
 if gpu_build:

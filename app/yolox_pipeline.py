@@ -19,6 +19,7 @@ from .vendor.inference import DetectorConfig, InferenceError
 from .accelerated_backend import AcceleratedONNXBackend
 from .checkpoint_export import prepare_model
 from .model_runtime import ModelDetector as Detector
+from .sorting_colors import canonical_sort_color
 
 
 class _ModelBackend(AcceleratedONNXBackend):
@@ -140,7 +141,7 @@ class YoloXPipeline:
             # The default bottle locator remains useful without color weights.
             self._mode = "two_models" if str(settings.get("color_model_path", "") or "").strip() else "tracking"
         self.settings.update(visual_only=self._visual_only, yolox_mode=self._mode)
-        self._pass_color = str(settings.get("pass_color", "orange")).strip().lower()
+        self._pass_color = canonical_sort_color(settings.get("pass_color", "orange"))
         self._color_confidence = 0.50
         self.progress = None
         self.cancelled = None
@@ -207,6 +208,7 @@ class YoloXPipeline:
                 raise ValueError("This COCO YOLOX export predicts generic objects, not trained bottle colors.")
             colors = build_color_map(names, self.settings.get("color_class_map"), count,
                                      allow_class_labels=True) if color else {}
+            colors = {index: canonical_sort_color(value) for index, value in colors.items()}
             if color and not self._visual_only and self._pass_color not in colors.values() and not self.settings.get('_inspect_models'):
                 raise ValueError("Choose a pass color/class from this model: "+', '.join(dict.fromkeys(colors.values()))+'.')
             cfg.class_names = names or [f"class_{index}" for index in range(count)]
@@ -246,10 +248,11 @@ class YoloXPipeline:
                             raise ValueError(f"Color neural network '{color_path}': {exc}"
                                              " Use the bundled distilV4_student.onnx with this model type;"
                                              " for a YOLOX color detector change Color model type to 'YOLOX color detector'.") from exc
-                        if (not self._visual_only and self._pass_color not in self._classifier.names
+                        available = list(dict.fromkeys(canonical_sort_color(name) for name in self._classifier.names))
+                        if (not self._visual_only and self._pass_color not in available
                                 and not self.settings.get('_inspect_models')):
                             raise ValueError("Choose a pass color/class from this model: "
-                                             + ', '.join(self._classifier.names) + '.')
+                                             + ', '.join(available) + '.')
                     else:
                         self._color = self._open_model(color_path, color=True, second=True)
                 self._parts = self._open_model(self._path("model_path", "models/yolox_nano.onnx"), color=False)
@@ -275,7 +278,7 @@ class YoloXPipeline:
         if self._classifier is not None:
             models.append({'path':str(self._classifier_path),'class_names':list(self._classifier.names),
                            'input_shape':list(getattr(self._classifier,'input_shape',()))})
-        return {'colors':list(self._classifier.names) if self._classifier is not None else
+        return {'colors':list(dict.fromkeys(canonical_sort_color(name) for name in self._classifier.names)) if self._classifier is not None else
                          list(dict.fromkeys(color.colors.values())) if color else [],
                 'visual_only':self._visual_only,
                 'models':models,
@@ -421,4 +424,4 @@ class YoloXPipeline:
             raise ValueError("Color classifier returned an invalid confidence.")
         if color not in self._classifier.names or confidence < self._color_confidence:
             return "unknown", 0.0, ""
-        return color, confidence, color
+        return canonical_sort_color(color), confidence, color

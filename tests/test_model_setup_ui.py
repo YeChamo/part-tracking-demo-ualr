@@ -76,7 +76,7 @@ class ModelSetupTests(unittest.TestCase):
             with patch('app.ui.ModelPreparationWorker') as preparer: self.window.use_bundled_models()
             preparer.assert_not_called()
             setattr(self.window,state,False)
-    def test_prepare_reads_classes_without_silently_changing_pass_target(self):
+    def test_prepare_keeps_blue_as_the_correct_color(self):
         target=self.window.fields['pass_color'].currentText().casefold()
         with patch('app.ui.ModelPreparationWorker',Preparation): self.window.prepare_models()
         worker=self.window.model_preparer
@@ -84,12 +84,12 @@ class ModelSetupTests(unittest.TestCase):
         self.assertFalse(self.window.path_buttons['model_path'].isEnabled())
         worker.prepared.emit({'colors':['pink','fruit punch'],'models':[]})
         combo=self.window.fields['pass_color']
-        self.assertEqual(combo.currentText(),target)
-        self.assertEqual([combo.itemText(i) for i in range(combo.count())],['pink','fruit punch'])
+        self.assertEqual(combo.currentText().casefold(),target)
+        self.assertEqual([combo.itemData(i) for i in range(combo.count())],['blue'])
         combo.setCurrentText('Fruit Punch')
         worker.active=False; worker.finished.emit()
         self.window.collect_settings()
-        self.assertEqual(self.window.settings['pass_color'],'fruit punch')
+        self.assertEqual(self.window.settings['pass_color'],'blue')
         self.assertTrue(self.window.start_button.isEnabled())
     def test_stop_cancels_preparation_and_cannot_arm_output(self):
         with patch('app.ui.ModelPreparationWorker',Preparation): self.window.prepare_models()

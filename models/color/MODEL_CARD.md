@@ -177,6 +177,9 @@ by comparing crops on three official product images (Cool Blue, Lemon Lime,
 Glacier Cherry). On those same product crops the model returned blue, yellow,
 and white. This is calibration on three examples, not independent accuracy
 validation, and it does not establish live conveyor performance. Full padded
-product-image localization can still fail. No class remapping, HSV color rule,
-or fabricated trained weights are used. Camera lighting, reflections, bottle
+product-image localization can still fail. The weights, raw class labels and
+probabilities are unchanged. For this sorting demo, operational aliases group
+yellow/red as RED and gray/grey/white as WHITE; BLUE is the correct/pass group.
+This mapping does not retrain the network. No HSV color rule or fabricated
+trained weights are used. Camera lighting, reflections, bottle
 pose and printed labels can change predictions; calibrate with actual bottles.
