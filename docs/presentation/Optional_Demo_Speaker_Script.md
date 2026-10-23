@@ -2,7 +2,7 @@
 
 **Brad + Wesley · prepared separately · not enabled in the main script**
 
-Use the complete [speaker script](Speaker_Script.md) and [phone cues](Phone_Cue_Cards.md) for the current 16-slide talk. Its demo is slide 11 at 0:16–0:36. Sentiment is introduced on slide 8; REMI on slide 9. These inserts replace time within the demo block if selected. They do not extend the hour or change Wesley's supplied personal sections.
+Use the complete [speaker script](Speaker_Script.md) and [phone cues](Phone_Cue_Cards.md) for the current 17-slide talk. Its demo is slide 12 at 0:16–0:36. Sentiment is introduced on slide 9; REMI on slide 10. These inserts replace time within the demo block if selected. They do not extend the hour or change Wesley's supplied personal sections.
 
 ## Sentiment insert — 3 minutes
 
@@ -56,7 +56,7 @@ Show the actual returned answer. Section A supports the expected facts: the conv
 
 **Optional rehearsed follow-up:** Ask for today's measured belt speed. The source does not provide that measurement. Use this only if it fits within the same two minutes; the expected behavior is to acknowledge the missing information.
 
-**Recovery:** Use a genuine saved REMI answer with the source visible and identify it as a prior run. If no genuine example is available, leave this insert out and retain the main script's slide 9 explanation. No model answer or REMI recording is included or fabricated here.
+**Recovery:** Use a genuine saved REMI answer with the source visible and identify it as a prior run. If no genuine example is available, leave this insert out and retain the main script's slide 10 explanation. No model answer or REMI recording is included or fabricated here.
 
 ## Bridges and timing
 
@@ -64,7 +64,7 @@ Show the actual returned answer. Section A supports the expected facts: the conv
 
 **Sentiment to REMI · Brad:** “Comments are one kind of information. Engineers also need to find answers in their project documentation. Wesley, show how Remi helps with that.”
 
-**REMI to slide 12 · Brad:** “Across these examples, the result has to hold up when conditions change, arrive in time, and give the person using it a reason to trust it.”
+**REMI to slide 13 · Brad:** “Across these examples, the result has to hold up when conditions change, arrive in time, and give the person using it a reason to trust it.”
 
 | Selected option | Bottle demonstration | Sentiment | REMI | Discussion and exit |
 | --- | --- | --- | --- | --- |
@@ -73,4 +73,4 @@ Show the actual returned answer. Section A supports the expected facts: the conv
 | REMI only | 15 minutes | — | 2 minutes | 3 minutes |
 | Both | 12 minutes | 3 minutes | 2 minutes | 3 minutes |
 
-Keep two baseline outcomes and one planned variation. Shorten optional bottle extras and discussion to make room. Return to slide 12 by **0:36**, begin the audience activity at **0:41**, and close the story by **0:40**, show the homepage QR on slide 15, and hold the final interactive slide for activity and questions from **0:41**. The current talk remains the default until an option is deliberately chosen.
+Keep two baseline outcomes and one planned variation. Shorten optional bottle extras and discussion to make room. Return to slide 13 by **0:36**, close by **0:40**, show the homepage QR on slide 16, and begin the interactive activity on final slide 17 at **0:41**. Keep that slide visible for questions. The current talk remains the default until an option is deliberately chosen.

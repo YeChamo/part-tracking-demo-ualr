@@ -1,95 +1,119 @@
-# Engineering at The Kinetic Group — story cues
+# Engineering at The Kinetic Group — phone cues
 
-**Brad + Wesley · 16 slides · October 23, 2026 · 11:30 a.m.**
+**17 slides. Familiar company/project slides, personal introduction over slides 1–2.**
 
-**Clock:** Demo 0:16 → leave demo 0:36 → close story 0:40 → homepage QR 0:40–0:41 → final-slide activity 0:41–0:49 → questions to 1:00.
+**Purpose:** Bring AI into real work. Build the next generation of manufacturing.
 
-**Story:** I started without knowing how → I struggled → we got a chance → I called Wesley → we learned to make it useful and reliable.
+**Clock:** Intro to 0:06; demo 0:16–0:36; close 0:40; homepage QR slide 16; final-slide lab 0:41–0:49; questions to 1:00.
 
-## 1 · PEOPLE — BRAD
+## 1 · PERSONAL INTRODUCTION — BRAD
 
-Electrical engineer, Remington/Lonoke, projects across TKG. Introduce Wesley. “I did not begin knowing how to build AI systems.” Start as a mechanical engineering intern.
+**Hold the cover; tell the story.** Mechanical intern. Full-time school Fayetteville; full-time Lonoke Friday–Monday. OCR from HMI web servers. First AI / worst SCADA joke, pause. Keyence + Cognex inspection; nearly a year; did not understand, felt defeated. Experienced engineers had struggled too. Proposed building it ourselves. Advance to CSG for the opportunity and call.
 
-## 2 · FIRST APPLICATION — BRAD
+## 2 · CSG AND THE CALL — BRAD → WESLEY → BRAD
 
-**Full-time school: Fayetteville. Full-time work: Lonoke, Friday–Monday.** Learning as I went. OCR pulled data off HMI web servers. First AI application, “probably the worst SCADA system the world has ever seen.” **Pause for the joke.** OCR reads image text; HMI is the machine screen.
+CSG = Czechoslovak Group. TKG belongs to CSG Ammo+; Remington is a TKG brand. New CSG management approved our proposal. “Go get an intern.” Called Wesley; he came to central Arkansas. **“Tell them your part of the story.”** Wesley's supplied introduction, then optional memory of the call/first problem. Brad: AI into useful capability; next generation of manufacturing. Finish introduction by about 0:06.
 
-## 3 · A YEAR OF TRYING — BRAD
+## 3 · HISTORY — BRAD
 
-**Keyence + Cognex. Told to make existing tools work.** Nearly a year, little progress, did not fully understand, felt defeated. Experienced engineers had walked this path too. Keep the story on my experience. “I thought I was the problem.” Pause.
+**1816 → Lonoke 1969 → our contribution.** Cameras, controls, software build on manufacturing experience. Remington is one of five TKG brands.
 
-## 4 · A CHANCE — BRAD
+## 4 · STAKES — BRAD
 
-**Propose our own system → new CSG management approves → “Go get an intern.”** Pause. Called Wesley. He came to central Arkansas to take it on with me.
+**Energetic materials, machinery, people.** Timing, clear information, recovery. Build with operators, maintenance, quality, and safety.
 
-## 5 · THE CALL — BRAD → WESLEY
+## 5 · SYSTEM — BRAD
 
-**Brad:** “I've told them how I got to that phone call. Take it from here.”
+**Image → inference → decision → response.** Camera conditions, signals, latency, workflow. Test the whole chain. Show the evidence.
 
-**Wesley:** Supplied introduction: software intern + machine prototypes → full time this February → AI tools and machines. Add your own memory of the call or first problem, 30–60 seconds. No need to invent a story if you do not add one.
+## 6 · PORTFOLIO — BRAD · TO 0:10
 
-## 6 · A REAL RESULT — WESLEY → BRAD
+**Two live inspection systems:** Centerfire + shotshell, still being refined. **Two broader capabilities:** Sentiment + Remi. Which decision does each help?
 
-**Wesley:** Your supplied real-reject moment: seeing our system toss it out. Add what you actually saw/felt if useful. Show operators the evidence; listen and refine.
+## 7 · CENTERFIRE — BRAD → WESLEY → BRAD
 
-**Brad:** Image → model result → useful floor response. Capture, label, train, infer. YOLOX. Working is a milestone; trust takes more work.
+**Brad:** Capture, label, train, infer. YOLOX, workstation or edge. The result must reach a usable workflow.
 
-## 7 · THE NEXT APPLICATION — WESLEY → BRAD
+**Wesley:** Show what it sees → listen to operators → refine with them.
 
-Shotshell: different product, camera view, training/test data, workflow. Carry tooling forward; validate again. One real Wesley example if ready. Both inspections live and being refined.
+**Brad:** Feedback and visible evidence earn trust.
 
-## 8 · BROADER QUESTIONS — BRAD
+## 8 · SHOTSHELL — WESLEY → BRAD
 
-Public comments instead of part images. Collect, VADER/domain scoring, original sources. Give people somewhere useful to investigate. **30–45 seconds. Optional live insert remains separate.**
+**Wesley:** Different product, camera view, training/test examples, workflow. Reuse tooling, validate the application.
 
-## 9 · PROJECT KNOWLEDGE — WESLEY → BRAD
+**Brad:** Live and still improving. Integration remains real work.
 
-Local model, retrieve approved documents, cite, verify. Scoped tools. Finding what we already know becomes another engineering problem. Optional REMI live insert remains separate.
+## 9 · SENTIMENT — BRAD
 
-## 10 · WHY WE LOVE IT — BRAD → WESLEY → BRAD · TO 0:16
+**Collect → score → retain source.** VADER + domain vocabulary. Trends guide investigation. Read the original comments.
+
+## 10 · REMI — WESLEY → BRAD
+
+**Wesley:** Local model, approved documents, retrieved passages, citations, scoped tools. Engineer verifies.
+
+**Brad:** Keep answers connected to evidence and control tool access.
+
+## 11 · WHY WE LOVE IT — BRAD → WESLEY → BRAD · TO 0:16
 
 **Brad:** “What do you enjoy most?”
 
-**Wesley:** Supplied wording: office debugging one day, grease/motor the next. Freedom to spitball, explore, and own solutions. Follow ideas through; help pave the way.
+**Wesley:** Code one day, grease and a stopped motor the next. Freedom to spitball and own solutions. **Real reject: our system tossed it out.** Seeing our work do its job. Follow ideas through; help pave the way.
 
-**Brad:** Given a chance. Let's show a small example.
+**Brad:** Let's show the image, decision, and visible result.
 
-## 11 · LIVE DEMO — BOTH · TO 0:36
+## 12 · LIVE DEMO — BRAD + WESLEY · TO 0:36
 
-**Predict → two clear observations/outcomes → one tested variation → what would you test next?** Describe actual build: box, model evidence/label, track, any real decision. Sorting only if that mode is shown; physical action only if validated. Score is not automatically probability. If surprised: “That gives us something useful to test.” Last good result; recover within two minutes. Exit to slide 12 at 0:36.
+**Two bottles → predictions → one pretested variation → engineering questions.**
 
-## 12 · RELIABILITY — BRAD → WESLEY → BRAD
+**Brad:** State pass color. Ask the room to predict.
+
+**Wesley:** Bottle box → model color prediction → track → on-screen decision. Generic bottle locator alone cannot predict colors. Describe the actual build; physical movement only if validated.
+
+**Ask:** “What would you test before relying on this all day?” Lighting, misses, timing, operator evidence. Model score is not automatically probability.
+
+**If surprised:** “That gives us something useful to test.” If stalled, show last result and move on within two minutes. Return to slide 13 at 0:36.
+
+## 13 · HARD PROBLEMS — BRAD → WESLEY → BRAD
 
 **Brad:** “What are the hardest problems in getting these systems to work reliably on the floor?”
 
-**Wesley:** Supplied wording: timing, right signal, downstream issue. Sunlight can blind cameras. Reliable enough to leave our hands; people need confidence. Takes work.
+**Wesley:** Timing? Right signal? Downstream issue? Sunlight can blind cameras for thirty minutes. Reliable enough to leave our hands. Users need confidence it keeps working.
 
-**Brad:** Demonstration we operate → system other people rely on.
+**Brad:** Prototype we operate → system others rely on.
 
-## 13 · YOUR START — BRAD
+## 14 · JOIN US — BRAD · TO 0:40
 
-I started as a mechanical engineering intern learning how. Wesley came through software/prototyping. Mechanical, controls, software, testing. What have you built? What do you want to learn?
+**Mechanical, controls, software, testing.** Own a problem through deployment and improvement. What have you built? What do you want to tackle?
 
-## 14 · CONNECT AND CLOSE — BRAD → WESLEY → BRAD · TO 0:40
+## 15 · CONNECT — BRAD → WESLEY → BRAD · TO 0:40
 
-**awhite@tkghunt.com.** Wesley's supplied invitation: engineering questions, internship, what you are building, spitball ideas.
+**awhite@tkghunt.com. Close before the two QR slides.**
 
-Brad: rough OCR application → problem unsolved → chance → called Wesley. Their foundation, next generation. Factory floor, future, come build. “Two ways to keep exploring.”
+**Brad:** “We’ll be here afterward. Wesley, anything you’d like to add?”
 
-## 15 · 4FOUNDERS HOME — BRAD · TO 0:41
+**Wesley:** Engineering questions, internship experience, what you are building. Come talk and spitball ideas.
 
-**QR = https://4founders.dev/**. Open now or save for later. Give time to scan. “The last slide takes you straight to the interactive demo.”
+**Brad:** Their foundation, next generation. “Our history was made on the factory floor. The future will be, too. Come build and fight with us. Turn AI into action.”
 
-## 16 · INTERACTIVE DEMO — BOTH · HOLD TO END
 
-**QR = https://4founders.dev/demo/ai-in-action/** · **PIN 877262**.
+Bring AI into real work. Build the next generation of manufacturing. Then two ways to keep exploring.
 
-Activity 0:41–0:49: 4–5 minutes to try, then two or three reactions. Wesley helps access. “What would you change for everyday use?” Questions 0:49–1:00. **Leave this slide up** so the QR/PIN remain visible. Access fails: one prepared example and audience prediction.
+## 16 · 4FOUNDERS HOME — BRAD · TO 0:41
+
+**QR = https://4founders.dev/**. Open or save. Pause for scan. “Last slide takes you straight to the interactive demo.”
+
+## 17 · 4FOUNDERS — BRAD + WESLEY · TO 0:49
+
+**Scan → PIN 877262 → try → share.**
+
+[4founders.dev/demo/ai-in-action/](https://4founders.dev/demo/ai-in-action/)
+
+Give 4–5 minutes, then take two or three reactions. Wesley helps access. Brad holds QR/PIN. “What would you change for everyday use?” Recheck before the event. Access fails: show one prepared example.
+
+
+**Final slide: hold QR/PIN through questions, 0:49–1:00.**
 
 ## Reset
 
-**Brad:** I was learning, I struggled, we got a chance, I called Wesley.
-
-**Wesley:** Own a real problem; keep improving until people can rely on it.
-
-If behind: shorten slides 8 and 9; keep the handoff, real-reject story, core demo, and final QR activity. No need to fill silence with extra technical detail.
+Brad: learning, struggle, chance, called Wesley. Then follow the original company/project route. Wesley: own the problem until others can rely on it. Shorten sentiment and Remi if behind; protect the demo and the final QR activity.

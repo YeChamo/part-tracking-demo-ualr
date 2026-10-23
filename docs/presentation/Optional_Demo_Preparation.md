@@ -1,8 +1,8 @@
 # Optional demo preparation
 
 Presentation documents only. Neither insert is enabled in the main talk.
-The current deck has 16 slides. The demonstration is slide 11 at 0:16–0:36,
-the audience activity begins at 0:41, and the closing invitation is at 0:40 and final-slide activity starts at 0:41.
+The current deck has 17 slides. The demonstration is slide 12 at 0:16–0:36,
+close by 0:40, show the homepage QR on slide 16, and begin final-slide activity at 0:41.
 Use the [main speaker script](Speaker_Script.md) and [main cues](Phone_Cue_Cards.md)
 unless an optional insert is deliberately selected.
 
@@ -14,7 +14,7 @@ five negative comments -58; five positive comments +56; The product is good.
 +40; The product is not good. -40. Clear between the last two to show individual
 scores. Keeping both averages to zero. Unmatched wording is unclassified.
 This teaching copy uses English word rules. The broader project described on
-slide 8 uses VADER with domain vocabulary. The stage script distinguishes them.
+slide 9 uses VADER with domain vocabulary. The stage script distinguishes them.
 
 ## REMI / Little Chef preparation and prompts
 

@@ -1,23 +1,35 @@
-# Go 4th Fridays — our engineering story
+# Go 4th Fridays — Engineering at The Kinetic Group
 
-Brad Daugherty and Wesley Siharath present **Engineering at The Kinetic Group** on October 23, 2026, at 11:30 a.m. The 16-slide corporate deck now follows Brad's origin story: a mechanical engineering internship, OCR from HMI web servers while studying in Fayetteville and working Friday–Monday in Lonoke, nearly a year struggling with inspection, approval under new CSG management to build a system, and the call to Wesley.
+Brad Daugherty and Wesley Siharath present on October 23, 2026, at 11:30 a.m. The 17-slide deck keeps the original company and project visuals and flow. Brad's personal introduction runs over the cover and the new CSG slide, with the handoff to Wesley on slide 2. The speech can develop the story without describing every slide literally.
+
+The purpose is to bring AI into something real and help build the next generation of manufacturing.
 
 - [PowerPoint with matching speaker notes](Engineering_at_The_Kinetic_Group.pptx)
-- [Complete story-led speaker script](Speaker_Script.md)
-- [Matching phone cue cards](Phone_Cue_Cards.md)
+- [Complete speaker script](Speaker_Script.md)
+- [Phone cue cards](Phone_Cue_Cards.md)
 - [Wesley's story worksheet](Wesley_Story_Notes.md)
 
-Brad hands the story to Wesley on slide 5. His supplied introduction, real-reject moment, ownership remarks, reliability examples, and invitation are retained. Additional memories are clearly marked as prompts for him to fill rather than invented anecdotes. The existing inspection, sentiment, and Remi slides serve the story instead of becoming a project catalog. The historical OCR/SCADA anecdote does not reintroduce a standalone SCADA project slide.
+The opening follows Brad's account: mechanical engineering internship, full-time school in Fayetteville and full-time work Friday–Monday in Lonoke, OCR from HMI web servers, inspection struggles, approval under new CSG management, and the call to Wesley. Wesley's supplied personal wording remains in the script. His optional memories are prompts for him to add. The historical OCR/SCADA anecdote does not add a standalone SCADA project slide.
 
-## Route and final slides
+## Route
 
-Start the live demo on slide 11 at **0:16**, leave it at **0:36**, and close the story/contact invitation on slide 14 by about **0:40**. Slide **15** has a clickable QR and URL for **https://4founders.dev/**. Slide **16**, the final slide, has the separate **interactive lab QR**, URL **https://4founders.dev/demo/ai-in-action/**, and PIN **877262**. Run the audience activity at **0:41–0:49** and leave that final slide visible for questions through 1:00. The contact remains **awhite@tkghunt.com**.
+| Clock | Slides | Focus |
+| --- | --- | --- |
+| 0:00–0:06 | 1–2 | Personal introduction, CSG context, Wesley handoff |
+| 0:06–0:10 | 3–6 | Original history, stakes, engineering method, portfolio |
+| 0:10–0:14 | 7–10 | Inspection, sentiment, and Remi examples |
+| 0:14–0:16 | 11 | Why we love this work, Wesley's real-reject story |
+| 0:16–0:36 | 12 | Bottle demonstration and guided questions |
+| 0:36–0:40 | 13–15 | Reliability, invitation, contact and close |
+| 0:40–0:41 | 16 | Homepage QR: https://4founders.dev/ |
+| 0:41–0:49 | 17 | Interactive lab: https://4founders.dev/demo/ai-in-action/ — PIN **877262** |
+| 0:49–1:00 | 17 held | Open questions |
 
-Both QR destinations were decoded from the rendered slides. The PPTX package, layout geometry, 16 notes sections, and final slide order were checked; the corporate template is preserved. Live page access, camera/hardware, and venue projection still require the event rehearsal.
+Contact: **awhite@tkghunt.com**. The final interactive slide stays visible for questions. Both QR destinations were decoded from the rendered slides. The deck has 17 matching notes sections. Camera, hardware, page access, and venue projection remain part of the event rehearsal.
 
 ## Optional live inserts remain separate
 
-Sentiment and REMI live inserts are prepared but **not enabled in the main script**. If chosen, they replace time inside the existing 20-minute demo block.
+Sentiment and REMI inserts are prepared but **not enabled in the main script**. If chosen, they replace time inside the existing 20-minute demo block.
 
 - [Optional speaker script](Optional_Demo_Speaker_Script.md)
 - [Optional phone cues](Optional_Demo_Phone_Cues.md)
