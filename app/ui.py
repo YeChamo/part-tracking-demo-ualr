@@ -686,18 +686,21 @@ class MainWindow(QMainWindow):
         self.field(form,'move_ms','Measured gate move (ms)','int',0,10000)
         self.field(form,'bottle_length_mm','Bottle length along belt (mm)',minimum=1,maximum=1000)
         self.field(form,'clearance_ms','Clearance margin (ms)','int',0,10000)
+        self.field(form,'run_late_triggers','Run late triggers (demo)','bool')
         box.addLayout(form)
         self.timing_note=self.note(box,'')
         for key in ('belt_speed','distance_mm','delay_ms','lead_ms','move_ms','bottle_length_mm','clearance_ms'):
             self.fields[key].valueChanged.connect(self.refresh_timing)
+        self.fields['run_late_triggers'].toggled.connect(self.refresh_timing)
         self.refresh_timing()
-        self.note(box,'Allow network/PC margin in Trigger lead. Live output requires enough upstream travel time and lead at least as long as the measured gate move. Stop + disarm when the hardware-controlled belt stops; there is no encoder or belt-run input.')
+        self.note(box,'Demo late triggers run when the diverter becomes available and are logged as late; bottle timing may be missed. Turn this off for strict timing. Stop + disarm when the hardware-controlled belt stops; there is no encoder or belt-run input.')
         box.addStretch()
 
     def refresh_timing(self, _value=None):
         values=self.settings.copy()
         for key in ('belt_speed','distance_mm','delay_ms','lead_ms','move_ms','bottle_length_mm','clearance_ms'):
             values[key]=self.fields[key].value()
+        values['run_late_triggers']=self.fields['run_late_triggers'].isChecked()
         try: self.timing_note.setText(diverter.preview(values))
         except ValueError as exc: self.timing_note.setText(str(exc))
 
@@ -1218,14 +1221,24 @@ class MainWindow(QMainWindow):
             self.pending.clear(); self.send_gate.clear()
             return
         if not self.pending or self.pending[0][0]>now: return
-        due,tid,event=heapq.heappop(self.pending)
+        due,tid,event=self.pending[0]
         if not self.armed:
+            heapq.heappop(self.pending)
             event['output']='CANCELLED'; self.refresh_event(event); return
-        if now-due>.25 or (event['_plan']['program_id'] and now>event['_send_deadline']):
+        recipe=event['_plan']
+        run_late=self.settings.get('run_late_triggers',False) is True
+        if run_late and (self.output_busy or self.owns_motion or (recipe['program_id'] and now<self.pass_clearance_until)):
+            if event['output']!='WAITING FOR DIVERTER':
+                event['output']='WAITING FOR DIVERTER'; self.refresh_event(event)
+            return
+        heapq.heappop(self.pending)
+        missed=bool(recipe['program_id']) and (now-due>.25 or now>event['_send_deadline'])
+        if missed and not run_late:
             event['output']='MISSED TIMING'; self.refresh_event(event); self.fail('Divert event arrived late; inspection stopped.'); return
+        if missed:
+            event['detail']+=f'; Demo late trigger: {max(0,now-due)*1000:.0f} ms after planned time'
         if self.output_busy or self.owns_motion:
             event['output']='REJECTOR BUSY'; self.refresh_event(event); self.fail('Diverter sequence overlaps the next bottle. Output disarmed; stop the conveyor using its hardware controls. Increase bottle spacing.'); return
-        recipe=event['_plan']
         if not recipe['program_id']:
             self.pass_clearance_until=max(self.pass_clearance_until,recipe['clearance_at'])
             event['output']='PASS'; self.refresh_event(event); return
@@ -1234,7 +1247,7 @@ class MainWindow(QMainWindow):
         self.owns_motion=self.output_busy=True
         self.active_event=event; self.active_run=None
         self.sequence_plan=recipe; self.sequence_cycle=1; self.sequence_stage='primary'
-        self.start_sequence_program(recipe['program_id'],event['_send_deadline'])
+        self.start_sequence_program(recipe['program_id'],None if run_late else event['_send_deadline'])
 
     def start_sequence_program(self, program, deadline=None):
         if self.visual_only: return

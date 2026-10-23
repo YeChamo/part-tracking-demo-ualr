@@ -123,6 +123,42 @@ class DiverterPlannerTests(unittest.TestCase):
         self.assertIn("Trigger delay: -150 ms", text)
         self.assertIn("Cannot arm", text)
 
+    def test_explicit_late_mode_allows_short_lead_and_overdue_trigger(self):
+        for changes in (
+            dict(lead_ms=100, move_ms=150),
+            dict(distance_mm=10, delay_ms=0, lead_ms=200),
+            dict(distance_mm=30, delay_ms=0, lead_ms=150, move_ms=150),
+        ):
+            settings = dict(self.settings, run_late_triggers=True, **changes)
+            with self.subTest(changes=changes):
+                self.assertIsNone(validate_timing(settings))
+        overdue = dict(self.settings, run_late_triggers=True, distance_mm=10, delay_ms=0)
+        self.assertAlmostEqual(plan(overdue, True, 10)['due_at'], 9.85)
+
+    def test_late_mode_preview_describes_execution_without_cannot_arm_message(self):
+        settings = dict(self.settings, run_late_triggers=True, distance_mm=10, delay_ms=0)
+        text = preview(settings)
+        self.assertIn('Trigger delay: -150 ms', text)
+        self.assertIn('Late triggers run when output becomes available', text)
+        self.assertNotIn('Cannot arm', text)
+
+    def test_late_mode_still_validates_all_numbers_programs_and_repeat_counts(self):
+        for key in ('distance_mm', 'delay_ms', 'lead_ms', 'move_ms', 'clearance_ms',
+                    'hold_ms', 'belt_speed', 'bottle_length_mm'):
+            for value in (-1, float('nan'), float('inf')):
+                with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                    validate_timing(dict(self.settings, run_late_triggers=True, **{key: value}))
+        for changes in (dict(belt_speed=0), dict(bottle_length_mm=0), dict(program_id='../bad'),
+                        dict(pass_program_id='two words'), dict(return_program_id=None),
+                        dict(reject_cycles=0), dict(pass_cycles=1.5)):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                validate_timing(dict(self.settings, run_late_triggers=True, **changes))
+
+    def test_late_mode_requires_explicit_boolean_true(self):
+        for value in (False, None, 'false', 'true', 1):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'travel time'):
+                validate_timing(dict(self.settings, run_late_triggers=value, distance_mm=10, delay_ms=0))
+
     def test_planning_does_not_mutate_settings(self):
         before = dict(self.settings)
         plan(self.settings, True, 10)

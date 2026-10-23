@@ -4,6 +4,8 @@ A standalone Windows bottle-tracking and color-sorting demo with YOLOX bottle de
 
 Version **1.5.1** packages as `PartTrackingDemoUALR-v1.5.1-Windows-x64.zip`.
 
+The latest Git build adds **Tracking → Run late triggers (demo)**, enabled by default. It removes the missed-timing stop and transmission deadline: overdue actions wait for the diverter to be free, then run in sequence and are logged as late. Pass events with no movement do not fail for timing lateness. Stop/disarm, controller readiness, fresh-camera checks and one-motion-at-a-time behavior remain. Late execution can miss the physical bottle. Turn the option off to restore strict timing. Close the application before `git pull`; the checked-in EXE includes this update.
+
 - Included COCO YOLOX-Nano locates bottles; a trained MobileNetV3 color network classifies an inner bottle-body crop.
 - Bottles receive IDs anywhere in the camera image, including stationary bottles in the center.
 - Named USB/Basler camera selection, live bottle/color confidence sliders, and full-screen inspection.

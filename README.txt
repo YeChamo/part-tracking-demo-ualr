@@ -20,6 +20,11 @@ If using the portable ZIP instead, extract all folders, including _runtime.
 Setup script failures are recorded in data/runtime-setup-error.txt.
 
 SORTING MODE
+The latest Git build adds Tracking -> Run late triggers (demo), ON by default.
+Late actions queue until the diverter is free, then run without a missed-timing
+cutoff. Stop/disarm and single-motion sequencing remain. Late motion may miss
+the bottle. Turn the option OFF to restore strict timing. Close before git pull.
+
 In Models choose EtherMotion sorting and click Apply mode / restart app.
 After restart, in Diverter connect the separate EtherMotion installation and select
 saved Once programs. Choose the pass color and calibrate belt/actuator timing.

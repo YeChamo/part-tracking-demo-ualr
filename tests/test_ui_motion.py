@@ -102,7 +102,7 @@ class UiMotionTests(unittest.TestCase):
         self.folder = tempfile.TemporaryDirectory(prefix="ualr-ui-motion-")
         self.root = Path(self.folder.name)
         (self.root / "data").mkdir()
-        (self.root / 'data' / 'settings.json').write_text('{"visual_only":false,"yolox_mode":"two_models","rule":"color"}',encoding='utf-8')
+        (self.root / 'data' / 'settings.json').write_text('{"visual_only":false,"yolox_mode":"two_models","rule":"color","run_late_triggers":false}',encoding='utf-8')
         # Disable the normal 200 ms simulation autostart.  Tests never process
         # GUI events or create a camera/network thread.
         with patch("app.ui.QTimer.singleShot"):
@@ -602,6 +602,62 @@ class UiMotionTests(unittest.TestCase):
         self.assertFalse(self.jobs.pending)
         self.assertFalse(self.controller.calls)
         self.assertFalse(self.window.armed)
+
+    def test_demo_late_trigger_runs_after_both_dispatch_and_network_deadlines(self):
+        self.live(); self.window.settings['run_late_triggers']=True
+        event,captured=self.schedule()
+        self.window.dispatch_due(captured+2)
+        with patch('app.ui.time.monotonic',return_value=captured+3): self.jobs.run_next()
+        self.assertEqual(event['output'],'ACCEPTED')
+        self.assertIn('Demo late trigger',event['detail'])
+        self.assertTrue(self.window.running)
+        self.assertTrue(self.window.armed)
+        self.assertEqual(sum(call[0]=='trigger' for call in self.controller.calls),1)
+
+    def test_demo_late_trigger_waits_until_diverter_is_available(self):
+        self.live(); self.window.settings['run_late_triggers']=True
+        event,captured=self.schedule()
+        self.window.output_busy=self.window.owns_motion=True
+        self.window.dispatch_due(captured+2)
+        self.assertEqual(event['output'],'WAITING FOR DIVERTER')
+        self.assertEqual(len(self.window.pending),1)
+        self.assertFalse(self.jobs.pending)
+        self.assertTrue(self.window.armed)
+        self.window.output_busy=self.window.owns_motion=False
+        self.window.dispatch_due(captured+3)
+        self.jobs.run_next()
+        self.assertEqual(event['output'],'ACCEPTED')
+        self.assertFalse(self.window.pending)
+
+    def test_demo_late_trigger_respects_pass_clearance_then_runs(self):
+        self.live(); self.window.settings['run_late_triggers']=True
+        event,captured=self.schedule()
+        self.window.pass_clearance_until=captured+4
+        self.window.dispatch_due(captured+2)
+        self.assertEqual(event['output'],'WAITING FOR DIVERTER')
+        self.assertFalse(self.jobs.pending)
+        self.window.dispatch_due(captured+4)
+        self.jobs.run_next()
+        self.assertEqual(event['output'],'ACCEPTED')
+
+    def test_pass_without_motion_does_not_fail_for_late_dispatch(self):
+        self.live()
+        event,captured=self.schedule(bad=False)
+        self.window.dispatch_due(captured+2)
+        self.assertEqual(event['output'],'PASS')
+        self.assertTrue(self.window.armed)
+        self.assertFalse(self.jobs.pending)
+
+    def test_stop_cancels_demo_late_trigger_waiting_for_diverter(self):
+        self.live(); self.window.settings['run_late_triggers']=True
+        event,captured=self.schedule()
+        self.window.pass_clearance_until=captured+4
+        self.window.dispatch_due(captured+2)
+        self.window.stop()
+        self.window.dispatch_due(captured+5)
+        self.assertEqual(event['output'],'CANCELLED')
+        self.assertFalse(self.window.pending)
+        self.assertFalse(any(call[0]=='trigger' for call in self.controller.calls))
 
 
 if __name__ == "__main__":

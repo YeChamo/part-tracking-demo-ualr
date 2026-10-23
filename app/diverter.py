@@ -84,13 +84,16 @@ def _settings(settings: dict) -> _Timing:
 def validate_timing(settings: dict) -> None:
     """Raise when configured timing cannot be armed for conveyor output.
 
-    A preview/plan may describe earlier trigger times, but armed output cannot
-    clamp an impossible deadline to the present. Lead must cover the move time
-    and must fit within camera-to-diverter travel plus the extra arrival delay.
+    Strict timing is used unless run_late_triggers is explicitly True. In the
+    demo's late-trigger mode the runtime may execute overdue actions when output
+    becomes available; only the travel/lead feasibility checks are bypassed.
+    Numeric values, program IDs, and repeat counts are always validated.
     Program existence, driver readiness, and available inter-bottle spacing
     are checked by the runtime that owns the hardware connection.
     """
     timing = _settings(settings)
+    if settings.get('run_late_triggers', False) is True:
+        return
     if timing.lead < timing.move:
         raise ValueError("Diverter lead must be at least the diverter move time before arming.")
     if timing.travel < timing.lead:
@@ -104,7 +107,8 @@ def plan(settings: dict, bad: bool, captured: float) -> dict:
     Travel includes the configured extra delay. A blank primary program means
     no action for this outcome; an optional return is suppressed in that case.
     Call ``validate_timing`` before arming output; this planner preserves exact
-    deadlines, including a due time earlier than capture for an invalid setup.
+    deadlines, including a due time earlier than capture. Late-trigger handling
+    belongs to the output runtime; this planner never changes the timestamp.
     """
     timing = _settings(settings)
     captured = _number(captured, "Bottle capture timestamp")
@@ -137,6 +141,8 @@ def preview(settings: dict) -> str:
                  "after each primary cycle completes.")
     else:
         text += "The primary saved cycle must contain its own hold and return."
+    if settings.get('run_late_triggers', False) is True:
+        text += " Late triggers run when output becomes available."
     try:
         validate_timing(settings)
     except ValueError as exc:
