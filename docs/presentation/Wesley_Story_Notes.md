@@ -38,4 +38,4 @@ Your supplied point is to show operators what the system sees, listen, and refin
 
 ## Rehearse the handback
 
-Finish the thought and look to Brad. Your supplied short wording works if you do not add an anecdote. Finish the opening with Brad by about 0:06. The slides then follow the original company/project flow. Your real-reject story belongs with the ownership discussion on slide 11, around 0:14–0:16. Begin the live demo on slide 12 at 0:16.
+Finish the thought and look to Brad. Your supplied short wording works if you do not add an anecdote. Keep the CSG slide visible through your introduction and optional memory. Finish the opening with Brad around 0:06, with room to 0:08. Brad uses the short company overview if the introduction takes longer. The slides then follow the original company/project flow. Your real-reject story belongs with the ownership discussion on slide 11, around 0:14–0:16. Begin the live demo on slide 12 at 0:16.

@@ -2,7 +2,7 @@
 
 **Brad Daugherty + Wesley Siharath · Go 4th Fridays · October 23, 2026 · 11:30 a.m.**
 
-17 slides. The company/project slides return to their original visual flow. Brad's personal introduction runs over the cover and the new CSG slide. The speech does not need to describe each slide literally. Wesley has space to add his own memory of the call; his supplied personal wording remains intact. Quoted paragraphs are suggested speech, and other lines are operator or delivery cues.
+17 slides, using the current deck. The full personal introduction stays over slides 1–2. Hold the cover while Brad tells the beginning; advance to CSG when the story reaches the proposal and approval. Wesley introduces himself on that same CSG slide. After the introduction, each slide develops the next part of the story. Quoted paragraphs are suggested speech. Bold stage directions are for the presenters, not for speaking aloud.
 
 **Purpose:** Bring AI into something real and help build the next generation of manufacturing.
 
@@ -20,11 +20,17 @@
 | 0:41–0:49 | 17 | Interactive Audience Lab and reactions |
 | 0:49–1:00 | 17 held | Open questions |
 
-These are targets, not time to fill. Let the introduction breathe, then move through the familiar slides. Optional sentiment and REMI demonstrations remain separate.
+These are targets, not time to fill. The introduction can naturally take **6–8 minutes**. Hold the cover for roughly 3–5 minutes and CSG for roughly 2–3 minutes, depending on Wesley's contribution. Change slides at the story turns below, even if the clock differs. A still cover is intentional: look at the audience, pause, and let the story carry the opening.
+
+If the introduction reaches 0:08, use the short route for slides 3–6 below and keep sentiment and Remi to about 30 seconds each. Aim to reach slide 11 around 0:14 and start the demo around 0:16. If more time is needed, use the demo's short route rather than rushing the story. Protect the close, the final QR activity, and questions. Optional sentiment and REMI live demonstrations remain separate.
+
+**Slide control:** Brad advances slides and watches the clock. Wesley operates the bottle demo. On slide 12, hold the slide while introducing the demonstration, switch to the demo application at the marked cue, then return to slide 13 after the final observation. Keep slide 17 visible throughout the final questions.
 
 ## 1. Engineering at The Kinetic Group — Brad
 
-**Cue:** Use the cover as a visual anchor for your personal introduction. Do not advance for every story beat. About 3 minutes, with room to speak naturally.
+**On screen:** Title, names, event.
+
+**HOLD SLIDE 1:** Tell the complete beginning, including the inspection struggle. Allow roughly 3–5 minutes. Look at the audience; no slide change is needed for the school, OCR, or inspection beats.
 
 **Brad:** “Good morning. I'm Brad Daugherty, an electrical engineer at Remington. Most of my work is in Lonoke, and I support projects across The Kinetic Group. I'm here with Wesley Siharath.”
 
@@ -44,13 +50,15 @@ These are targets, not time to fill. Let the introduction breathe, then move thr
 
 **Delivery:** Keep this centered on your learning and your experience with that application. This is a personal introduction over the cover, not a series of new story slides.
 
-**Bridge:** Advance to the CSG slide for the company context and the opportunity to try.
+**ADVANCE TO SLIDE 2 after:** “I proposed that we build it ourselves.” Let that sentence land, then introduce the company context before telling them what happened to the proposal.
 
 ## 2. Czechoslovak Group (CSG) — Brad → Wesley → Brad
 
-**Cue:** CSG context, approval, and the call to Wesley. Complete the personal introduction by about 0:06.
+**On screen:** CSG brand, Prague headquarters, 1995 origins, main industries, and TKG membership in Ammo+.
 
-**Brad:** “CSG stands for Czechoslovak Group. It is a global industrial and technology group headquartered in Prague, in the Czech Republic. Its roots go back to Excalibur Army in 1995, and its businesses span defense, aerospace, and automotive industries. The Kinetic Group is part of CSG Ammo+, and Remington is one of the TKG brands. Today's examples come mainly from Lonoke.”
+**HOLD SLIDE 2:** Briefly explain who CSG is, then continue the approval story and hand off to Wesley. Keep this slide visible through his introduction and optional memory. Target the end of the opening around 0:06; up to 0:08 is workable.
+
+**Brad:** “Before I tell you what happened to that proposal, this is where CSG fits. CSG stands for Czechoslovak Group. It is a global industrial and technology group headquartered in Prague, in the Czech Republic. Its roots go back to Excalibur Army in 1995, and its businesses span defense, aerospace, and automotive industries. The Kinetic Group is part of CSG Ammo+, and Remington is one of the TKG brands. Today's examples come mainly from Lonoke.”
 
 “Under the new CSG management, the proposal to build our own system was actually approved. They told me to go get an intern.”
 
@@ -64,48 +72,88 @@ These are targets, not time to fill. Let the introduction breathe, then move thr
 
 **Wesley's optional story slot, 30–60 seconds:** [Add your own memory of the call, coming to central Arkansas, or the first problem you tackled together. The supplied introduction works without an added anecdote.]
 
-**Brad:** “We want to turn that opportunity into useful capability on the floor. That is how we want to help build the next generation of manufacturing. Here is the company and the work that story sits inside.”
+**Brad:** “That is how the two of us got into this work. We were given a chance to turn an idea into something people could use on the floor. Our part in that story is recent. The manufacturing history we are building on goes back much further.”
+
+**ADVANCE TO SLIDE 3 after:** “goes back much further.”
 
 **Sources for company context:** [CSG About Us](https://csg.com/en/about-us) (Prague headquarters, 1995 origins, industries); [The Kinetic Group About Us](https://www.thekineticgroup.com/aboutus.html) (Ammo+ membership), checked October 22, 2026. Brand image supplied by Brad in this chat. The AI ambition is the presenters' framing. The approval and internship details are Brad's account.
 
 ## 3. Writing the next rules — Brad
+
+**On screen:** 1816, Lonoke 1969, NEXT. Use the timeline as the setting for your story.
 
 **Cue:** 1816, Lonoke 1969, and our turn to contribute.
 
 **Brad:** “Remington's history goes back to 1816. Lonoke has been part of it since 1969. We inherited generations of work in machinery and manufacturing. Our contribution is to connect that experience with cameras, controls, and software. Remington is one of five TKG ammunition brands, so the problems we support extend beyond one site.”
 
 
-**Bridge from the personal introduction:** The slides now return to the original company/project flow. Use the history as context rather than retelling the internship.
+**Short route if the introduction ran long:** “Our part of the story is recent. Remington goes back to 1816, and Lonoke to 1969. Our contribution is to build on that experience with cameras, controls, and software.”
+
+**Brad, transition:** “That history carries responsibility, because this is real manufacturing.”
+
+**ADVANCE TO SLIDE 4 after:** “real manufacturing.”
 
 ## 4. The stakes are real — Brad
 
+**On screen:** Ammunition manufacturing, propellants and primers, moving machinery, real production.
+
 **Cue:** Real machinery, real operators, real consequences.
 
-**Brad:** “We work around energetic materials and moving machinery. That makes timing, clear information, and recovery part of the engineering problem. We build with operators, maintenance, quality, and safety. The software has to fit their workflow and the established safeguards.”
+**Brad:** “That was part of what made those inspection projects so challenging. We work around energetic materials and moving machinery. That makes timing, clear information, and recovery part of the engineering problem. We build with operators, maintenance, quality, and safety. The software has to fit their workflow and the established safeguards.”
+
+**Short route:** “We work around energetic materials, moving machinery, and real production. The system has to fit the people, workflow, and safeguards.”
+
+**Brad, transition:** “So what does it take for software to reach that floor?”
+
+**ADVANCE TO SLIDE 5 after:** “reach that floor?”
 
 ## 5. Engineering that reaches the floor — Brad
 
+**On screen:** SENSE / DECIDE / ACT. Connect each word to the whole system you had to build.
+
 **Cue:** Capture, inference, decision, response.
 
-**Brad:** “Sense, decide, act. For a vision system, that means acquiring an image, running inference, interpreting the output, and delivering a result in time for the workflow. A model result is one step in that chain. Camera conditions, signals, software latency, and the response all have to fit together. We test the whole chain and show people the evidence behind the result.”
+**Brad:** “When we proposed building it ourselves, this was the whole problem we were taking on. Sense, decide, act. For a vision system, that means acquiring an image, running inference, interpreting the output, and delivering a result in time for the workflow. A model result is one step in that chain. Camera conditions, signals, software latency, and the response all have to fit together. We test the whole chain and show people the evidence behind the result.”
+
+**Short route:** “Sense, decide, act. Capturing an image, making a decision, and getting a usable response all have to work together.”
+
+**Brad, transition:** “You can see that same pattern across our work.”
+
+**ADVANCE TO SLIDE 6 after:** “across our work.”
 
 ## 6. The work spans the organization — Brad
 
+**On screen:** Two production inspection systems and two other capabilities. Give the room a brief map.
+
 **Cue:** Two live inspection systems, two broader capabilities. Finish this context block by about 0:10.
 
-**Brad:** “Centerfire and shotshell inspection are live and still being refined. Public sentiment and Remi apply software to different questions: what customers are saying, and how engineers find project knowledge. The common problem is making the evidence useful to someone making a decision.”
+**Brad:** “That approach now connects the different kinds of work we do. Centerfire and shotshell inspection are live and still being refined. Public sentiment and Remi apply software to different questions: what customers are saying, and how engineers find project knowledge. The common problem is making the evidence useful to someone making a decision.”
+
+**Short route:** “Centerfire and shotshell inspection are live and being refined. Sentiment and Remi address other kinds of information. I will start with inspection.”
+
+**Brad, transition for the full route:** “Start with centerfire inspection and what building that capability involves.”
+
+**ADVANCE TO SLIDE 7 after:** the centerfire introduction. Finish this overview around 0:10.
 
 ## 7. Centerfire inspection — Brad → Wesley → Brad
 
+**On screen:** Image capture, inference, a usable result, and earning trust. Explain what building our own involves.
+
 **Cue:** Vision pipeline, visible evidence, operator trust.
 
-**Brad:** “Remington Vision brings image capture, labeling, model training, and inference into one toolset. It uses YOLOX detection models and supports workstation and edge deployment. The model is only part of the system. The result has to reach a usable workflow, and people need to understand what the camera saw.”
+**Brad:** “Here is what building our own system involves. Remington Vision brings image capture, labeling, model training, and inference into one toolset. It uses YOLOX detection models and supports workstation and edge deployment. The model is only part of the system. The result has to reach a usable workflow, and people need to understand what the camera saw.”
 
 **Wesley:** “On the floor we show operators what the system sees, listen when something is confusing, and make changes they can judge for themselves.”
 
 **Brad:** “That feedback is part of commissioning and continued improvement. It is how the technical result earns trust.”
 
+**Brad, transition:** “Carrying that tooling into another product still leaves a different engineering problem. Wesley, take shotshell.”
+
+**ADVANCE TO SLIDE 8 after:** “take shotshell.”
+
 ## 8. Shotshell inspection — Wesley → Brad
+
+**On screen:** A different product, different data and view. Wesley explains why reuse still requires engineering.
 
 **Cue:** A different product changes the image and the data.
 
@@ -113,25 +161,47 @@ These are targets, not time to fill. Let the introduction breathe, then move thr
 
 **Brad:** “This is also live and being refined. Reusing software still leaves real integration work.”
 
+**Brad, transition:** “Those are image problems on the floor. Other teams need help making sense of text.”
+
+**ADVANCE TO SLIDE 9 after:** “making sense of text.”
+
 ## 9. Public sentiment — Brad
+
+**On screen:** Public discussion, themes, source links. Brief overview; no optional live insert is enabled.
 
 **Cue:** Collect, score, retain the source.
 
-**Brad:** “The sentiment project collects public discussion, scores sentiment and product themes, and stores the results for review. The scoring uses VADER with a domain vocabulary. A trend gives the team somewhere to investigate. Keeping the original comments available lets people check what the score actually represents.”
+**Brad:** “The same need to turn information into a useful decision also shows up away from the production line. The sentiment project collects public discussion, scores sentiment and product themes, and stores the results for review. The scoring uses VADER with a domain vocabulary. A trend gives the team somewhere to investigate. Keeping the original comments available lets people check what the score actually represents.”
+
+**If behind:** Keep the spoken overview to about 30 seconds. Retain the original-comment point.
+
+**Brad, transition:** “Public comments are one source. Our own project documents are another. Wesley?”
+
+**ADVANCE TO SLIDE 10 after:** “Wesley?”
 
 ## 10. Remi — Wesley → Brad
 
+**On screen:** Project documents, retrieval, citations, local model, scoped tools. Brief overview.
+
 **Cue:** Retrieve project material, generate an answer, check the source.
 
-**Wesley:** “Remi uses a local language model with retrieval over approved project documents. It indexes the material, finds relevant passages, and answers with citations. Scoped tools let it work within a defined workspace. The engineer still checks the source and the result.”
+**Wesley:** “Another kind of information we work with is project documentation. Remi uses a local language model with retrieval over approved project documents. It indexes the material, finds relevant passages, and answers with citations. Scoped tools let it work within a defined workspace. The engineer still checks the source and the result.”
 
 **Brad:** “Here the integration problem is keeping the answer connected to evidence and controlling what the tools can do.”
 
+**If behind:** About 30 seconds. Keep retrieval, citations, and the engineer checking the source.
+
+**Brad, transition:** “Those are the projects. The part that keeps us interested is getting to carry an idea into use.”
+
+**ADVANCE TO SLIDE 11 after:** “carry an idea into use.”
+
 ## 11. Why we love this work — Brad → Wesley → Brad
+
+**On screen:** Variety, freedom, ownership, growth. This is where Wesley tells his real-reject moment.
 
 **Cue:** Variety, freedom, ownership, and a real result. Demo at 0:16.
 
-**Brad:** “Wesley, what do you enjoy most about working here?”
+**Brad:** “We have shown you the kinds of work. Wesley, what do you enjoy most about actually doing it here?”
 
 **Wesley:** “What I love most is the variety of problems we face day to day. One day I might be debugging code in the office. Another day I might be knee-deep in grease, figuring out why a machine’s motor isn’t spinning.”
 
@@ -143,13 +213,19 @@ These are targets, not time to fill. Let the introduction breathe, then move thr
 
 **Brad:** “Let's show that connection between an image, a decision, and a visible result.”
 
+**ADVANCE TO SLIDE 12 after:** “a visible result.” Target 0:16. Keep Wesley's real-reject moment here so it lands once.
+
 ## 12. Live demonstration — Brad + Wesley
+
+**On screen:** CAMERA → AI → ACTION and Gatorade bottles. Hold this while framing the demo, then switch applications.
 
 **Cue:** Detection, color prediction, track, decision, one variation. 0:16–0:36.
 
 **Before the event:** Rehearse the exact application build, camera, two bottles, and one variation. The repository's standard mode uses YOLOX bottle detection and a trained color model. A visual-tracking build can instead show boxes, labels, and track identity; use the rehearsed outcomes of the actual build. The generic bundled bottle locator does not predict colors. Describe the mode actually shown. Keep the core demonstration on screen; include physical movement only if the complete event setup has been validated.
 
 **Opening, 2 minutes. Brad:** “This is a separate event demo using Gatorade bottles, a small example of AI becoming something useful in manufacturing. We detect the bottle, associate evidence with its track, and apply a color rule to produce an on-screen sort decision. First, predict the result. Then we will change one condition and look at what happened.”
+
+**Application cue:** Show slide 12 for the opening, then say, “Wesley, let's look at it.” Switch to the rehearsed demo application before the baseline.
 
 **Baseline, 4 minutes. Brad** states the pass color and asks for predictions for two contrasting bottles. **Wesley** points out the bottle box, model color prediction, track, and displayed decision. In the standard repository mode, unknown color diverts. Show what this build actually did.
 
@@ -161,7 +237,13 @@ These are targets, not time to fill. Let the introduction breathe, then move thr
 
 **Recovery:** Show the camera view and last successful result. Ask what the audience would inspect first. Move on within two minutes. Optional barcodes and physical motion are outside the core sequence.
 
+**Short route if starting late:** Two minutes framing, four minutes for the two baseline outcomes, four minutes for one variation, then guided questions and exit by 0:36. Trim discussion to the time remaining.
+
+**RETURN TO THE DECK AT SLIDE 13** after the demo transition. Do not move through the sentiment or Remi slides again.
+
 ## 13. The hard problems — Brad → Wesley → Brad
+
+**On screen:** Variation, timing, reliability. Return here from the application after the demo.
 
 **Cue:** Timing, signals, sunlight, and confidence.
 
@@ -177,13 +259,25 @@ These are targets, not time to fill. Let the introduction breathe, then move thr
 
 **Brad:** “That is the step from a prototype we operate ourselves to a system other people can rely on.”
 
+**Brad, transition:** “Working through those problems takes people with different skills. That is where the next person can come in.”
+
+**ADVANCE TO SLIDE 14 after:** “the next person can come in.”
+
 ## 14. Come fight for what is next — Brad
+
+**On screen:** Mechanical, controls, software, testing. Tie the invitation to how Brad and Wesley started.
 
 **Cue:** Mechanical, controls, software, and testing. Close before the two final QR slides.
 
-**Brad:** “Building the next generation of manufacturing means connecting AI to real work. These problems cross mechanical engineering, controls, software, and testing. We want people who will follow a problem from the first question through deployment and improvement. Tell us what you have built and what you want to take on next.”
+**Brad:** “I started as a mechanical engineering intern trying to solve a problem I did not understand. Wesley started through software and machine prototyping. Building the next generation of manufacturing needs people from all of those directions. These problems cross mechanical engineering, controls, software, and testing. We want people who will follow a problem from the first question through deployment and improvement. Tell us what you have built and what you want to take on next.”
+
+**Brad, transition:** “If that sounds like the kind of work you want to do, come talk to us.”
+
+**ADVANCE TO SLIDE 15 after:** “come talk to us.”
 
 ## 15. Let us connect — Brad → Wesley → Brad
+
+**On screen:** Factory-floor closing message and awhite@tkghunt.com. Close the story before the QR slides.
 
 **Cue:** awhite@tkghunt.com, questions, internship, and ideas. Close the story by about 0:40, before the homepage and lab QR slides.
 
@@ -191,12 +285,16 @@ These are targets, not time to fill. Let the introduction breathe, then move thr
 
 **Wesley:** “Yeah, if you guys have any engineering questions or want to hear more about my internship experience, come talk with us afterward. I’d love to hear what you’re building and spitball some ideas with you.”
 
-**Brad:** “The generations before us built the foundation. We want to build what the next generation can stand on. Our history was made on the factory floor. The future will be, too. Let's bring AI into real work and build the next generation of manufacturing together. Come build and fight with us. Turn AI into action.”
+**Brad:** “For me, this started with a rough OCR application and a problem I could not solve. Then we got the chance to try, and I called Wesley. That is what I hope you take from our story: you can start while you are still learning, find people to build with, and keep working until the result is useful to someone else. Our history was made on the factory floor. The future will be, too. Come help us bring AI into real work and build the next generation of manufacturing.”
 
 
 **Bridge:** “Before we finish, here are two ways to keep exploring.”
 
+**ADVANCE TO SLIDE 16 after:** “two ways to keep exploring.” Aim to close the personal story around 0:40.
+
 ## 16. Explore 4Founders — Brad
+
+**On screen:** Homepage QR and 4founders.dev. Pause for people to scan.
 
 **Cue:** Penultimate slide. Homepage QR, about 0:40–0:41.
 
@@ -206,7 +304,11 @@ Pause for a scan. The QR encodes **https://4founders.dev/**. Do not promise unve
 
 **Bridge:** “The last slide takes you straight to the interactive demo.”
 
+**ADVANCE TO SLIDE 17 after:** “straight to the interactive demo.” Allow time for the homepage scan first.
+
 ## 17. 4Founders challenge — Brad + Wesley
+
+**On screen:** Interactive lab QR, URL, and PIN 877262. Hold through the activity and open questions.
 
 **Cue:** Scan, PIN, try, share. 0:41–0:49.
 
@@ -218,6 +320,8 @@ Give **4–5 minutes**. Wesley helps with access. Brad keeps the QR and PIN visi
 
 
 **Questions, 0:49–1:00:** Keep this final slide visible so the lab QR, URL, and PIN remain available. “What are you curious about, or what are you trying to build?”
+
+**HOLD SLIDE 17:** Keep the QR, URL, and PIN visible during the activity and questions. No further slide change.
 
 ## Source and status notes
 
