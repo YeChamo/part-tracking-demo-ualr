@@ -58,9 +58,9 @@
 
 **End exactly:** “there’s always something new to learn.” **Pause and look to Brad.**
 
-**Brad:** Live and still improving. Integration remains real work.
+**Brad:** “These are the problems we face on the floor”
 
-**SLIDE CUE:** Images on the floor → making sense of text. Advance to 9.
+**SLIDE CUE:** Advance to 9 after Brad’s line.
 
 ## 9 · SENTIMENT — BRAD
 

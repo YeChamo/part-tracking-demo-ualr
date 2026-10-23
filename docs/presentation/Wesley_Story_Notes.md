@@ -26,7 +26,7 @@ Pause after “use this degree.” Keep CSG visible. Finish with your supplied u
 
 **Wesley handback:** Finish on “there’s always something new to learn.” Pause and look to Brad. Keep slide 8 visible until Brad's transition.
 
-Brad responds: “This is also live and being refined. Reusing software still leaves real integration work.” Then he bridges from images to text and advances to slide 9. Keep this section within the project overview, aiming to finish slides 7–10 around 0:14.
+Brad responds: “These are the problems we face on the floor” and advances to slide 9. Keep this section within the project overview, aiming to finish slides 7–10 around 0:14.
 
 ## Slide 11 — the real reject
 

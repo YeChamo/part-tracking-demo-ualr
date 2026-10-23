@@ -163,11 +163,9 @@ Aim to reach slide 11 around 0:14 and start the demo around 0:16. Optional senti
 
 **Wesley handback:** Finish on “there’s always something new to learn.” Pause and look to Brad. Keep slide 8 visible until Brad's transition.
 
-**Brad:** “This is also live and being refined. Reusing software still leaves real integration work.”
+**Brad:** “These are the problems we face on the floor”
 
-**Brad, transition:** “Those are image problems on the floor. Other teams need help making sense of text.”
-
-**ADVANCE TO SLIDE 9 after:** “making sense of text.”
+**ADVANCE TO SLIDE 9 after:** “These are the problems we face on the floor”
 
 ## 9. Public sentiment — Brad
 
