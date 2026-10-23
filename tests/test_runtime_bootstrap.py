@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 import shutil
 import subprocess
@@ -139,6 +140,65 @@ class RuntimeBootstrapTests(unittest.TestCase):
             'function Test-Python311 { return $true }\n'
             'if (Test-BuildDependencies $ProbeExe) { throw "Failed dependency probe accepted" }'
         )
+
+    def test_hash_reads_file_held_by_a_shared_writer(self):
+        with tempfile.TemporaryDirectory() as folder:
+            executable = Path(folder) / 'PartTrackingUALR.exe'
+            executable.write_bytes(b'example executable')
+            expected = hashlib.sha256(executable.read_bytes()).hexdigest()
+            self.assert_ok(
+                '$File = ' + ps_quote(executable) + '\n'
+                '$Writer = [IO.File]::Open($File, [IO.FileMode]::Open, [IO.FileAccess]::ReadWrite, [IO.FileShare]::Read)\n'
+                'try {\n'
+                ' $OldReadFailed = $false\n'
+                ' try { $OldStream = [IO.File]::OpenRead($File); $OldStream.Dispose() } catch { $OldReadFailed = $true }\n'
+                ' if (-not $OldReadFailed) { throw "Sharing failure was not reproduced" }\n'
+                ' if ((Get-RuntimeSha256 $File) -ne ' + ps_quote(expected) + ') { throw "Wrong file hash" }\n'
+                '} finally { $Writer.Dispose() }'
+            )
+
+    def test_hash_resolves_relative_path_from_powershell_location(self):
+        with tempfile.TemporaryDirectory() as folder:
+            executable = Path(folder) / 'PartTrackingUALR.exe'
+            executable.write_bytes(b'relative location example')
+            expected = hashlib.sha256(executable.read_bytes()).hexdigest()
+            self.assert_ok(
+                'Set-Location -LiteralPath ' + ps_quote(folder) + '\n'
+                '[Environment]::CurrentDirectory = $env:WINDIR\n'
+                'if ((Get-RuntimeSha256 "PartTrackingUALR.exe") -ne ' + ps_quote(expected)
+                + ') { throw "Relative path used the wrong directory" }'
+            )
+
+    def test_locked_file_reports_actionable_full_path(self):
+        with tempfile.TemporaryDirectory() as folder:
+            executable = Path(folder) / 'PartTrackingUALR.exe'
+            executable.write_bytes(b'locked file')
+            self.assert_ok(
+                '$File = ' + ps_quote(executable) + '\n'
+                '$Lock = [IO.File]::Open($File, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::None)\n'
+                '$Rejected = $false\ntry {\n'
+                ' try { Get-RuntimeSha256 $File | Out-Null } catch {\n'
+                '  if (-not $_.Exception.Message.Contains($File) -or $_.Exception.Message -notmatch "4 attempts") { throw }\n'
+                '  $Rejected = $true\n }\n'
+                '} finally { $Lock.Dispose() }\n'
+                'if (-not $Rejected) { throw "Exclusive file lock ignored" }'
+            )
+
+    def test_entrypoint_failure_writes_stage_and_folder_diagnostics(self):
+        with tempfile.TemporaryDirectory() as folder:
+            base = Path(folder)
+            script = base / 'SetupRuntime.ps1'
+            shutil.copyfile(ROOT / 'SetupRuntime.ps1', script)
+            result = subprocess.run(
+                [POWERSHELL, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', str(script)],
+                text=True, capture_output=True, timeout=30,
+            )
+            self.assertEqual(result.returncode, 1)
+            log = (base / 'data/runtime-setup-error.txt').read_text()
+            self.assertIn('reading runtime-manifest.json', log)
+            self.assertIn(str(base.resolve()), log)
+            self.assertIn('runtime-manifest.json', log)
+            self.assertIn('Error details saved to:', result.stdout)
 
 
 if __name__ == '__main__':

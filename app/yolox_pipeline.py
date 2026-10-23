@@ -15,7 +15,7 @@ import numpy as np
 
 from .model_classes import (build_color_map, class_names_from_metadata,
                             parse_class_names)
-from .vendor.inference import DetectorConfig
+from .vendor.inference import DetectorConfig, InferenceError
 from .accelerated_backend import AcceleratedONNXBackend
 from .checkpoint_export import prepare_model
 from .model_runtime import ModelDetector as Detector
@@ -88,7 +88,11 @@ def _class_count(details: dict, image_size: int, *, automatic=False) -> int:
     channels = _fixed_dimension(output[-1]) if output else None
     if (len(output) != 3 or _fixed_dimension(output[0]) not in (None, 1)
             or channels is None or channels <= 5):
-        raise ValueError("YOLOX output must be [1, N, 5+C] with a fixed class count. Export the detection head without NMS.")
+        hint = (" This is a class-score output, not bottle detections."
+                " For distilV4_student.onnx choose 'Bundled color neural network' under Color model type;"
+                " the Bottle model should be yolox_nano.onnx."
+                if len(output) == 2 else " Export the detection head without NMS.")
+        raise ValueError(f"YOLOX output must be [1, N, 5+C] with a fixed class count; got {output}.{hint}")
     return channels - 5
 
 
@@ -207,9 +211,14 @@ class YoloXPipeline:
                 raise ValueError("Choose a pass color/class from this model: "+', '.join(dict.fromkeys(colors.values()))+'.')
             cfg.class_names = names or [f"class_{index}" for index in range(count)]
             return _Model(detector, cfg.class_names, count, colors, original_path, confidence)
-        except Exception:
+        except Exception as exc:
             detector.close()
-            raise
+            slot = 'YOLOX color model' if second else 'Combined bottle/color YOLOX model' if color else 'Bottle YOLOX model'
+            hint = (" Put distilV4_student.onnx in Color model with Color model type set to"
+                    " 'Bundled color neural network', and yolox_nano.onnx in Bottle model."
+                    if original_path.name.casefold() == 'distilv4_student.onnx' else '')
+            error_type = type(exc) if isinstance(exc, (ValueError, InferenceError)) else RuntimeError
+            raise error_type(f"{slot} '{original_path}': {exc}{hint}") from exc
 
     def open(self) -> "YoloXPipeline":
         self.close()
@@ -231,7 +240,12 @@ class YoloXPipeline:
                         from .color_classifier import ColorClassifier
                         self._classifier_path = color_path
                         self._classifier = ColorClassifier(color_path)
-                        self._classifier.open()
+                        try:
+                            self._classifier.open()
+                        except Exception as exc:
+                            raise ValueError(f"Color neural network '{color_path}': {exc}"
+                                             " Use the bundled distilV4_student.onnx with this model type;"
+                                             " for a YOLOX color detector change Color model type to 'YOLOX color detector'.") from exc
                         if (not self._visual_only and self._pass_color not in self._classifier.names
                                 and not self.settings.get('_inspect_models')):
                             raise ValueError("Choose a pass color/class from this model: "

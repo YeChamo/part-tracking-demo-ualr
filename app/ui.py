@@ -515,6 +515,9 @@ class MainWindow(QMainWindow):
         self.prepare_models_button=QPushButton('Load / convert models')
         self.prepare_models_button.clicked.connect(self.prepare_models)
         box.addWidget(self.prepare_models_button)
+        self.bundled_models_button=QPushButton('Use included bottle + color models')
+        self.bundled_models_button.clicked.connect(self.use_bundled_models)
+        box.addWidget(self.bundled_models_button)
         self.model_note=self.note(box,'Bundled models are ready. YOLOX checkpoints convert automatically.')
         thresholds=QFormLayout(); thresholds.setSpacing(12)
         thresholds.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapAllRows)
@@ -551,6 +554,23 @@ class MainWindow(QMainWindow):
         box.addWidget(advanced)
         self.note(box,'Model names and input size are read automatically. Use Advanced for missing labels or a modified YOLOX graph. A custom experiment runs Python model-building code; select your own training configuration. Generic COCO weights locate bottles only.')
         box.addStretch()
+
+    def use_bundled_models(self):
+        if self.running or self.armed or self.arming or self.owns_motion or (self.model_preparer and self.model_preparer.isRunning()): return
+        values={key:store.DEFAULTS[key] for key in (
+            'model_path','color_model_path','color_backend','model_class_id','image_size',
+            'color_image_size','model_class_names','color_class_names','color_class_map',
+            'model_architecture','color_architecture','model_experiment_path','color_experiment_path',
+            'auto_model_config','inference_backend','confidence','color_confidence')}
+        values['yolox_mode']='tracking' if self.visual_only else 'two_models'
+        for key,value in values.items():
+            widget=self.fields[key]
+            if isinstance(widget,QComboBox): widget.setCurrentIndex(widget.findData(value))
+            elif isinstance(widget,QCheckBox): widget.setChecked(value)
+            elif isinstance(widget,QLineEdit): widget.setText(value)
+            else: widget.setValue(value)
+        self.settings.update(values)
+        self.prepare_models()
 
     def apply_operation_mode(self):
         if self.running or self.armed or self.arming or self.owns_motion or (self.model_preparer and self.model_preparer.isRunning()):
@@ -891,6 +911,7 @@ class MainWindow(QMainWindow):
         self.apply_mode_button.setEnabled(self.operation_mode.isEnabled())
         self.start_button.setEnabled(editable and not self.owns_motion and not self.camera_scanning)
         self.prepare_models_button.setEnabled(editable and not self.owns_motion)
+        self.bundled_models_button.setEnabled(editable and not self.armed and not self.arming and not self.owns_motion)
         for widget in self.fields.values(): widget.setEnabled(editable)
         for button in self.path_buttons.values(): button.setEnabled(editable)
         two_models=self.visual_only or self.fields['yolox_mode'].currentData()=='two_models'

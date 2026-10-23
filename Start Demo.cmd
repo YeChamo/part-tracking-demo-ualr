@@ -8,7 +8,11 @@ if not exist "%~dp0PartTrackingUALR.exe" (
 )
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0SetupRuntime.ps1"
 if errorlevel 1 (
-  echo Runtime setup failed. See the error above. No models or settings were replaced.
+  echo Runtime setup failed with exit code %ERRORLEVEL%.
+  echo Demo folder: "%~dp0"
+  echo Read the error above or data\runtime-setup-error.txt in this folder.
+  echo For offline startup, extract the complete portable ZIP with all folders.
+  echo Your models and settings were preserved.
   pause
   exit /b 1
 )

@@ -1,4 +1,4 @@
-PART TRACKING DEMO UALR 1.5.0 - BOTTLE TRACKING AND COLOR SORTING
+PART TRACKING DEMO UALR 1.5.1 - BOTTLE TRACKING AND COLOR SORTING
 
 1. Pull the Git repository, or extract the complete portable ZIP. Run Start Demo.cmd.
    Git includes the EXE and supplied models. A missing runtime is downloaded from
@@ -10,6 +10,14 @@ PART TRACKING DEMO UALR 1.5.0 - BOTTLE TRACKING AND COLOR SORTING
    trained color neural network classifies their inner bottle-body crop.
 4. Put a bottle anywhere in view. Boxes, stable IDs and confidence appear on the live image.
 5. Adjust Bottle confidence as needed. F11 opens full screen; Esc exits full screen.
+
+OTHER PC / OFFLINE EXE
+The Offline EXE release contains the complete app, Python runtime and models.
+Run it to extract PartTrackingDemoUALR-1.5.1 beside itself and open the app.
+It needs no PowerShell setup, internet or installed Python. Later starts keep
+using that extracted folder and its settings. Requires Windows 10/11 x64.
+If using the portable ZIP instead, extract all folders, including _runtime.
+Setup script failures are recorded in data/runtime-setup-error.txt.
 
 SORTING MODE
 In Models choose EtherMotion sorting and click Apply mode / restart app.
@@ -24,6 +32,10 @@ Bottle boxes and stable IDs can appear anywhere in view, including stationary
 bottles. Barcode decoding stays separate; actual unread symbols remain UNREAD.
 
 MODELS
+If loading reports output shape [1,N,5+C], stop and click Models ->
+Use included bottle + color models. This restores and checks the correct
+detector/classifier pairing without changing your camera or EtherMotion setup.
+
 The included COCO YOLOX-Nano uses bottle class 39. YOLOX-S is also supplied and is
 larger/slower on CPU. Generic YOLOX locates bottles; it does not classify colors.
 The bundled models/color/distilV4_student.onnx is a trained MobileNetV3 network,

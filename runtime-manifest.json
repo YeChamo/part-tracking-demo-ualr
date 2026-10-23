@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "runtime_version": "1.4.0",
-  "compatible_application": "1.4.0 and 1.5.0",
+  "compatible_application": "1.4.0 through 1.5.1",
   "url": "https://github.com/YeChamo/part-tracking-demo-ualr/releases/download/v1.4.0-rc1/PartTrackingDemoUALR-v1.4.0-Windows-x64.zip",
   "sha256": "679edbb08d61f5779476dee2386158095652ce827203c48fd7153fac0061be04",
   "bytes": 426673716

@@ -57,6 +57,25 @@ class ModelSetupTests(unittest.TestCase):
         self.assertIn('model_experiment_path',self.window.fields)
         self.assertIn('color_experiment_path',self.window.fields)
         self.assertTrue(self.window.fields['auto_model_config'].isChecked())
+
+    def test_restore_bundled_models_sets_detector_and_classifier_slots_together(self):
+        self.window.fields['model_path'].setText('models/color/distilV4_student.onnx')
+        self.window.fields['color_backend'].setCurrentIndex(self.window.fields['color_backend'].findData('yolox'))
+        with patch('app.ui.ModelPreparationWorker',Preparation): self.window.use_bundled_models()
+        setup=self.window.model_preparer.settings
+        self.assertEqual(setup['model_path'],'models/yolox_nano.onnx')
+        self.assertEqual(setup['model_class_id'],39)
+        self.assertEqual(setup['color_model_path'],'models/color/distilV4_student.onnx')
+        self.assertEqual(setup['color_backend'],'classifier')
+        self.assertEqual(setup['yolox_mode'],'two_models')
+        self.assertFalse(self.window.armed)
+
+    def test_restore_models_cannot_change_running_or_armed_inspection(self):
+        for state in ('running','armed','arming','owns_motion'):
+            setattr(self.window,state,True)
+            with patch('app.ui.ModelPreparationWorker') as preparer: self.window.use_bundled_models()
+            preparer.assert_not_called()
+            setattr(self.window,state,False)
     def test_prepare_reads_classes_without_silently_changing_pass_target(self):
         target=self.window.fields['pass_color'].currentText().casefold()
         with patch('app.ui.ModelPreparationWorker',Preparation): self.window.prepare_models()

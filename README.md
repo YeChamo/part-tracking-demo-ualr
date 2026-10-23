@@ -2,7 +2,7 @@
 
 A standalone Windows bottle-tracking and color-sorting demo with YOLOX bottle detection, persistent IDs, a bundled trained color neural network, camera selection, confidence controls, barcode display, and optional EtherMotion output. It starts in **Visual preview**, with motion disarmed. Select **EtherMotion sorting** when configuring the conveyor installation.
 
-Version **1.5.0** packages as `PartTrackingDemoUALR-v1.5.0-Windows-x64.zip`.
+Version **1.5.1** packages as `PartTrackingDemoUALR-v1.5.1-Windows-x64.zip`.
 
 - Included COCO YOLOX-Nano locates bottles; a trained MobileNetV3 color network classifies an inner bottle-body crop.
 - Bottles receive IDs anywhere in the camera image, including stationary bottles in the center.
@@ -15,6 +15,10 @@ Version **1.5.0** packages as `PartTrackingDemoUALR-v1.5.0-Windows-x64.zip`.
 Pull this repository and double-click **Start Demo.cmd**. The executable and supplied models are tracked in Git. When `_runtime` is missing, the launcher downloads the pinned [1.4.0 runtime release](https://github.com/YeChamo/part-tracking-demo-ualr/releases/tag/v1.4.0-rc1), verifies its exact size and SHA-256, extracts only `_runtime`, and checks it before installation. This first launch needs internet and a 407 MB download; your executable, models, and saved settings are preserved. A compatible runtime already present is checked and reused.
 
 For an offline station, download the complete **Windows portable ZIP** from [Releases](https://github.com/YeChamo/part-tracking-demo-ualr/releases), extract the complete folder, and run **Start Demo.cmd**. No Python installation is needed for either route. Keep `_runtime`, `models`, and the other supplied folders beside `PartTrackingUALR.exe`.
+
+The **Offline EXE** release contains that complete folder inside one file. Run it on the target PC: it extracts into `PartTrackingDemoUALR-1.5.1` beside itself and opens the app directly, without PowerShell or a runtime download. Later launches reuse that folder and its saved settings. Keep that extracted folder if you move the offline launcher. Windows 10/11 x64 is required; Python is included.
+
+If the ordinary Git launcher fails, `data/runtime-setup-error.txt` records the exact setup stage and filename. A Python 3.11 loading error usually means the complete `_runtime` folder was not installed or kept beside the application. Use the Offline EXE or the fully extracted portable ZIP; a system Python installation is not required. Setup now handles shared file locks and reports missing/locked files explicitly.
 
 ## Camera, models, and display
 
@@ -30,6 +34,8 @@ A saved USB camera is followed by device identity when Windows changes its index
 Press **F11** or double-click the inspection view for full screen. Press **Esc** to leave full screen.
 
 ## YOLOX models and confidence
+
+If model loading reports output shape `[1, N, 5+C]`, stop inspection and click **Models → Use included bottle + color models**. It restores the Nano bottle detector, the color classifier, their model types and class settings together, then checks both models. Camera selection, pass color and EtherMotion settings are preserved. The color classifier belongs in the Color model slot with **Bundled color neural network** selected; it is not a YOLOX bottle detector. Custom model errors name the selected file, slot and actual output shape.
 
 The supplied setup uses **YOLOX-Nano** for bottle boxes and `models/color/distilV4_student.onnx` for color. The color model is an unmodified, MIT-licensed MobileNetV3-Small network trained on procedural garment images; it is **not bottle-trained**. See its [model card](models/color/MODEL_CARD.md), [provenance](models/color/PROVENANCE.txt), and [upstream model page](https://huggingface.co/giosanchez0208/clothing-color-recognition). The app applies its trained input composition to a fixed inner-body crop; it uses no HSV color rules.
 

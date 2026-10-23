@@ -1,5 +1,6 @@
 param([switch]$ForceDownload)
 $ErrorActionPreference = 'Stop'
+$script:RuntimeSetupStage = 'starting setup'
 
 function Assert-DemoStopped {
     if (@(Get-Process -Name 'PartTrackingUALR' -ErrorAction SilentlyContinue).Count) {
@@ -24,10 +25,55 @@ function Test-RuntimeFiles([string]$Runtime) {
 }
 
 function Get-RuntimeSha256([string]$Path) {
-    $Stream = [IO.File]::OpenRead($Path)
-    $Hasher = [Security.Cryptography.SHA256]::Create()
-    try { return [BitConverter]::ToString($Hasher.ComputeHash($Stream)).Replace('-', '').ToLowerInvariant() }
-    finally { $Hasher.Dispose(); $Stream.Dispose() }
+    # Resolve relative paths through PowerShell, whose working directory can
+    # differ from the .NET process directory when invoked manually.
+    $Resolved = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
+    $Sharing = [IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete
+    for ($Attempt = 1; $Attempt -le 4; $Attempt++) {
+        $Stream = $null; $Hasher = $null
+        try {
+            $Stream = [IO.File]::Open($Resolved, [IO.FileMode]::Open, [IO.FileAccess]::Read, $Sharing)
+            $Hasher = [Security.Cryptography.SHA256]::Create()
+            return [BitConverter]::ToString($Hasher.ComputeHash($Stream)).Replace('-', '').ToLowerInvariant()
+        } catch {
+            $ReadFailure = $_.Exception
+            if ($Attempt -eq 4) {
+                throw "Cannot read '$Resolved' to verify SHA-256 after $Attempt attempts. $($ReadFailure.Message) Check that the file exists, is fully downloaded, and is accessible; check Windows Security protection history if it was removed or blocked."
+            }
+            # A scanner or synchronization client may briefly hold the file.
+            [Threading.Thread]::Sleep(200)
+        } finally {
+            if ($Hasher) { $Hasher.Dispose() }
+            if ($Stream) { $Stream.Dispose() }
+        }
+    }
+}
+
+function Write-RuntimeSetupFailure([string]$Root, $Failure) {
+    $Details = @(
+        'UALR runtime setup failure',
+        ('Time (UTC): ' + [DateTime]::UtcNow.ToString('o')),
+        ('Stage: ' + $script:RuntimeSetupStage),
+        ('Demo folder: ' + $Root),
+        ('PowerShell: ' + $PSVersionTable.PSVersion),
+        ('64-bit Windows: ' + [Environment]::Is64BitOperatingSystem),
+        ('64-bit PowerShell: ' + [Environment]::Is64BitProcess),
+        ('Executable exists: ' + (Test-Path -LiteralPath (Join-Path $Root 'PartTrackingUALR.exe') -PathType Leaf)),
+        ('python311.dll exists: ' + (Test-Path -LiteralPath (Join-Path $Root '_runtime\python311.dll') -PathType Leaf)),
+        ('Error: ' + $Failure.Exception.Message),
+        ('Location: ' + $Failure.InvocationInfo.PositionMessage),
+        ('Stack: ' + $Failure.ScriptStackTrace)
+    ) -join [Environment]::NewLine
+    $Paths = @((Join-Path $Root 'data\runtime-setup-error.txt'))
+    if ($env:TEMP) { $Paths += (Join-Path $env:TEMP ('UALR-runtime-setup-error-' + [Guid]::NewGuid().ToString('N') + '.txt')) }
+    foreach ($Log in $Paths) {
+        try {
+            [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($Log)) | Out-Null
+            [IO.File]::WriteAllText($Log, $Details)
+            return $Log
+        } catch { continue }
+    }
+    return ''
 }
 
 function Test-DemoCandidate([string]$Root, [string]$Executable, [string]$Runtime, [string]$Validation) {
@@ -111,11 +157,14 @@ function Save-RuntimeArchive([string]$Url, [string]$Destination) {
 }
 
 function Initialize-DemoRuntime([string]$Root, [bool]$Download = $false) {
+    $Root = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Root)
+    $script:RuntimeSetupStage = 'reading runtime-manifest.json'
     $Manifest = Get-Content -LiteralPath (Join-Path $Root 'runtime-manifest.json') -Raw | ConvertFrom-Json
     if ($Manifest.sha256 -notmatch '^[0-9a-f]{64}$' -or $Manifest.url -notmatch '^https://github\.com/YeChamo/part-tracking-demo-ualr/releases/download/[^/]+/[^/]+\.zip$') { throw 'Invalid runtime manifest.' }
     $Executable = Join-Path $Root 'PartTrackingUALR.exe'
     if (-not (Test-Path -LiteralPath $Executable -PathType Leaf)) { throw 'PartTrackingUALR.exe is missing. Pull the complete Git repository again.' }
     $Runtime = Join-Path $Root '_runtime'
+    $script:RuntimeSetupStage = 'reading PartTrackingUALR.exe for SHA-256 verification'
     $ExeHash = Get-RuntimeSha256 $Executable
     $Stamp = Join-Path $Runtime '.ualr-runtime.json'
     if (-not $Download -and (Test-RuntimeFiles $Runtime)) {
@@ -124,6 +173,7 @@ function Initialize-DemoRuntime([string]$Root, [bool]$Download = $false) {
                 $Saved = Get-Content -LiteralPath $Stamp -Raw | ConvertFrom-Json
                 if ($Saved.exe_sha256 -eq $ExeHash -and $Saved.archive_sha256 -eq $Manifest.sha256) { return }
             }
+            $script:RuntimeSetupStage = 'checking the existing runtime'
             Test-DemoCandidate $Root $Executable $Runtime (Join-Path $Root ('.runtime-setup\check-' + [Guid]::NewGuid().ToString('N')))
             @{exe_sha256=$ExeHash; archive_sha256=$Manifest.sha256; validation='existing-runtime-self-test'} | ConvertTo-Json | Set-Content -LiteralPath $Stamp -Encoding UTF8
             Write-Output 'Existing runtime verified.'
@@ -135,15 +185,31 @@ function Initialize-DemoRuntime([string]$Root, [bool]$Download = $false) {
     New-Item -ItemType Directory -Path $Work -Force | Out-Null
     $Archive = Join-Path $Work 'runtime.zip'
     Write-Output 'Downloading the pinned Windows runtime (407 MB, first run only)...'
+    $script:RuntimeSetupStage = 'downloading the pinned runtime from GitHub'
     Save-RuntimeArchive $Manifest.url $Archive
+    $script:RuntimeSetupStage = 'verifying the downloaded runtime size and SHA-256'
     if ((Get-Item -LiteralPath $Archive).Length -ne [long]$Manifest.bytes -or (Get-RuntimeSha256 $Archive) -ne $Manifest.sha256) { throw 'Runtime download failed its size or SHA-256 check. Installed files were preserved.' }
     $Candidate = Join-Path $Work '_runtime'
     New-Item -ItemType Directory -Path $Candidate | Out-Null
+    $script:RuntimeSetupStage = 'extracting the verified runtime'
     Expand-RuntimeArchive $Archive $Candidate
+    $script:RuntimeSetupStage = 'running the downloaded runtime self-test'
     Test-DemoCandidate $Root $Executable $Candidate (Join-Path $Work 'validation')
+    $script:RuntimeSetupStage = 'installing the verified runtime'
     Install-DemoRuntime $Root $Candidate
     @{exe_sha256=$ExeHash; archive_sha256=$Manifest.sha256; validation='verified-release-and-self-test'} | ConvertTo-Json | Set-Content -LiteralPath $Stamp -Encoding UTF8
     Write-Output 'Runtime ready. Your executable, models and settings were preserved.'
 }
 
-if ($MyInvocation.InvocationName -ne '.') { Initialize-DemoRuntime $PSScriptRoot ([bool]$ForceDownload) }
+if ($MyInvocation.InvocationName -ne '.') {
+    try { Initialize-DemoRuntime $PSScriptRoot ([bool]$ForceDownload) }
+    catch {
+        $Failure = $_
+        $LogPath = Write-RuntimeSetupFailure $PSScriptRoot $Failure
+        Write-Host ('Runtime setup failed while ' + $script:RuntimeSetupStage + '.') -ForegroundColor Red
+        Write-Host $Failure.Exception.Message -ForegroundColor Red
+        if ($LogPath) { Write-Host ("Error details saved to: $LogPath") }
+        Write-Host 'You can also use the complete portable ZIP, extracted with all its folders, for offline startup.'
+        exit 1
+    }
+}

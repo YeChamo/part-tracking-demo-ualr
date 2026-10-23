@@ -221,7 +221,12 @@ class AcceleratedONNXBackend(ONNXBackend):
         first = outputs[0]
         if (not isinstance(first, np.ndarray) or first.ndim != 3 or first.shape[0] != 1
                 or first.shape[1] < 1 or first.shape[2] <= 5):
-            raise InferenceError("YOLOX output must have shape [1, N, 5+C].")
+            actual = list(first.shape) if isinstance(first, np.ndarray) else type(first).__name__
+            hint = (" A two-dimensional class-score output is not a YOLOX detection head."
+                    " For the bundled distilV4_student.onnx, choose 'Bundled color neural network'"
+                    " under Color model type; use yolox_nano.onnx as the Bottle model."
+                    if isinstance(first, np.ndarray) and first.ndim == 2 else "")
+            raise InferenceError(f"YOLOX output must have shape [1, N, 5+C]; got {actual}.{hint}")
         for output in outputs:
             if not isinstance(output, np.ndarray) or not np.issubdtype(output.dtype, np.number) or not np.isfinite(output).all():
                 raise InferenceError("YOLOX output contains invalid or non-finite values.")
@@ -350,7 +355,7 @@ class AcceleratedONNXBackend(ONNXBackend):
             except (_Cancelled, _SourceChanged):
                 raise
             except Exception as exc:
-                raise InferenceError(f"Could not load and warm the YOLOX CPU model: {exc}") from exc
+                raise InferenceError(f"Could not load and warm YOLOX CPU model '{source}': {exc}") from exc
             self.actual_mode = "cpu"
         self._check_cancelled()
         self._session = session
