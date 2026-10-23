@@ -41,6 +41,7 @@ class StopConfirmationTests(unittest.TestCase):
         self.folder = tempfile.TemporaryDirectory(prefix="ualr-stop-confirmation-")
         self.root = Path(self.folder.name)
         (self.root / "data").mkdir()
+        (self.root / 'data' / 'settings.json').write_text('{"visual_only":false,"yolox_mode":"two_models","rule":"color"}',encoding='utf-8')
         with patch("app.ui.QTimer.singleShot"):
             self.window = MainWindow(self.root, smoke_test=True)
         self.window.timer.stop()

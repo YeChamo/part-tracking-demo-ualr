@@ -42,6 +42,7 @@ class UiControlsTests(unittest.TestCase):
         self.folder = tempfile.TemporaryDirectory(prefix="ualr-ui-controls-")
         self.root = Path(self.folder.name)
         (self.root / "data").mkdir()
+        (self.root / 'data' / 'settings.json').write_text('{"visual_only":false,"yolox_mode":"two_models","rule":"color"}',encoding='utf-8')
         # No event loop: prevent normal simulation startup and never let a
         # timer create camera/network work while these controls are exercised.
         with patch("app.ui.QTimer.singleShot"):

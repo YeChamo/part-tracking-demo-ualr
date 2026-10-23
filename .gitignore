@@ -10,6 +10,10 @@ __pycache__/
 *.exe
 *.zip
 *.pyd
+*.pth
+*.pt
+*.ckpt
+*.engine
 .venv/
 .env
 .env.*

@@ -13,7 +13,7 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 
-COLORS = ("orange", "yellow", "green", "blue", "red", "purple", "clear")
+COLORS = ("orange", "yellow", "green", "blue", "red", "purple", "white", "clear")
 
 
 def _structured(value: str) -> Any:
@@ -84,11 +84,35 @@ def color_from_class_name(name: str) -> str | None:
     return next(iter(matches)) if len(matches) == 1 else None
 
 
-def parse_color_map(value: Any) -> dict[int, str]:
+_RESERVED_LABELS = {"unknown", "other", "background", "unlabeled", "unlabelled", "none"}
+_GENERIC_LABELS = {"bottle", "bottles", "object", "objects", "item", "items", "class"}
+
+
+def _route_label(value: Any) -> str | None:
+    """Normalize a trained literal category without inventing missing labels."""
+    if not isinstance(value, str):
+        return None
+    label = " ".join(value.strip().casefold().split())
+    if not label:
+        return None
+    words = set(re.findall(r"[a-z]+", label))
+    if words & _RESERVED_LABELS or words and words <= _GENERIC_LABELS:
+        return None
+    if re.fullmatch(r"(?:class|label|category)[ _-]*\d+", label):
+        return None
+    # An ambiguous color class cannot become a confident category merely by
+    # enabling automatic model labels.
+    if len(words.intersection(COLORS)) > 1:
+        return None
+    return label
+
+
+def parse_color_map(value: Any, *, allow_class_labels: bool = False) -> dict[int, str]:
     """Read explicit model class IDs to colors, without assuming output order.
 
     Accept a mapping, a JSON/Python literal mapping, or ``0:orange,1:blue``.
-    Color names must be one of ``COLORS``. Duplicate numeric IDs are rejected.
+    Color names must be one of ``COLORS`` by default. With explicit opt-in,
+    arbitrary non-reserved category names are accepted. IDs never shift.
     """
     if value is None or (isinstance(value, str) and not value.strip()):
         return {}
@@ -118,20 +142,25 @@ def parse_color_map(value: Any) -> dict[int, str]:
         index = _class_id(key)
         if index in result:
             raise ValueError(f"Color mapping repeats class ID {index}.")
-        color = str(name).strip().lower()
-        if color not in COLORS:
+        color = _route_label(name) if allow_class_labels else str(name).strip().lower()
+        if allow_class_labels and color is None:
+            raise ValueError(f"Class {index} needs a non-empty category other than generic / unknown labels.")
+        if not allow_class_labels and color not in COLORS:
             raise ValueError(f"Class {index} needs a supported color: {', '.join(COLORS)}.")
         result[index] = color
     return result
 
 
 def build_color_map(class_names: Any = None, explicit_map: Any = None,
-                    class_count: int | None = None) -> dict[int, str]:
+                    class_count: int | None = None, *,
+                    allow_class_labels: bool = False) -> dict[int, str]:
     """Validate a model's trained bottle-color class configuration.
 
     Explicit mappings override names for that class. At least two distinct
     colors are required for sorting. An actual class count, when supplied,
     verifies that class labels and IDs fit the model instead of guessed IDs.
+    ``allow_class_labels`` permits even one trained literal category, while
+    preserving generic/unknown exclusions and ambiguous-color rejection.
     """
     names = parse_class_names(class_names)
     if class_count is not None:
@@ -140,22 +169,31 @@ def build_color_map(class_names: Any = None, explicit_map: Any = None,
             raise ValueError("YOLOX model has no class channels.")
         if names and len(names) != class_count:
             raise ValueError(f"The model has {class_count} classes, but {len(names)} class names were supplied.")
-    result = {index: color for index, name in enumerate(names)
-              if (color := color_from_class_name(name)) is not None}
-    result.update(parse_color_map(explicit_map))
+    result = {}
+    for index, name in enumerate(names):
+        literal = _route_label(name) if allow_class_labels else None
+        if allow_class_labels and literal is None:
+            continue
+        color = color_from_class_name(name) or literal
+        if color is not None:
+            result[index] = color
+    result.update(parse_color_map(explicit_map, allow_class_labels=allow_class_labels))
     if class_count is not None and any(index >= class_count for index in result):
         raise ValueError(f"Color class IDs must be below the model's {class_count} classes.")
-    if len(set(result.values())) < 2:
+    if allow_class_labels and not result:
+        raise ValueError("The YOLOX model needs at least one named trained category; generic / unknown bottle labels cannot supply a sorting category.")
+    if not allow_class_labels and len(set(result.values())) < 2:
         raise ValueError("Select a YOLOX model trained for at least two bottle colors and configure its color class IDs. The bundled COCO model only detects generic bottles.")
     return result
 
 
 def color_map_error(class_names: Any = None, explicit_map: Any = None,
-                    class_count: int | None = None, pass_color: str | None = None) -> str:
+                    class_count: int | None = None, pass_color: str | None = None, *,
+                    allow_class_labels: bool = False) -> str:
     """Return a user-visible setup error, or an empty string when valid."""
     try:
-        colors = build_color_map(class_names, explicit_map, class_count)
-        if pass_color is not None and str(pass_color).lower() not in colors.values():
+        colors = build_color_map(class_names, explicit_map, class_count, allow_class_labels=allow_class_labels)
+        if pass_color is not None and str(pass_color).strip().casefold() not in colors.values():
             return "The pass color must be one of the YOLOX model's configured bottle colors."
     except (ValueError, TypeError) as exc:
         return str(exc)

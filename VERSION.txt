@@ -1,8 +1,19 @@
-Part Tracking Demo UALR 1.2.0
+Part Tracking Demo UALR 1.4.0 preview
 Windows x64 portable demo
+Package: PartTrackingDemoUALR-v1.4.0-Windows-x64.zip
+Default: visual-only YOLOX bottle tracking; no diverter connection or motion
+Tracking: stable bottle IDs anywhere in the image; no entry/decision crossing required
 Routing: 0 = PASS (optional program), 1 = REJECT / DIVERT
-Models: separate bottle/color YOLOX ONNX pickers or one colored-bottle model
+Models: .pth/.pt/.onnx bottle/color pickers or one colored-bottle model
+Preparation: CPU checkpoint -> cached verified ONNX; saved model settings read automatically
+Custom YOLOX: standard variants, recorded graphs, explicit build_model()/Exp().get_model()
+Graph limits: missing custom layers/configuration must be supplied; no guessed architecture
+Acceleration: optional ORT TensorRT engine cache on compatible NVIDIA stations; CPU fallback reported
+Engine identity: model/input/precision/GPU/driver/runtime-specific cache, warmed before camera startup
+Generic bottle locators: blank = YOLOX-Nano; optional selectable YOLOX-S (COCO ID 39)
 Color decisions: trained YOLOX class outputs only; no pixel-color fallback
+White color: supported only through a trained YOLOX class and explicit/metadata labels
+Gatorade photo references: optional offline assets only; no live brand/photo gate
 Live confidence: separate bottle/color thresholds while disarmed; fresh tracks required
 Camera inputs: named USB, Basler/GigE, video dry run; no automatic fallback
 Display: F11 or double-click full screen; Esc exits
@@ -17,4 +28,6 @@ Busy/overlapping bottles disarm output; the app cannot stop the conveyor
 
 Keep _runtime, models, data, and supplied folders beside PartTrackingUALR.exe.
 Runtime checks: Verify Demo.cmd (does not open cameras or send motion).
-Editable source: app/ and run.py. Rebuild: Build.ps1.
+Editable source: app/ and run.py. Rebuild CPU: Build.ps1. Optional GPU: Build.ps1 -TensorRT.
+Checkpoint export runtime: CPU PyTorch 2.12.0, ONNX 1.21.0, ONNX Script 0.7.0.
+GPU execution was not verified on this Intel graphics laptop.

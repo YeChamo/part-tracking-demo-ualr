@@ -100,6 +100,7 @@ class UiMotionTests(unittest.TestCase):
         self.folder = tempfile.TemporaryDirectory(prefix="ualr-ui-motion-")
         self.root = Path(self.folder.name)
         (self.root / "data").mkdir()
+        (self.root / 'data' / 'settings.json').write_text('{"visual_only":false,"yolox_mode":"two_models","rule":"color"}',encoding='utf-8')
         # Disable the normal 200 ms simulation autostart.  Tests never process
         # GUI events or create a camera/network thread.
         with patch("app.ui.QTimer.singleShot"):

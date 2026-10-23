@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import zipfile
 
+VERSION = '1.4.0'
 
 def main():
     root = Path(__file__).resolve().parents[1]
@@ -16,7 +17,9 @@ def main():
         raise SystemExit('Build the application before packaging a release.')
     output = root / '.releases'
     output.mkdir(exist_ok=True)
-    archive = output / 'PartTrackingDemoUALR-v1.2.0-Windows-x64.zip'
+    archive = output / f'PartTrackingDemoUALR-v{VERSION}-Windows-x64.zip'
+    if archive.exists():
+        raise SystemExit(f'Release archive already exists; retain it and choose a new version before packaging: {archive}')
     files = subprocess.check_output(['git','ls-files','-z'],cwd=root).decode('utf-8').split('\0')
     prefix = 'PartTrackingDemoUALR/'
     entries = []
@@ -28,6 +31,8 @@ def main():
             raise RuntimeError('Source path must remain inside the project.')
         if name.startswith('data/') and name != 'data/.gitkeep':
             raise RuntimeError('Saved workstation data must not be tracked or packaged.')
+        if relative.suffix.lower() in ('.pth', '.pt', '.ckpt', '.engine'):
+            raise RuntimeError('User checkpoints and hardware-specific engine caches must not be tracked or packaged.')
         if name.endswith(('.exe','.pyd','.zip')) or name.startswith(('_runtime/','.build','.package/','.releases/')):
             raise RuntimeError('Generated binaries must not be tracked as source.')
         entries.append((root / relative,prefix+relative.as_posix()))
@@ -43,11 +48,19 @@ def main():
         names=zf.namelist()
         assert prefix+'PartTrackingUALR.exe' in names
         assert prefix+'models/yolox_nano.onnx.data' in names
+        assert prefix+'models/yolox_s.onnx' in names
+        for label in ('logo', 'blue', 'yellow', 'white'):
+            assert prefix+f'models/gatorade_{label}_reference.png' in names
         assert prefix+'Start Demo.cmd' in names
+        assert prefix+'app/vendor/yolox_models/LICENSE' in names
+        assert prefix+'app/vendor/yolox_models/NOTICE' in names
+        assert any(name.startswith(prefix+'_runtime/torch/') for name in names)
         assert all(not name.startswith(prefix+'data/') or name in (prefix+'data/',prefix+'data/.gitkeep') for name in names)
         assert prefix+'EtherMotion/EtherMotion.exe' not in names
-    digest=hashlib.file_digest(archive.open('rb'),'sha256').hexdigest()
+    with archive.open('rb') as content:
+        digest=hashlib.file_digest(content,'sha256').hexdigest()
     (output/'SHA256SUMS.txt').write_text(f'{digest}  {archive.name}\n',encoding='utf-8')
+    archive.with_suffix('.sha256').write_text(f'{digest}  {archive.name}\n',encoding='utf-8')
     print(f'Packaged {len(entries)} files, {archive.stat().st_size/1024**2:.1f} MiB: {archive}')
 
 

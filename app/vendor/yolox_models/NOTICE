@@ -1,0 +1,20 @@
+Megvii YOLOX inference model definitions
+Copyright (c) Megvii Inc. All rights reserved.
+Upstream: https://github.com/Megvii-BaseDetection/YOLOX
+License: Apache License, Version 2.0 (see LICENSE)
+
+network_blocks.py, darknet.py, and yolo_pafpn.py were copied from the existing
+Megvii-derived model sources in the local RemingtonVision project. Their
+copyright notices are retained.
+
+Modified for Part Tracking Demo UALR in 2026:
+- yolo_head.py retains the stock inference layers and parameter names, and
+  removes training losses, assignment, visualization, and optional imports.
+- yolox.py retains the backbone/head inference composition and removes
+  training and visualization entry points.
+- __init__.py provides a validated CPU/FP32 model factory and applies the
+  recorded activation and BatchNorm settings supplied by the caller.
+
+The resulting graph emits raw YOLOX box channels and sigmoid objectness/class
+probabilities. It does not include preprocessing, training, non-maximum
+suppression, checkpoint deserialization, or device-control code.

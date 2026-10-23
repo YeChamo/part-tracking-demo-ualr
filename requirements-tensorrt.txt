@@ -1,0 +1,5 @@
+# Optional overlay after requirements.txt. Uninstall onnxruntime first;
+# CPU and GPU ONNX Runtime distributions cannot share an environment.
+onnxruntime-gpu==1.23.2
+# Match the TensorRT 10.9 generation used by ONNX Runtime 1.23.2.
+tensorrt-cu12==10.9.0.34

@@ -9,6 +9,7 @@ import numpy as np
 
 from app.vendor.inference import Detection, InferenceResult
 from app.yolox_pipeline import YoloXPipeline, _ModelBackend, _class_count
+from app.vendor.inference import DetectorConfig
 
 
 def detection(box=(10, 10, 100, 200), color_id=0, score=0.9, label="orange_bottle"):
@@ -26,7 +27,7 @@ class PipelineTests(unittest.TestCase):
         owner = self
 
         class Backend:
-            def __init__(self):
+            def __init__(self, **kwargs):
                 self.cfg = None
                 self.spec = None
 
@@ -94,6 +95,19 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(result, pipe.infer(white))
         self.assertIs(self.seen[0][1], black)
 
+    def test_combined_white_prediction_is_distinct_from_clear_and_comes_from_model(self):
+        self.model("colors.onnx", names=["white_bottle", "clear_bottle"], detections=[
+            detection(color_id=0, label="white_bottle"),
+            detection((120, 10, 210, 200), 1, .85, "clear_bottle"),
+        ])
+        pipe = self.pipeline(pass_color="white")
+        black = np.zeros((240, 320, 3), dtype=np.uint8)
+        result = pipe.infer(black)
+        self.assertEqual(result["colors"], ["white", "clear"])
+        self.assertEqual(result["reasons"], [[], ["YOLOX color clear (divert)"]])
+        self.assertEqual(result["model_labels"], ["white_bottle", "clear_bottle"])
+        self.assertEqual(result, pipe.infer(np.full_like(black, 255)))
+
     def test_combined_class_agnostic_duplicates_are_one_bottle(self):
         self.models["colors.onnx"]["detections"] = [detection(), detection((12, 12, 101, 202), 0, .8)]
         result = self.pipeline().infer(np.zeros((1, 1, 3)))
@@ -148,17 +162,68 @@ class PipelineTests(unittest.TestCase):
 
     def test_missing_class_configuration_rejected(self):
         self.model("colors.onnx", count=3)
-        with self.assertRaisesRegex(ValueError, "at least two bottle colors"):
+        with self.assertRaisesRegex(ValueError, "named trained category"):
             self.pipeline()
+
+    def test_custom_categories_remain_supported_when_image_size_is_manual(self):
+        self.model("colors.onnx", names=["plum", "lemon"],
+                   input_shape=[1, 3, 160, 160],
+                   detections=[detection(color_id=1, label="lemon")])
+        pipe = self.pipeline(image_size=160, auto_model_config=False, pass_color="lemon")
+        result = pipe.infer(np.full((160, 160, 3), (0, 128, 255), np.uint8))
+        self.assertEqual(result["colors"], ["lemon"])
+        self.assertEqual(result["reasons"], [[]])
+        self.assertEqual(pipe.information()["colors"], ["plum", "lemon"])
+
+    def test_tracking_mode_uses_only_bottle_model_and_preserves_detector_confidence(self):
+        self.model("bottles.onnx", count=80, detections=[
+            detection(color_id=39, score=.83, label="bottle"),
+            detection((130, 10, 200, 190), 0, .95, "person"),
+        ])
+        pipe = self.pipeline(visual_only=True, yolox_mode="tracking", rule="tracking",
+                             model_path="bottles.onnx", color_model_path="", pass_color="unused")
+        result = pipe.infer(np.zeros((240, 320, 3), np.uint8))
+        self.assertEqual(result["boxes"], [(10., 10., 100., 200.)])
+        self.assertEqual(result["confidences"], [.83])
+        self.assertEqual(result["model_labels"], ["bottle"])
+        self.assertEqual(result["colors"], ["unknown"])
+        self.assertEqual(result["reasons"], [[]])
+        self.assertTrue(result["visual_only"])
+        self.assertIsNone(pipe._color)
+        self.assertEqual(len(self.seen), 1)
+
+    def test_visual_only_flag_bypasses_a_saved_two_model_color_requirement(self):
+        self.model("bottles.onnx", names=["bottle"], detections=[detection(label="bottle")])
+        pipe = self.pipeline(visual_only=True, yolox_mode="two_models", auto_model_config=True,
+                             model_path="bottles.onnx", color_model_path="missing.onnx", color_confidence=None)
+        self.assertEqual(pipe.settings["model_class_id"], 0)
+        self.assertEqual(len(self.opened), 1)
+        self.assertEqual(pipe.information()["colors"], [])
+        self.assertEqual(pipe.infer(np.zeros((240, 320, 3), np.uint8))["model_labels"], ["bottle"])
 
     def test_pass_color_must_be_in_trained_classes(self):
         with self.assertRaisesRegex(ValueError, "pass color"):
             self.pipeline(pass_color="green")
 
-    def test_bundled_stock_model_cannot_be_relabelled_as_color(self):
-        self.model("models/yolox_nano.onnx", count=80)
+    def test_bundled_stock_models_cannot_be_relabelled_as_color_without_metadata(self):
+        for name in ("yolox_nano.onnx", "yolox_s.onnx"):
+            self.model("models/" + name, count=80)
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, "generic bottles"):
+                self.pipeline(model_path="models/" + name, color_class_map="0:orange,1:blue")
+        self.assertEqual(self.opened, [])
+
+    def test_bundled_s_cannot_be_made_a_color_model_with_explicit_class_names(self):
+        self.model("models/yolox_s.onnx", count=80)
+        names = ["white_bottle", "clear_bottle"] + [f"class_{index}" for index in range(2, 80)]
         with self.assertRaisesRegex(ValueError, "generic bottles"):
-            self.pipeline(model_path="models/yolox_nano.onnx", color_class_map="0:orange,1:blue")
+            self.pipeline(model_path="models/yolox_s.onnx", model_class_names=names, pass_color="white")
+        self.assertEqual(self.opened, [])
+
+    def test_bundled_s_cannot_be_the_separate_color_model(self):
+        self.model("models/yolox_s.onnx", count=80)
+        with self.assertRaisesRegex(ValueError, "generic bottles"):
+            self.pipeline(yolox_mode="two_models", color_model_path="models/yolox_s.onnx",
+                          color_class_map="0:white,1:clear", pass_color="white")
         self.assertEqual(self.opened, [])
 
     def test_stock_coco_metadata_rejected_when_file_renamed(self):
@@ -194,6 +259,37 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(result["colors"], ["orange", "blue"])
         self.assertEqual(result["inference_ms"], 7)
         self.assertTrue(all(item[1] is frame for item in self.seen))
+
+    def test_bundled_s_is_allowed_as_bottle_locator_with_trained_white_color_model(self):
+        self.model("models/yolox_s.onnx", count=80, detections=[
+            detection(color_id=39, label="bottle"),
+            detection((120, 10, 210, 200), 0, .95, "person"),
+        ])
+        self.model("colors.onnx", names=["white", "clear"], detections=[
+            detection((20, 60, 80, 100), 0, .9, "white"),
+        ])
+        pipe = self.pipeline(yolox_mode="two_models", model_path="models/yolox_s.onnx",
+                             color_model_path="colors.onnx", pass_color="white")
+        result = pipe.infer(np.zeros((240, 320, 3), dtype=np.uint8))
+        self.assertEqual(len(result["boxes"]), 1)
+        self.assertEqual(result["colors"], ["white"])
+        self.assertEqual(result["reasons"], [[]])
+        self.assertEqual(result["model_labels"], ["white"])
+
+    def test_two_models_preserve_white_and_clear_color_predictions(self):
+        self.model("bottles.onnx", count=80, detections=[
+            detection(color_id=39, label="bottle"),
+            detection((120, 10, 210, 200), 39, .9, "bottle"),
+        ])
+        self.model("colors.onnx", names=["white", "clear"], detections=[
+            detection((20, 60, 80, 100), 0, .9, "white"),
+            detection((130, 60, 190, 100), 1, .85, "clear"),
+        ])
+        pipe = self.pipeline(yolox_mode="two_models", model_path="bottles.onnx",
+                             color_model_path="colors.onnx", pass_color="white")
+        result = pipe.infer(np.zeros((240, 320, 3), dtype=np.uint8))
+        self.assertEqual(result["colors"], ["white", "clear"])
+        self.assertEqual(result["reasons"], [[], ["YOLOX color clear (divert)"]])
 
     def test_color_with_no_owner_does_not_assign_to_nearest_bottle(self):
         pipe = self.two_models(colors=[detection((150, 70, 180, 100))])
@@ -313,6 +409,50 @@ class PipelineTests(unittest.TestCase):
 
 @unittest.skipUnless(importlib.util.find_spec("onnxruntime"), "ONNX Runtime is optional for unit tests")
 class BundledModelTests(unittest.TestCase):
+    def test_symbolic_output_probe_reuses_dynamic_rectangular_warmup_geometry(self):
+        if not importlib.util.find_spec("onnx"):
+            self.skipTest("Generating this test graph requires optional ONNX")
+        import onnx
+        from onnx import TensorProto, helper, numpy_helper
+
+        # This small real graph emits a stride-8 YOLOX tensor whose anchor count
+        # depends on H/W. Both spatial input axes and the output class axis are
+        # symbolic, as in several native export paths.
+        inputs = [helper.make_tensor_value_info("images", TensorProto.FLOAT, [1, 3, "height", "width"])]
+        outputs = [helper.make_tensor_value_info("output", TensorProto.FLOAT, [1, "anchors", "classes"])]
+        initializers = [numpy_helper.from_array(np.asarray(value, dtype=np.int64), name)
+                        for name, value in (("h_index", [2]), ("w_index", [3]),
+                                            ("stride", [8]), ("one", [1]), ("classes", [7]))]
+        nodes = [helper.make_node("Shape", ["images"], ["input_shape"]),
+                 helper.make_node("Gather", ["input_shape", "h_index"], ["height"], axis=0),
+                 helper.make_node("Gather", ["input_shape", "w_index"], ["width"], axis=0),
+                 helper.make_node("Div", ["height", "stride"], ["grid_h"]),
+                 helper.make_node("Div", ["width", "stride"], ["grid_w"]),
+                 helper.make_node("Mul", ["grid_h", "grid_w"], ["anchors"]),
+                 helper.make_node("Concat", ["one", "anchors", "classes"], ["output_shape"], axis=0),
+                 helper.make_node("ConstantOfShape", ["output_shape"], ["output"],
+                                  value=numpy_helper.from_array(np.asarray([0], dtype=np.float32)))]
+        graph = helper.make_graph(nodes, "dynamic_rectangular_yolox", inputs, outputs, initializer=initializers)
+        model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 17)])
+        model.ir_version = 10
+        helper.set_model_props(model, {"input_size": "[160,192]", "names": '["orange","blue"]',
+                                       "letterbox": "top_left", "yolox_decode": "raw", "yolox_strides": "[8]"})
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "dynamic.onnx"
+            onnx.save(model, str(path))
+            backend = _ModelBackend(mode="cpu")
+            backend.auto_model_config = True
+            try:
+                backend.open(DetectorConfig(model_path=str(path), img_size=640,
+                                            intra_op_threads=1, inter_op_threads=1))
+                with patch.object(backend, "infer_raw", wraps=backend.infer_raw) as probe:
+                    details = backend.model_details()
+                self.assertEqual(probe.call_args.args[0].shape, (1, 3, 160, 192))
+                self.assertEqual(details["output_shape"], [1, 480, 7])
+                self.assertEqual(_class_count(details, 640, automatic=True), 2)
+            finally:
+                backend.close()
+
     def test_real_cpu_model_symbolic_output_is_measured_and_generic_color_is_rejected(self):
         from app.vendor.inference import DetectorConfig
 
@@ -329,6 +469,26 @@ class BundledModelTests(unittest.TestCase):
         finally:
             backend.close()
         pipeline = YoloXPipeline({"yolox_mode": "combined", "color_class_map": "0:orange,1:blue"}, root)
+        with self.assertRaisesRegex(ValueError, "generic bottles"):
+            pipeline.open()
+
+    def test_real_s_cpu_model_opens_as_eighty_class_bottle_locator(self):
+        from app.vendor.inference import DetectorConfig
+
+        root = Path(__file__).resolve().parents[1]
+        model = root / "models" / "yolox_s.onnx"
+        if not model.is_file():
+            self.skipTest("Bundled YOLOX-S model is not in this checkout")
+        backend = _ModelBackend()
+        try:
+            backend.open(DetectorConfig(model_path=str(model), device="cpu", intra_op_threads=2, inter_op_threads=1))
+            details = backend.model_details()
+            self.assertEqual(_class_count(details, 640), 80)
+            self.assertEqual(details["output_shape"], [1, 8400, 85])
+        finally:
+            backend.close()
+        pipeline = YoloXPipeline({"yolox_mode": "combined", "model_path": str(model),
+                                 "color_class_map": "0:white,1:clear", "pass_color": "white"}, root)
         with self.assertRaisesRegex(ValueError, "generic bottles"):
             pipeline.open()
 

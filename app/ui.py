@@ -29,39 +29,41 @@ from .confidence_control import ConfidenceControl
 from . import diverter
 from .ethermotion import EtherMotionClient
 from .fullscreen_view import FullscreenCameraWindow
+from .model_preparation import ModelPreparationWorker
 from .simulation import HEIGHT, WIDTH, Simulation
 from .tracking import BottleTracker, TrackingConfig
 from .vision import VideoWorker
 
 STYLE = '''
-QMainWindow, QWidget { background: #0c1422; color: #e5edf8; font-family: "Segoe UI"; font-size: 12px; }
-QFrame#card { background: #142034; border: 1px solid #24344a; border-radius: 10px; }
+QMainWindow, QWidget { background: #1e1e1e; color: #f2f4f7; font-family: "Segoe UI"; font-size: 12px; }
+QFrame#card { background: #2c2f36; border: 1px solid #3a3e46; border-radius: 10px; }
+QFrame#liveInspection { background: #202a38; border: 1px solid #385778; border-radius: 10px; }
 QLabel { background: transparent; }
-QLabel#muted { color: #94a6bd; }
+QLabel#muted { color: #a8adb7; }
 QLabel#title { font-size: 23px; font-weight: 700; }
 QLabel#stat { font-size: 24px; font-weight: 700; }
-QLabel#badge { background: #20364e; color: #8cd4ff; padding: 7px 12px; border-radius: 12px; }
-QPushButton { background: #213249; border: 1px solid #334962; border-radius: 6px; padding: 9px 13px; font-weight: 600; }
-QPushButton:hover { background: #2b425e; border-color: #5c7b9f; }
-QPushButton:disabled { color: #60738b; background: #162235; border-color: #223247; }
-QPushButton#primary { background: #2e75eb; border-color: #4a8cfa; color: white; }
-QPushButton#stop { background: #50303c; border-color: #804453; color: #ffc5ca; }
-QComboBox, QLineEdit, QSpinBox, QDoubleSpinBox { background: #101b2b; border: 1px solid #34475e; padding: 7px; border-radius: 5px; min-height: 18px; }
-QComboBox QAbstractItemView { background: #17273a; selection-background-color: #2e75eb; }
-QTabWidget::pane { border: 1px solid #24344a; border-radius: 8px; }
-QTabBar::tab { background: #132034; padding: 10px 11px; color: #92a6bf; }
-QTabBar::tab:selected { color: #8dcaff; background: #20344e; border-bottom: 2px solid #579aff; }
-QTableWidget { background: #101a2a; alternate-background-color: #142237; gridline-color: #203047; border: none; }
-QHeaderView::section { background: #17263a; color: #93a8c1; border: none; padding: 7px; text-align: left; }
+QLabel#badge { background: #243b61; color: #c8dcff; padding: 7px 12px; border-radius: 12px; }
+QPushButton { background: #353941; border: 1px solid #4a4f59; border-radius: 6px; padding: 9px 13px; font-weight: 600; }
+QPushButton:hover { background: #424752; border-color: #6e7889; }
+QPushButton:disabled { color: #777d88; background: #282b30; border-color: #343840; }
+QPushButton#primary { background: #2e76f3; border-color: #5a93f7; color: white; }
+QPushButton#stop { background: #4b3038; border-color: #80505b; color: #ffced2; }
+QComboBox, QLineEdit, QSpinBox, QDoubleSpinBox { background: #22252a; border: 1px solid #505660; padding: 7px; border-radius: 5px; min-height: 18px; }
+QComboBox QAbstractItemView { background: #2c2f36; selection-background-color: #2e76f3; }
+QTabWidget::pane { border: 1px solid #3a3e46; border-radius: 8px; }
+QTabBar::tab { background: #282b31; padding: 10px 11px; color: #a8adb7; }
+QTabBar::tab:selected { color: #dce9ff; background: #2d3c55; border-bottom: 2px solid #2e76f3; }
+QTableWidget { background: #25282e; alternate-background-color: #2c2f36; gridline-color: #3a3e46; border: none; }
+QHeaderView::section { background: #333741; color: #c0c6d0; border: none; padding: 7px; text-align: left; }
 QScrollArea { border: none; }
 QCheckBox { spacing: 8px; padding: 5px 0; }
 QCheckBox::indicator { width: 17px; height: 17px; }
-QSlider::groove:horizontal { height: 5px; background: #2a405b; border-radius: 2px; }
-QSlider::sub-page:horizontal { background: #4389ed; border-radius: 2px; }
-QSlider::handle:horizontal { background: #9fcaff; width: 15px; margin: -5px 0; border-radius: 7px; }
-QSlider::handle:horizontal:disabled { background: #4b5c73; }
-QToolTip { color: #eaf2fc; background: #263951; border: 1px solid #65809e; }
-QSplitter::handle { background: #0c1422; }
+QSlider::groove:horizontal { height: 5px; background: #4a5361; border-radius: 2px; }
+QSlider::sub-page:horizontal { background: #2e76f3; border-radius: 2px; }
+QSlider::handle:horizontal { background: #a9c8ff; width: 15px; margin: -5px 0; border-radius: 7px; }
+QSlider::handle:horizontal:disabled { background: #656d79; }
+QToolTip { color: #f2f4f7; background: #363a42; border: 1px solid #6b737f; }
+QSplitter::handle { background: #1e1e1e; }
 '''
 
 
@@ -109,7 +111,7 @@ class VisionView(QWidget):
     def paintEvent(self, event):
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        p.fillRect(self.rect(), QColor('#0d1727'))
+        p.fillRect(self.rect(), QColor('#20242b'))
         m = self.main
         frame = m.last_packet.get('frame') if m.last_packet else None
         if m.settings['source'] == 'simulation':
@@ -131,27 +133,44 @@ class VisionView(QWidget):
             p.setPen(QColor('#8ba1bc'))
             p.setFont(QFont('Segoe UI', 23))
             p.drawText(QRectF(0, 0, w, h), Qt.AlignmentFlag.AlignCenter, 'Choose a source, then start inspection')
-        # Geometry and tracking boxes use source-image coordinates.
-        rtl = m.settings['direction'] == 'rtl'
-        entry = w*(1-m.settings['entry'] if rtl else m.settings['entry'])
-        line = w*(1-m.settings['line'] if rtl else m.settings['line'])
-        p.setPen(QPen(QColor('#418fc7'), 2/scale, Qt.PenStyle.DashLine))
-        p.drawLine(int(entry), 100 if h == HEIGHT else 0, int(entry), h)
-        p.setPen(QPen(QColor('#f3b252'), 2.5/scale, Qt.PenStyle.DashLine))
-        p.drawLine(int(line), 94 if h == HEIGHT else 0, int(line), h)
-        p.setFont(QFont('Segoe UI', max(10, round(11/scale)), QFont.Weight.DemiBold))
-        p.setPen(QColor('#f6c671'))
-        p.drawText(QRectF(max(0, line-160), h-37/scale, 315, 28/scale), Qt.AlignmentFlag.AlignCenter, 'DECISION / REJECT LINE')
+        # Visual tracking uses the whole image and has no routing geometry.
+        if not m.visual_only:
+            rtl = m.settings['direction'] == 'rtl'
+            entry = w*(1-m.settings['entry'] if rtl else m.settings['entry'])
+            line = w*(1-m.settings['line'] if rtl else m.settings['line'])
+            p.setPen(QPen(QColor('#418fc7'), 2/scale, Qt.PenStyle.DashLine))
+            p.drawLine(int(entry), 100 if h == HEIGHT else 0, int(entry), h)
+            p.setPen(QPen(QColor('#f3b252'), 2.5/scale, Qt.PenStyle.DashLine))
+            p.drawLine(int(line), 94 if h == HEIGHT else 0, int(line), h)
+            p.setFont(QFont('Segoe UI', max(10, round(11/scale)), QFont.Weight.DemiBold))
+            p.setPen(QColor('#f6c671'))
+            p.drawText(QRectF(max(0, line-160), h-37/scale, 315, 28/scale), Qt.AlignmentFlag.AlignCenter, 'DECISION / REJECT LINE')
+        if m.running and m.last_packet and m.settings['source'] != 'simulation':
+            for index, box in enumerate(m.last_packet.get('boxes', [])):
+                x1,y1,x2,y2 = box
+                center_x, center_y = (x1+x2)/2, (y1+y2)/2
+                if any(not track.missed and track.bbox[0]<=center_x<=track.bbox[2]
+                       and track.bbox[1]<=center_y<=track.bbox[3] for track in m.tracker.tracks):
+                    continue
+                p.setPen(QPen(QColor('#a9c8ff'), 2/scale, Qt.PenStyle.DashLine))
+                p.setBrush(Qt.BrushStyle.NoBrush)
+                p.drawRoundedRect(QRectF(x1,y1,x2-x1,y2-y1), 5/scale, 5/scale)
+                labels = m.last_packet.get('model_labels' if m.visual_only else 'colors', [])
+                label = str(labels[index] if index<len(labels) else 'bottle').upper()
+                p.setFont(QFont('Segoe UI', max(10, round(10/scale)), QFont.Weight.DemiBold))
+                p.drawText(QRectF(max(0,x1),max(18,y1-7/scale),max(130,x2-x1),25/scale),
+                           Qt.AlignmentFlag.AlignLeft, label if m.visual_only else f'BOTTLE · {label} / MOVE TO ENTRY')
         for track in m.tracker.tracks:
             if track.missed:
                 continue
             x1,y1,x2,y2 = track.bbox
-            color = QColor('#fb8b94' if track.bad else '#54dfbb')
+            color = QColor('#8dcaff' if m.visual_only else '#fb8b94' if track.bad else '#54dfbb')
             p.setPen(QPen(color, 2/scale))
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawRoundedRect(QRectF(x1-5,y1-5,x2-x1+10,y2-y1+10), 5/scale, 5/scale)
             meta = m.track_meta.get(track.id, {})
-            title = f"#{track.id:03d}  {meta.get('color', '').upper()}  {'1 DIVERT' if track.bad else '0 PASS'}"
+            title = (m.visual_track_title(track) if m.visual_only else
+                     f"#{track.id:03d}  {meta.get('color', '').upper()}  {'1 DIVERT' if track.bad else '0 PASS'}")
             p.setFont(QFont('Segoe UI', max(10, round(10/scale)), QFont.Weight.Bold))
             text_w = p.fontMetrics().horizontalAdvance(title) + 14/scale
             tag_y = max(0, y1-30/scale)
@@ -165,9 +184,14 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.root, self.smoke_test = root, smoke_test
         self.settings = store.load(root)
-        # Every launch begins in the hardware-free demo. Saved live recipes remain in the fields.
-        self.settings['source'] = 'simulation'
-        self.settings['rule'] = 'color'
+        self.visual_only = bool(self.settings.get('visual_only', True))
+        if self.visual_only:
+            self.settings.update(visual_only=True, yolox_mode='tracking', rule='tracking')
+        # Normal launches are live camera inspections. The synthetic source is
+        # only exposed by the explicit --smoke-test diagnostic.
+        self.settings['source'] = ('simulation' if smoke_test else
+                                   self.settings['source'] if self.settings['source'] in ('usb', 'basler') else 'usb')
+        if not self.visual_only: self.settings['rule'] = 'color'
         self.sim = Simulation()
         self.tracker = self.make_tracker()
         self.worker = None
@@ -175,6 +199,8 @@ class MainWindow(QMainWindow):
         self.track_meta = {}
         self.session = uuid.uuid4().hex[:12]
         self.events, self.pending = [], []
+        self.seen_track_ids = set()
+        self.visual_events = {}
         self.running = self.armed = self.arming = self.owns_motion = self.output_busy = False
         self.active_run, self.active_event = None, None
         self.active_program = None
@@ -193,7 +219,9 @@ class MainWindow(QMainWindow):
         self.client = None
         self.camera_devices = []
         self.camera_scanning = False
+        self.auto_start_saved_camera = not smoke_test
         self.fullscreen = None
+        self.model_preparer = None
         self.expected_confidence_revision = 0
         self.confidence_timer = QTimer(self)
         self.confidence_timer.setSingleShot(True)
@@ -202,24 +230,29 @@ class MainWindow(QMainWindow):
         self.last_poll = 0.0
         self.pass_count = self.divert_count = self.complete_count = 0
         self.jobs = Jobs(self)
-        self.setWindowTitle('Part Tracking Demo UALR • Color Sort + Barcode')
+        self.setWindowTitle('RemingtonVision • Visual Part Tracking' if self.visual_only else 'RemingtonVision • Gatorade Sorting Demo')
         self.setWindowIcon(QIcon(str(root/'assets'/'demo.ico')))
         self.resize(1450, 960)
-        self.setMinimumSize(1180, 800)
+        self.setMinimumSize(1100, 720)
         self.setStyleSheet(STYLE)
         self.build_ui()
+        self.update_enabled()
         self.last_tick = time.monotonic()
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.tick)
         self.timer.start(30)
-        self.set_status('Ready • Simulation', '#8dcaff')
-        self.log('Demo ready. Pass color = '+self.settings['pass_color']+'. Barcodes in simulation are synthetic.')
-        QTimer.singleShot(200, self.start)
+        if smoke_test:
+            self.set_status('Ready • Simulation diagnostic', '#a9c8ff')
+            QTimer.singleShot(200, self.start)
+        else:
+            self.set_status('Finding live cameras…', '#a9c8ff')
+            QTimer.singleShot(0, self.refresh_cameras)
+        self.log('Demo ready. Pass color = '+self.settings['pass_color']+'. Source = '+self.settings['source'])
 
     def make_tracker(self):
         return BottleTracker(TrackingConfig(direction=self.settings['direction'], line=self.settings['line'],
                                            entry=self.settings['entry'], confirm_frames=self.settings['confirm_frames'],
-                                           max_miss=self.settings['max_miss']))
+                                           max_miss=self.settings['max_miss'],visual_only=self.visual_only))
 
     def build_ui(self):
         central = QWidget()
@@ -228,15 +261,15 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(22,18,22,16)
         layout.setSpacing(14)
         header = QHBoxLayout()
-        brand = QLabel('UALR')
-        brand.setStyleSheet('background:#2e75eb;color:white;font-weight:800;font-size:17px;border-radius:9px;padding:15px;')
+        brand = QLabel('RV')
+        brand.setStyleSheet('background:#2e76f3;color:white;font-weight:800;font-size:18px;border-radius:9px;padding:15px;')
         header.addWidget(brand)
         title = QVBoxLayout()
-        title.addWidget(self.label('Part tracking demo', 'title'))
-        title.addWidget(self.label('Bottle color sorting  /  Barcode reading  /  EtherMotion reject', 'muted'))
+        title.addWidget(self.label('Visual part tracking' if self.visual_only else 'Gatorade color sorting', 'title'))
+        title.addWidget(self.label('RemingtonVision  /  UALR live demo', 'muted'))
         header.addLayout(title)
         header.addStretch()
-        self.badge = self.label('SIMULATION • NO HARDWARE', 'badge')
+        self.badge = self.label('VISUAL ONLY' if self.visual_only else 'SIMULATION • NO HARDWARE' if self.smoke_test else 'LIVE CAMERA • OUTPUT DISARMED', 'badge')
         header.addWidget(self.badge)
         self.export_button = QPushButton('Export CSV')
         self.export_button.clicked.connect(self.export)
@@ -244,19 +277,27 @@ class MainWindow(QMainWindow):
         layout.addLayout(header)
         stats = QHBoxLayout()
         self.stats = {}
-        for key, title, color in [('total','BOTTLES SORTED','#e5edf8'),('pass','0 · PASS','#54dfbb'),('divert','1 · DIVERT','#fb8b94'),('output','MOTION COMPLETED','#8dcaff')]:
+        self.stat_cards = {}
+        for key, title, color in [('total','BOTTLES SORTED','#f2f4f7'),('pass','PASS  /  0','#54dfbb'),('divert','DIVERT  /  1','#fb8b94'),('output','MOTION COMPLETED','#a9c8ff')]:
             card = QFrame(); card.setObjectName('card')
+            self.stat_cards[key] = card
             box = QVBoxLayout(card); box.setContentsMargins(16,8,16,8)
+            if self.visual_only: title = 'PARTS SEEN' if key=='total' else 'IN VIEW' if key=='pass' else ''
             box.addWidget(self.label(title,'muted'))
             value = self.label('0','stat'); value.setStyleSheet('color:'+color)
             box.addWidget(value); self.stats[key] = value
             stats.addWidget(card)
+            if self.visual_only and key in ('divert','output'): card.hide()
         layout.addLayout(stats)
         controls = QHBoxLayout()
         controls.addWidget(self.label('SOURCE','muted'))
         self.source = QComboBox()
-        for name, value in [('Simulation','simulation'),('USB camera','usb'),('Basler / GigE','basler'),('Video file (dry run)','video')]:
+        sources = ([('Simulation','simulation'),('USB camera','usb'),('Basler / GigE','basler'),
+                    ('Video file (dry run)','video')] if self.smoke_test else
+                   [('USB camera','usb'),('Basler / GigE','basler')])
+        for name, value in sources:
             self.source.addItem(name, value)
+        self.source.setCurrentIndex(max(0, self.source.findData(self.settings['source'])))
         self.source.currentIndexChanged.connect(self.source_changed)
         self.source.setMaximumWidth(185)
         controls.addWidget(self.source)
@@ -274,7 +315,7 @@ class MainWindow(QMainWindow):
         self.start_button = QPushButton('Start inspection'); self.start_button.setObjectName('primary')
         self.start_button.clicked.connect(self.start)
         controls.addWidget(self.start_button)
-        self.stop_button = QPushButton('Stop + disarm'); self.stop_button.setObjectName('stop')
+        self.stop_button = QPushButton('Stop tracking' if self.visual_only else 'Stop + disarm'); self.stop_button.setObjectName('stop')
         self.stop_button.clicked.connect(self.stop)
         controls.addWidget(self.stop_button)
         self.inject_button = QPushButton('Next bottle: divert color')
@@ -289,16 +330,37 @@ class MainWindow(QMainWindow):
         left = QWidget(); ll = QVBoxLayout(left); ll.setContentsMargins(0,0,0,0); ll.setSpacing(8)
         self.view = VisionView(self)
         ll.addWidget(self.view,1)
-        self.diagnostics = self.label('Simulation • upright bottles • entry → decision → reject', 'muted')
+        self.diagnostics = self.label('Waiting for live camera inspection', 'muted')
         ll.addWidget(self.diagnostics)
+        inspection = QFrame(); inspection.setObjectName('liveInspection')
+        readout = QHBoxLayout(inspection); readout.setContentsMargins(16,10,16,10); readout.setSpacing(16)
+        self.live_swatch = QLabel('—')
+        self.live_swatch.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.live_swatch.setFixedSize(58,58)
+        readout.addWidget(self.live_swatch)
+        inspection_text = QVBoxLayout(); inspection_text.setSpacing(2)
+        self.live_title = self.label('WAITING FOR BOTTLE', 'muted')
+        self.live_title.setStyleSheet('font-weight:700;letter-spacing:1px;color:#a9c8ff;')
+        self.live_detail = self.label('Live camera inspection will appear here')
+        self.live_detail.setStyleSheet('font-size:17px;font-weight:700;')
+        self.live_evidence = self.label('YOLOX detection • stable IDs across the image' if self.visual_only else 'YOLOX model predictions','muted')
+        inspection_text.addWidget(self.live_title)
+        inspection_text.addWidget(self.live_detail)
+        inspection_text.addWidget(self.live_evidence)
+        readout.addLayout(inspection_text,1)
+        self.live_route = self.label('AWAITING', 'badge')
+        readout.addWidget(self.live_route)
+        ll.addWidget(inspection)
+        self.update_live_inspection()
         barcode_card = QFrame(); barcode_card.setObjectName('card')
+        self.barcode_card = barcode_card
         bc = QVBoxLayout(barcode_card); bc.setContentsMargins(16,10,16,10)
-        self.barcode_title = self.label('LAST BARCODE  •  SYNTHETIC DEMO DATA','muted'); bc.addWidget(self.barcode_title)
+        self.barcode_title = self.label('LAST BARCODE  •  SYNTHETIC DEMO DATA' if self.smoke_test else 'LAST BARCODE  •  LIVE DECODE','muted'); bc.addWidget(self.barcode_title)
         self.barcode_text = QLabel('Waiting for a bottle…')
         self.barcode_text.setTextFormat(Qt.TextFormat.PlainText)
         self.barcode_text.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.barcode_text.setSizePolicy(QSizePolicy.Policy.Ignored,QSizePolicy.Policy.Preferred)
-        self.barcode_text.setStyleSheet('font-size:24px;font-family:Consolas;font-weight:600;color:#b8ddff;')
+        self.barcode_text.setStyleSheet('font-size:24px;font-family:Consolas;font-weight:600;color:#c8dcff;')
         bc.addWidget(self.barcode_text)
         self.barcode_info = self.label('Color and barcode follow the tracked bottle ID.','muted'); bc.addWidget(self.barcode_info)
         self.scanner_input = QLineEdit()
@@ -306,20 +368,25 @@ class MainWindow(QMainWindow):
         self.scanner_input.setPlaceholderText('USB barcode scanner: click here, scan, then Enter')
         self.scanner_input.returnPressed.connect(self.scanner_read)
         bc.addWidget(self.scanner_input)
-        ll.addWidget(barcode_card)
         splitter.addWidget(left)
-        self.tabs = QTabWidget(); self.tabs.setMinimumWidth(335); self.tabs.setMaximumWidth(440)
+        self.tabs = QTabWidget(); self.tabs.setMinimumWidth(365); self.tabs.setMaximumWidth(470)
         self.fields = {}
         self.path_buttons = {}
         self.build_models_tab()
         self.build_sort_tab()
         self.build_conveyor_tab()
         self.build_reject_tab()
+        if self.visual_only:
+            self.tabs.setTabVisible(self.tabs.count()-1,False)
         splitter.addWidget(self.tabs)
-        splitter.setSizes([990,370])
+        splitter.setSizes([970,430])
         layout.addWidget(splitter,1)
         self.table = QTableWidget(0,6)
         self.table.setHorizontalHeaderLabels(['TIME / BOTTLE','COLOR','ROUTING','BARCODE','OUTPUT','DETAIL'])
+        if self.visual_only:
+            self.table.setHorizontalHeaderLabels(['TIME / PART','MODEL LABEL','','BARCODE','','CONFIDENCE'])
+            self.table.setColumnHidden(2,True)
+            self.table.setColumnHidden(4,True)
         self.table.setAlternatingRowColors(True)
         self.table.verticalHeader().hide()
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -337,6 +404,7 @@ class MainWindow(QMainWindow):
         footer.addWidget(help_button)
         layout.addLayout(footer)
         self.fields['yolox_mode'].currentIndexChanged.connect(self.update_enabled)
+        self.fields['rule'].currentIndexChanged.connect(self.update_enabled)
 
     @staticmethod
     def label(text, name=None):
@@ -348,6 +416,7 @@ class MainWindow(QMainWindow):
     def new_tab(self,name):
         inner = QWidget(); box = QVBoxLayout(inner); box.setContentsMargins(14,16,14,16); box.setSpacing(12)
         scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setWidget(inner)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.tabs.addTab(scroll,name)
         return box
 
@@ -357,7 +426,9 @@ class MainWindow(QMainWindow):
 
     def field(self, form, key, title, kind='float', minimum=0, maximum=10000, decimals=0):
         form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
-        if kind == 'text':
+        if kind == 'bool':
+            widget=QCheckBox(); widget.setChecked(bool(self.settings[key]))
+        elif kind == 'text':
             widget = QLineEdit(str(self.settings[key]))
         elif kind == 'int':
             widget = QSpinBox(); widget.setRange(int(minimum),int(maximum)); widget.setValue(int(self.settings[key]))
@@ -370,6 +441,9 @@ class MainWindow(QMainWindow):
     def combo(self,form,key,title,choices):
         widget = QComboBox()
         for name,value in choices: widget.addItem(name,value)
+        widget.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        widget.setMinimumContentsLength(10)
+        widget.setSizePolicy(QSizePolicy.Policy.Expanding,QSizePolicy.Policy.Fixed)
         index = widget.findData(self.settings[key]); widget.setCurrentIndex(max(0,index))
         self.fields[key] = widget; form.addRow(title,widget)
         return widget
@@ -386,42 +460,62 @@ class MainWindow(QMainWindow):
         rl.addWidget(edit); rl.addWidget(browse); form.addRow(title,row)
 
     def build_sort_tab(self):
-        box = self.new_tab('Color + code')
-        self.note(box,'Choose the color that stays on the belt. Other colors produce decision 1 and the selected divert motion.')
-        form = QFormLayout(); form.setSpacing(10)
-        self.combo(form,'pass_color','Pass color',[(c.title(),c) for c in ['orange','blue','green','red','yellow','purple','clear']])
-        self.combo(form,'rule','Sort rule',[('YOLOX color → 0 / 1','color'),('Every Nth (simulation)','every_n'),('Divert all (simulation)','all'),('Pass all (simulation)','none')])
+        box = self.new_tab('Barcode' if self.visual_only else 'Color + code')
+        if not self.visual_only:
+            self.note(box,'Choose the color that stays on the belt. Other colors produce decision 1 and the selected divert motion.')
+        routing = QWidget()
+        form = QFormLayout(routing); form.setSpacing(10)
+        self.combo(form,'pass_color','Pass color',[(c.title(),c) for c in ['orange','blue','green','red','yellow','purple','white','clear']])
+        self.fields['pass_color'].setEditable(True)
+        self.fields['pass_color'].setToolTip('Choose a trained color/class, or type its exact name. Load models to read their class names.')
+        self.combo(form,'rule','Sort rule',[('Visual tracking','tracking'),('YOLOX color → 0 / 1','color'),('Every Nth (simulation)','every_n'),('Divert all (simulation)','all'),('Pass all (simulation)','none')])
         self.field(form,'every_n','Every Nth','int',2,100)
-        box.addLayout(form)
-        self.note(box,'Live barcode reader: UPC / EAN / Code 128 / QR and more. Unread codes remain UNREAD. Codes are displayed and logged; color determines routing.')
+        box.addWidget(routing)
+        routing.setVisible(not self.visual_only)
+        box.addWidget(self.barcode_card)
+        self.note(box,'Live barcode reader: UPC / EAN / Code 128 / QR and more. Unread codes remain UNREAD. Codes are displayed and logged with the tracked bottle.')
         form = QFormLayout(); form.setSpacing(10)
         self.field(form,'camera_index','Manual USB index','int',0,63)
         self.path_field(form,'video_path','Video file','Videos (*.mp4 *.avi *.mov *.mkv);;All files (*)')
+        if not self.smoke_test:
+            form.setRowVisible(self.fields['video_path'].parentWidget(), False)
         box.addLayout(form)
-        self.note(box,'Pick the camera by name in the toolbar. Manual index is an advanced fallback. Live sorting uses the YOLOX models selected on the Models tab.')
+        self.note(box,'Pick the camera by name in the toolbar. Manual index is an advanced fallback. The Models tab selects the YOLOX detector.')
         tools=QHBoxLayout(); tools.addWidget(self.inject_button); tools.addWidget(self.reset_button)
         box.addLayout(tools)
+        self.inject_button.setVisible(not self.visual_only and self.smoke_test)
         box.addStretch()
 
     def build_models_tab(self):
         box = self.new_tab('Models')
-        self.note(box,'Choose the YOLOX models used for bottle tracking and color sorting.')
+        self.note(box,'Choose the YOLOX model used to detect and track bottles.' if self.visual_only else 'Choose the YOLOX models used for bottle tracking and color sorting.')
         form = QFormLayout(); form.setSpacing(10)
-        self.combo(form,'yolox_mode','YOLOX models',[('Bottle model + color model','two_models'),('One model: colored bottles','combined')])
-        self.path_field(form,'model_path','Bottle YOLOX (.onnx)','YOLOX ONNX models (*.onnx)')
-        self.path_field(form,'color_model_path','Color YOLOX (.onnx)','YOLOX ONNX models (*.onnx)')
+        modes = [('Part tracking (one model)','tracking')]
+        if not self.visual_only: modes += [('Bottle model + color model','two_models'),('One model: colored bottles','combined')]
+        self.combo(form,'yolox_mode','YOLOX models',modes)
+        self.path_field(form,'model_path','Bottle YOLOX','YOLOX models (*.pth *.pt *.onnx)')
+        self.path_field(form,'color_model_path','Color YOLOX','YOLOX models (*.pth *.pt *.onnx)')
+        if self.visual_only: form.setRowVisible(self.fields['color_model_path'].parentWidget(),False)
+        self.combo(form,'inference_backend','Acceleration',[('Automatic (GPU if available)','auto'),('ONNX CPU','cpu'),('TensorRT FP32','tensorrt_fp32'),('TensorRT FP16','tensorrt_fp16')])
+        self.field(form,'auto_model_config','Read saved model settings','bool')
         self.path_buttons['model_path'].setText('Choose'); self.path_buttons['model_path'].setMaximumWidth(70)
         self.path_buttons['color_model_path'].setText('Choose'); self.path_buttons['color_model_path'].setMaximumWidth(70)
         box.addLayout(form)
+        self.prepare_models_button=QPushButton('Load / convert models')
+        self.prepare_models_button.clicked.connect(self.prepare_models)
+        box.addWidget(self.prepare_models_button)
+        self.model_note=self.note(box,'Pick .pth/.pt or ONNX. Checkpoints convert automatically; saved exports and GPU engines are reused.')
         thresholds=QFormLayout(); thresholds.setSpacing(12)
+        thresholds.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapAllRows)
         for key,title in (('confidence','Bottle confidence'),('color_confidence','Color confidence')):
             control=ConfidenceControl(float(self.settings[key]))
-            control.setToolTip('Adjust during live preview while reject output is disarmed.')
+            control.setToolTip('Minimum YOLOX detection confidence.' if self.visual_only else 'Adjust during live preview while reject output is disarmed.')
             self.fields[key]=control
             thresholds.addRow(title,control)
             control.valueChanged.connect(self.confidence_changed)
+            if self.visual_only and key=='color_confidence': thresholds.setRowVisible(control,False)
         box.addLayout(thresholds)
-        self.note(box,'Higher confidence requires a stronger YOLOX prediction. Sliders update live preview while output is disarmed.')
+        self.note(box,'Higher confidence requires a stronger YOLOX prediction. Adjust the slider during live tracking.' if self.visual_only else 'Higher confidence requires a stronger YOLOX prediction. Sliders update live preview while output is disarmed.')
         advanced_button=QPushButton('Advanced model settings')
         advanced_button.setCheckable(True)
         box.addWidget(advanced_button)
@@ -437,9 +531,50 @@ class MainWindow(QMainWindow):
         names.setPlaceholderText('Read from ONNX; e.g. orange,blue,green')
         mapping=self.field(form,'color_class_map','Class → color map','text')
         mapping.setPlaceholderText('Optional: 0:orange,1:blue,2:green')
+        variants=[('Automatic from checkpoint','auto')]+[(name.replace('_','-').upper(),name) for name in ('nano','tiny','s','m','l','x')]
+        self.combo(form,'model_architecture','Bottle architecture',variants)
+        self.combo(form,'color_architecture','Color architecture',variants)
+        self.path_field(form,'model_experiment_path','Bottle experiment','YOLOX Python experiment (*.py)')
+        self.path_field(form,'color_experiment_path','Color experiment','YOLOX Python experiment (*.py)')
+        if self.visual_only:
+            for key in ('color_image_size','color_class_names','color_class_map','color_architecture'):
+                form.setRowVisible(self.fields[key],False)
+            form.setRowVisible(self.fields['color_experiment_path'].parentWidget(),False)
         box.addWidget(advanced)
-        self.note(box,'Class names are read from ONNX metadata. Use Advanced for an export without names. The bundled model locates bottles only; choose your trained color model. Export .pth to ONNX first.')
+        self.note(box,'Model names and input size are read automatically. Use Advanced for missing labels or a modified YOLOX graph. A custom experiment runs Python model-building code; select your own training configuration. Generic COCO weights locate bottles only.')
         box.addStretch()
+
+    @staticmethod
+    def widget_value(widget):
+        if isinstance(widget,QCheckBox): return widget.isChecked()
+        if isinstance(widget,QComboBox):
+            return widget.currentText().strip().casefold() if widget.isEditable() else widget.currentData()
+        if isinstance(widget,QLineEdit): return widget.text().strip()
+        return widget.value()
+
+    def prepare_models(self):
+        if self.running or self.owns_motion or (self.model_preparer and self.model_preparer.isRunning()): return
+        for key,widget in self.fields.items(): self.settings[key]=self.widget_value(widget)
+        store.save(self.root,self.settings)
+        worker=ModelPreparationWorker(self.settings,self.root,self)
+        self.model_preparer=worker
+        def progress(message):
+            if self.model_preparer is worker: self.model_note.setText(message)
+        def prepared(info):
+            if self.model_preparer is not worker: return
+            choices=info.get('colors',[]); combo=self.fields['pass_color']
+            current=combo.currentText().strip().casefold()
+            combo.clear()
+            for choice in choices: combo.addItem(choice,choice)
+            combo.setCurrentText(current)
+            details='; '.join(f"{Path(m['path']).name}: {len(m['class_names'])} classes, {' × '.join(map(str,m['input_shape']))}" for m in info.get('models',[]))
+            suffix = '. Start visual tracking.' if self.visual_only else '. Choose the class that should pass, then start inspection.'
+            self.model_note.setText('Ready • '+details+suffix)
+        worker.progress.connect(progress)
+        worker.prepared.connect(prepared)
+        worker.fault.connect(lambda message:progress('Model setup: '+message))
+        worker.finished.connect(self.update_enabled)
+        worker.start(); self.update_enabled()
 
     def confidence_changed(self, _value=None):
         if self.armed or self.arming or self.owns_motion:
@@ -474,6 +609,14 @@ class MainWindow(QMainWindow):
 
     def build_conveyor_tab(self):
         box = self.new_tab('Tracking')
+        if self.visual_only:
+            self.note(box,'Bottles receive a stable ID anywhere in the image. Move a bottle naturally through the camera view; no entry or decision line is required.')
+            form=QFormLayout(); form.setSpacing(11)
+            self.field(form,'max_miss','Track timeout (s)',minimum=.05,maximum=3,decimals=2)
+            box.addLayout(form)
+            self.note(box,'A briefly missed detection keeps its identity until the timeout. Camera frames and YOLOX predictions drive the display; this mode sends no motion commands.')
+            box.addStretch()
+            return
         self.note(box,'The conveyor runs from its hardware controls. These measurements only predict bottle arrival; the app controls the diverter through EtherMotion.')
         form = QFormLayout(); form.setSpacing(11)
         self.combo(form,'direction','Travel direction',[('Left → right','ltr'),('Right → left','rtl')])
@@ -541,17 +684,16 @@ class MainWindow(QMainWindow):
 
     def collect_settings(self):
         for key,widget in self.fields.items():
-            if isinstance(widget,QComboBox): value = widget.currentData()
-            elif isinstance(widget,QLineEdit): value = widget.text().strip()
-            else: value = widget.value()
-            self.settings[key] = value
+            self.settings[key] = self.widget_value(widget)
         self.settings['source'] = self.source.currentData()
         self.settings['program_id'] = self.program.currentData() or self.settings.get('program_id','')
         self.settings['pass_program_id'] = self.pass_program.currentData() or ''
         self.settings['return_program_id'] = self.return_program.currentData() or ''
-        if not 0 < self.settings['entry'] < self.settings['line'] < 1:
+        if self.visual_only:
+            self.settings.update(visual_only=True,yolox_mode='tracking',rule='tracking')
+        if not self.visual_only and not 0 < self.settings['entry'] < self.settings['line'] < 1:
             raise ValueError('Entry zone must be smaller than the decision line fraction.')
-        if self.settings['source'] != 'simulation' and self.settings['rule'] != 'color':
+        if not self.visual_only and self.settings['source'] != 'simulation' and self.settings['rule'] != 'color':
             raise ValueError('Choose YOLOX color → 0 / 1 for a camera or video.')
         if self.settings['source'] in ('usb','basler'):
             selection=self.camera_picker.currentData()
@@ -570,7 +712,7 @@ class MainWindow(QMainWindow):
         if self.running: self.stop()
         self.last_packet = None
         self.settings['source'] = self.source.currentData()
-        self.badge.setText('SIMULATION • NO HARDWARE' if self.settings['source']=='simulation' else ('VIDEO • NO HARDWARE' if self.settings['source']=='video' else 'LIVE CAMERA • OUTPUT DISARMED'))
+        self.badge.setText('VISUAL ONLY' if self.visual_only else 'SIMULATION • NO HARDWARE' if self.settings['source']=='simulation' else ('VIDEO • NO HARDWARE' if self.settings['source']=='video' else 'LIVE CAMERA • OUTPUT DISARMED'))
         self.inject_button.setEnabled(self.settings['source']=='simulation')
         self.barcode_title.setText('LAST BARCODE  •  SYNTHETIC DEMO DATA' if self.settings['source']=='simulation' else 'LAST BARCODE  •  LIVE DECODE')
         self.barcode_text.setText('Waiting for a bottle…')
@@ -635,10 +777,15 @@ class MainWindow(QMainWindow):
             else:
                 self.set_status(f'{count} camera(s) found • choose the conveyor camera by name.','#8dcaff')
             self.update_enabled()
+            auto_start = self.auto_start_saved_camera
+            self.auto_start_saved_camera = False
+            selected=self.camera_picker.currentData()
+            if restored and auto_start and not self.running and isinstance(selected,CameraChoice):
+                QTimer.singleShot(0, self.start)
         self.jobs.submit(discover_cameras,done)
 
     def start(self):
-        if self.running or self.owns_motion:
+        if self.running or self.owns_motion or (self.model_preparer and self.model_preparer.isRunning()):
             return
         if self.worker and self.worker.isRunning():
             self.set_status('Camera is still releasing. Wait, then start again.','#f3b252'); return
@@ -660,11 +807,12 @@ class MainWindow(QMainWindow):
                 self.worker = VideoWorker(self.settings.copy(),self.root)
                 worker = self.worker
                 worker.fault.connect(lambda message: self.camera_fault(worker,message))
+                worker.preparing.connect(lambda message: self.set_status(message,'#8dcaff') if self.worker is worker and self.running else None)
                 worker.ready.connect(lambda message: self.set_status('Running • '+message,'#54dfbb') if self.worker is worker and self.running else None)
                 self.worker.start()
                 self.set_status('Opening source and loading bottle detector…','#8dcaff')
             self.update_enabled()
-            self.log('Inspection started • '+self.settings['source']+' • pass='+self.settings['pass_color'])
+            self.log('Visual tracking started • '+self.settings['source'] if self.visual_only else 'Inspection started • '+self.settings['source']+' • pass='+self.settings['pass_color'])
         except Exception as exc:
             self.running = False
             self.set_status(str(exc),'#fb8b94')
@@ -672,16 +820,18 @@ class MainWindow(QMainWindow):
 
     def stop(self):
         self.running = False
+        if self.model_preparer and self.model_preparer.isRunning(): self.model_preparer.stop()
         if self.confidence_timer.isActive(): self.flush_confidence()
         self.generation += 1
         for _,_,event in self.pending:
             event['output']='CANCELLED'; self.refresh_event(event)
         self.pending.clear()
         self.tracker.reset()
+        self.update_live_inspection()
         if self.worker: self.worker.stop()
         self.set_disarmed()
         self.request_motion_stop()
-        self.set_status('Stopped • pending decisions cleared • output disarmed','#f3b252')
+        self.set_status('Visual tracking stopped' if self.visual_only else 'Stopped • pending decisions cleared • output disarmed','#f3b252')
         self.update_enabled(); self.view.update()
 
     def camera_fault(self,worker,message):
@@ -699,30 +849,37 @@ class MainWindow(QMainWindow):
         self.arm_generation += 1
         self.armed = self.arming = False
         self.arm.blockSignals(True); self.arm.setChecked(False); self.arm.blockSignals(False)
-        self.output_note.setText('DISARMED • no new divert commands')
+        self.output_note.setText('VISUAL ONLY' if self.visual_only else 'DISARMED • no new divert commands')
         if self.settings['source'] in ('usb','basler'):
-            self.badge.setText('LIVE CAMERA • OUTPUT DISARMED')
+            self.badge.setText('VISUAL ONLY' if self.visual_only else 'LIVE CAMERA • OUTPUT DISARMED')
 
     def update_enabled(self):
-        self.start_button.setEnabled(not self.running and not self.owns_motion and not self.camera_scanning)
-        for widget in self.fields.values(): widget.setEnabled(not self.running)
-        for button in self.path_buttons.values(): button.setEnabled(not self.running)
+        preparing=bool(self.model_preparer and self.model_preparer.isRunning())
+        editable=not self.running and not preparing
+        self.start_button.setEnabled(editable and not self.owns_motion and not self.camera_scanning)
+        self.prepare_models_button.setEnabled(editable and not self.owns_motion)
+        for widget in self.fields.values(): widget.setEnabled(editable)
+        for button in self.path_buttons.values(): button.setEnabled(editable)
         two_models=self.fields['yolox_mode'].currentData()=='two_models'
         for key in ('color_model_path','color_class_names','color_image_size','model_class_id'):
-            self.fields[key].setEnabled(not self.running and two_models)
-        self.path_buttons['color_model_path'].setEnabled(not self.running and two_models)
+            self.fields[key].setEnabled(editable and two_models)
+        if self.visual_only: self.fields['model_class_id'].setEnabled(editable)
+        for key in ('color_model_path','color_experiment_path'):
+            self.path_buttons[key].setEnabled(editable and two_models)
+        for key in ('color_experiment_path','color_architecture'):
+            self.fields[key].setEnabled(editable and two_models)
         for key in ('confidence','color_confidence'):
-            self.fields[key].setEnabled(not self.armed and not self.arming and not self.owns_motion)
+            self.fields[key].setEnabled(not preparing and not self.armed and not self.arming and not self.owns_motion)
         camera_source=self.source.currentData() in ('usb','basler')
-        self.camera_picker.setEnabled(not self.running and not self.owns_motion and not self.camera_scanning and camera_source)
-        self.refresh_cameras_button.setEnabled(not self.running and not self.owns_motion and not self.camera_scanning and camera_source)
-        self.fields['camera_index'].setEnabled(not self.running and self.source.currentData()=='usb' and self.camera_picker.currentData()=='manual')
+        self.camera_picker.setEnabled(editable and not self.owns_motion and not self.camera_scanning and camera_source)
+        self.refresh_cameras_button.setEnabled(editable and not self.owns_motion and not self.camera_scanning and camera_source)
+        self.fields['camera_index'].setEnabled(editable and self.source.currentData()=='usb' and self.camera_picker.currentData()=='manual')
         for widget in (self.program,self.pass_program,self.return_program):
-            widget.setEnabled(not self.running and not self.armed and not self.arming and not self.owns_motion)
-        self.connect_button.setEnabled(not self.armed and not self.arming and not self.owns_motion)
+            widget.setEnabled(not self.visual_only and editable and not self.armed and not self.arming and not self.owns_motion)
+        self.connect_button.setEnabled(not self.visual_only and not self.armed and not self.arming and not self.owns_motion)
         self.reset_button.setEnabled(not self.running)
         thresholds_ready=not self.confidence_timer.isActive() and (self.last_packet or {}).get('confidence_revision',0)>=self.expected_confidence_revision
-        self.arm.setEnabled(self.running and not self.owns_motion and not self.arming and self.settings['source'] in ('usb','basler') and self.client is not None and bool(self.program.currentData()) and thresholds_ready)
+        self.arm.setEnabled(not self.visual_only and self.running and not self.owns_motion and not self.arming and self.settings['source'] in ('usb','basler') and self.client is not None and bool(self.program.currentData()) and thresholds_ready)
 
     def tick(self):
         now = time.monotonic(); dt = min(.12,max(.001,now-self.last_tick)); self.last_tick = now
@@ -750,19 +907,24 @@ class MainWindow(QMainWindow):
                             h,w = packet['frame'].shape[:2]
                             tracks,decisions = self.tracker.update(packet['boxes'],packet['reasons'],packet['captured'],w,h)
                             self.update_meta(packet,tracks)
+                            self.update_live_inspection(tracks,packet)
                             for decision in decisions: self.decision(decision)
                         self.diagnostics.setText(f"{packet.get('vision_pipeline','YOLOX')}  •  {packet.get('fps',0):.1f} FPS  •  {packet.get('inference_ms',0):.0f} ms model  •  frame age {age*1000:.0f} ms  •  {packet.get('barcode_decoder','barcode reader')}")
                         if not packet.get('inspection_ready',True):
                             self.fail(packet.get('inspection_error','Inspection unavailable')); return
                     elif self.last_packet and now-self.last_packet['captured'] > 1.0:
                         self.fail('No fresh camera image for 1 second. Inspection stopped.'); return
-                    elif self.last_packet is None and now-self.started_at>15:
-                        self.fail('Source did not deliver its first inspection within 15 seconds.'); return
+                    elif self.last_packet is None:
+                        if getattr(self.worker,'preparing_models',False):
+                            if now-self.started_at>600:
+                                self.fail('Model preparation exceeded 10 minutes. Check the model and configuration.'); return
+                        elif now-(getattr(self.worker,'source_started_at',None) or self.started_at)>15:
+                            self.fail('Source did not deliver its first inspection within 15 seconds.'); return
                     self.update_enabled()
-                if self.running: self.dispatch_due(now)
+                if self.running and not self.visual_only: self.dispatch_due(now)
             except Exception as exc:
                 self.fail('Inspection error: '+str(exc))
-        if self.output_busy and self.owns_motion:
+        if not self.visual_only and self.output_busy and self.owns_motion:
             if self.sequence_wait_until is not None and not self.stopping_motion:
                 self.resume_sequence(now)
             elif not self.network_poll and now-self.last_poll>.18:
@@ -771,6 +933,9 @@ class MainWindow(QMainWindow):
 
     def update_meta(self,packet,tracks):
         boxes = packet['boxes']; colors = packet.get('colors',[]); codes = packet.get('barcodes',[])
+        labels=packet.get('model_labels',[])
+        confidences=packet.get('confidences',[])
+        color_confidences=packet.get('color_confidences',[])
         fresh = [t for t in tracks if not t.missed]
         for track in fresh:
             meta = self.track_meta.setdefault(track.id,{'color':'unknown','barcode':'UNREAD','format':''})
@@ -778,6 +943,9 @@ class MainWindow(QMainWindow):
             if boxes:
                 i=min(range(len(boxes)),key=lambda j: abs((boxes[j][0]+boxes[j][2])/2-cx)+abs((boxes[j][1]+boxes[j][3])/2-cy))
                 if i<len(colors): meta['color']=colors[i]
+                if i<len(labels): meta['model_label']=labels[i]
+                if i<len(confidences): meta['confidence']=confidences[i]
+                if i<len(color_confidences): meta['color_confidence']=color_confidences[i]
             for code in codes:
                 box=code.get('bbox')
                 if box:
@@ -796,6 +964,117 @@ class MainWindow(QMainWindow):
         if codes and not fresh:
             self.barcode_text.setText(str(codes[-1]['text']))
             self.barcode_info.setText('Read in frame • not associated with a tracked bottle')
+        if self.visual_only: self.record_visual_tracks(fresh)
+
+    def visual_track_title(self,track):
+        meta=self.track_meta.get(track.id,{})
+        return f"#{track.id:03d}  {meta.get('model_label','bottle').upper()}  {float(meta.get('confidence',0)):.0%}"
+
+    def record_visual_tracks(self,tracks):
+        changed=False
+        for track in tracks:
+            key=(self.generation,track.id)
+            self.seen_track_ids.add(key)
+            meta=self.track_meta.get(track.id,{})
+            event=self.visual_events.get(key)
+            if event is None:
+                event={'time':datetime.now().astimezone().isoformat(timespec='milliseconds'),
+                       'session':self.session,'event_id':f'{self.session}-{self.generation}-{track.id}',
+                       'bottle_id':track.id,'model_label':meta.get('model_label','bottle'),
+                       'confidence':float(meta.get('confidence',0)),
+                       'barcode':meta.get('barcode','UNREAD'),'barcode_format':meta.get('format',''),
+                       'source':self.settings['source'],'color':'','decision':'','output':'VISUAL','detail':''}
+                self.visual_events[key]=event
+                self.events.append(event)
+                self.add_row(event)
+                changed=True
+            else:
+                new_code=meta.get('barcode','UNREAD')
+                changed=changed or new_code!=event['barcode']
+                event.update(model_label=meta.get('model_label','bottle'),confidence=float(meta.get('confidence',0)),
+                             barcode=new_code,barcode_format=meta.get('format',''))
+                for row in range(self.table.rowCount()):
+                    if self.table.item(row,0).data(Qt.ItemDataRole.UserRole)==event['event_id']:
+                        self.table.item(row,3).setText(event['barcode'])
+                        self.table.item(row,5).setText(f"{event['confidence']:.0%}")
+                        break
+        if changed: self.save_events()
+        self.refresh_counts()
+
+    def update_live_inspection(self, tracks=None, packet=None):
+        fresh = [track for track in (tracks or []) if not track.missed]
+        if self.visual_only:
+            if fresh:
+                selected=getattr(self,'_displayed_track_id',None)
+                track=next((item for item in fresh if item.id==selected),min(fresh,key=lambda item:item.id))
+                self._displayed_track_id=track.id
+                meta=self.track_meta.get(track.id,{})
+                self.live_swatch.setText(f'{track.id:03d}')
+                self.live_swatch.setStyleSheet('background:#243b61;color:#c8dcff;border-radius:10px;font-size:23px;font-weight:700;')
+                self.live_title.setText(f'LIVE PART  #{track.id:03d}')
+                self.live_detail.setText(f"{meta.get('model_label','bottle').upper()}  •  {float(meta.get('confidence',0)):.0%} confidence")
+                self.live_evidence.setText(f'YOLOX prediction  •  {track.hits} camera frame(s) tracked')
+                self.live_route.setText('TRACKING')
+            elif packet and packet.get('boxes'):
+                self.live_swatch.setText('•')
+                self.live_title.setText('PART DETECTED')
+                self.live_detail.setText('YOLOX detection • acquiring ID')
+                self.live_evidence.setText('Tracking starts anywhere in the image')
+                self.live_route.setText('DETECTED')
+            else:
+                self.live_swatch.setText('—')
+                self.live_title.setText('WAITING FOR PART' if self.running else 'TRACKING IDLE')
+                self.live_detail.setText('Place a bottle in the camera view' if self.running else 'Choose the camera and start tracking')
+                self.live_evidence.setText('YOLOX detection • stable IDs across the image')
+                self.live_route.setText('AWAITING')
+            return
+        if not fresh and packet and packet.get('boxes'):
+            boxes = packet['boxes']
+            index = max(range(len(boxes)), key=lambda i: (boxes[i][2]-boxes[i][0])*(boxes[i][3]-boxes[i][1]))
+            color = str(packet.get('colors',[])[index] if index<len(packet.get('colors',[])) else 'unknown').lower()
+            values = packet.get('color_confidences',[])
+            support = max(0.0,min(1.0,float(values[index]))) if index<len(values) else 0.0
+            matches = packet.get('brand_matches',[])
+            label = 'label visible' if index<len(matches) and matches[index] else 'label not confirmed'
+            self.show_live_color(color,support)
+            self.live_title.setText('BOTTLE DETECTED · NOT TRACKED')
+            self.live_evidence.setText(f'{label}  •  move across blue entry line to start sorting')
+            self.live_route.setText('MOVE TO ENTRY')
+            self.live_route.setStyleSheet('background:#35445a;color:#c8dcff;padding:9px 12px;border-radius:8px;font-weight:700;')
+            return
+        if not fresh:
+            self.live_swatch.setText('—')
+            self.live_swatch.setStyleSheet('background:#35445a;color:#a9c8ff;border-radius:10px;font-size:26px;')
+            self.live_title.setText('WAITING FOR BOTTLE' if self.running else 'INSPECTION IDLE')
+            self.live_detail.setText('Place a bottle in the camera view' if self.running else 'Start live inspection')
+            self.live_evidence.setText('YOLOX-S bottle detection + exposed drink color')
+            self.live_route.setText('AWAITING')
+            self.live_route.setStyleSheet('background:#243b61;color:#c8dcff;padding:9px 12px;border-radius:8px;font-weight:700;')
+            return
+        # Show the bottle nearest the decision line when several are visible.
+        width = self.last_packet['frame'].shape[1] if self.last_packet else WIDTH
+        target = (1-self.settings['line'] if self.settings['direction']=='rtl' else self.settings['line']) * width
+        track = min(fresh, key=lambda item: abs((item.bbox[0]+item.bbox[2])/2-target))
+        meta = self.track_meta.get(track.id,{})
+        color = str(meta.get('color','unknown')).lower()
+        support = max(0.0,min(1.0,float(meta.get('color_confidence',0))))
+        self.show_live_color(color,support)
+        self.live_title.setText(f'LIVE BOTTLE  #{track.id:03d}')
+        label = 'label visible' if meta.get('gatorade_label_match') else 'label not confirmed'
+        self.live_evidence.setText(f'{label}  •  {track.hits} camera frame(s) tracked')
+        passing = color == self.settings['pass_color'] and not track.bad
+        self.live_route.setText('PREDICTED 0 · PASS' if passing else 'PREDICTED 1 · DIVERT')
+        tone = '#174b3f' if passing else '#633942'
+        ink = '#75f0c7' if passing else '#ffc3cc'
+        self.live_route.setStyleSheet(f'background:{tone};color:{ink};padding:9px 12px;border-radius:8px;font-weight:700;')
+
+    def show_live_color(self,color,support):
+        palette = {'blue':('#1d5db7','#e6f0ff'),'yellow':('#f4c841','#242424'),
+                   'white':('#f0f2f5','#242424')}
+        background, foreground = palette.get(color,('#43546a','#f2f4f7'))
+        self.live_swatch.setText(color[:1].upper() if color in palette else '?')
+        self.live_swatch.setStyleSheet(f'background:{background};color:{foreground};border-radius:10px;font-size:25px;font-weight:800;')
+        self.live_detail.setText(f'{color.upper()}  •  {support:.0%} color confidence' if color!='unknown' else 'COLOR UNCERTAIN')
 
     def show_barcode(self,tid,meta):
         self.barcode_title.setText('LAST BARCODE  •  SYNTHETIC DEMO DATA' if self.settings['source']=='simulation' else 'LAST BARCODE  •  LIVE DECODE')
@@ -822,15 +1101,22 @@ class MainWindow(QMainWindow):
             self.set_status('Scanner log could not be written: '+str(exc),'#fb8b94')
 
     def decision(self,decision):
+        if self.visual_only: return
         meta = self.track_meta.get(decision.id,{'color':'unknown','barcode':'UNREAD','format':''})
         self.show_barcode(decision.id,meta)
         if decision.bad: self.divert_count+=1
         else: self.pass_count+=1
+        if self.settings['source']=='simulation':
+            output = 'SIMULATED' if decision.bad else 'PASS'
+        elif not self.armed:
+            output = 'DISARMED'
+        else:
+            output = 'PENDING' if decision.bad else 'PASS'
         event = {'time':datetime.now().astimezone().isoformat(timespec='milliseconds'),'session':self.session,
                  'event_id':f'{self.session}-{self.generation}-{decision.id}',
                  'bottle_id':decision.id,'color':meta['color'],'decision':1 if decision.bad else 0,
                  'barcode':meta.get('barcode','UNREAD'),'barcode_format':meta.get('format',''),
-                 'source':self.settings['source'],'output':'PASS' if not decision.bad else 'DRY RUN',
+                 'source':self.settings['source'],'output':output,
                  'detail':'; '.join(decision.reasons),'request_id':'','run_id':''}
         self.events.append(event)
         if decision.bad and self.settings['source']=='simulation':
@@ -851,9 +1137,11 @@ class MainWindow(QMainWindow):
     def add_row(self,event):
         self.table.insertRow(0)
         values=[event['time'][11:19]+f"  #{event['bottle_id']:03d}",event['color'].upper(),f"{event['decision']} · {'DIVERT' if event['decision'] else 'PASS'}",event['barcode'],event['output'],event['detail']]
+        if self.visual_only:
+            values=[event['time'][11:19]+f"  #{event['bottle_id']:03d}",event.get('model_label','bottle').upper(),'',event['barcode'],'',f"{event.get('confidence',0):.0%}"]
         for i,text in enumerate(values):
             item=QTableWidgetItem(str(text)); item.setData(Qt.ItemDataRole.UserRole,event['event_id'])
-            if i==2: item.setForeground(QColor('#fb8b94' if event['decision'] else '#54dfbb'))
+            if i==2 and not self.visual_only: item.setForeground(QColor('#fb8b94' if event['decision'] else '#54dfbb'))
             self.table.setItem(0,i,item)
         if self.table.rowCount()>100: self.table.removeRow(100)
 
@@ -866,6 +1154,9 @@ class MainWindow(QMainWindow):
         self.save_events()
 
     def dispatch_due(self,now):
+        if self.visual_only:
+            self.pending.clear(); self.send_gate.clear()
+            return
         if not self.pending or self.pending[0][0]>now: return
         due,tid,event=heapq.heappop(self.pending)
         if not self.armed:
@@ -886,6 +1177,7 @@ class MainWindow(QMainWindow):
         self.start_sequence_program(recipe['program_id'],event['_send_deadline'])
 
     def start_sequence_program(self, program, deadline=None):
+        if self.visual_only: return
         event=self.active_event
         self.active_program=program
         self.phase_generation+=1; phase=self.phase_generation
@@ -937,6 +1229,7 @@ class MainWindow(QMainWindow):
         self.resume_sequence(now)
 
     def resume_sequence(self, now):
+        if self.visual_only: return
         if self.sequence_wait_until is None or now<self.sequence_wait_until: return
         if not self.running or not self.armed or not self.send_gate.is_set(): return
         action=self.sequence_next
@@ -954,6 +1247,9 @@ class MainWindow(QMainWindow):
             self.refresh_event(event); self.refresh_counts(); self.update_enabled()
 
     def discover(self):
+        if self.visual_only:
+            self.client=None
+            return
         if self.owns_motion or self.armed: return
         try:
             url=self.fields['base_url'].text().strip()
@@ -980,6 +1276,9 @@ class MainWindow(QMainWindow):
         self.jobs.submit(client.discover,done)
 
     def toggle_arm(self,checked):
+        if self.visual_only:
+            self.set_disarmed(); self.update_enabled()
+            return
         if not checked:
             self.set_disarmed()
             for _,_,event in self.pending: event['output']='CANCELLED'; self.refresh_event(event)
@@ -1021,6 +1320,7 @@ class MainWindow(QMainWindow):
         self.jobs.submit(lambda:[client.check_ready(p) for p in programs],done)
 
     def poll_motion(self):
+        if self.visual_only: return
         if self.active_event is None or getattr(self,'request_pending',False): return
         if self.sequence_wait_until is not None and not self.stopping_motion: return
         if self.stopping_motion and not self.stop_acknowledged: return
@@ -1074,6 +1374,7 @@ class MainWindow(QMainWindow):
         self.jobs.submit(lambda:client.program_status(program),done)
 
     def request_motion_stop(self):
+        if self.visual_only: return
         if not self.owns_motion or not self.client or (self.stopping_motion and self.output_busy): return
         self.stopping_motion=True
         self.stop_acknowledged=False
@@ -1093,6 +1394,7 @@ class MainWindow(QMainWindow):
         self.jobs.submit(lambda:client.stop(program,'ualr-stop-'+uuid.uuid4().hex),done)
 
     def launch_ethermotion(self):
+        if self.visual_only: return
         original=Path(self.settings['ethermotion_path'])
         executable=original if original.is_file() else self.root/'EtherMotion'/'EtherMotion.exe'
         if not executable.is_file():
@@ -1110,6 +1412,10 @@ class MainWindow(QMainWindow):
         self.status.setText(text); self.status.setStyleSheet('color:'+color)
 
     def refresh_counts(self):
+        if self.visual_only:
+            self.stats['total'].setText(str(len(self.seen_track_ids)))
+            self.stats['pass'].setText(str(sum(not track.missed for track in self.tracker.tracks)))
+            return
         self.stats['total'].setText(str(self.pass_count+self.divert_count))
         self.stats['pass'].setText(str(self.pass_count)); self.stats['divert'].setText(str(self.divert_count))
         self.stats['output'].setText(str(self.complete_count))
@@ -1118,10 +1424,13 @@ class MainWindow(QMainWindow):
         if self.running: return
         self.pass_count=self.divert_count=self.complete_count=0
         self.table.setRowCount(0); self.events.clear(); self.session=uuid.uuid4().hex[:12]
+        self.seen_track_ids.clear(); self.visual_events.clear()
         self.refresh_counts()
 
     def write_csv(self,path):
         fields=['time','session','event_id','bottle_id','color','decision','barcode','barcode_format','source','output','detail','request_id','run_id','program_id','return_program_id','cycles','cycles_completed']
+        if self.visual_only:
+            fields=['time','session','event_id','bottle_id','model_label','confidence','barcode','barcode_format','source']
         with Path(path).open('w',newline='',encoding='utf-8-sig') as file:
             writer=csv.DictWriter(file,fieldnames=fields); writer.writeheader()
             writer.writerows({key:event.get(key,'') for key in fields} for event in self.events)
@@ -1146,6 +1455,8 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self,event):
         self.stop()
+        if self.model_preparer and self.model_preparer.isRunning() and not self.model_preparer.wait(1200):
+            event.ignore(); self.set_status('Model preparation is cancelling; close again after it finishes.','#f3b252'); return
         if self.owns_motion:
             event.ignore(); self.set_status('Waiting for EtherMotion stop acknowledgement; close again after it finishes.','#f3b252'); return
         if self.worker and self.worker.isRunning():
